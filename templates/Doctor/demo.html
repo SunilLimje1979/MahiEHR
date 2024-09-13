@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Appointments</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- jQuery library -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css"/>
+
+    <!-- Custom Styles -->
+
+    <!-- jQuery DateTimePicker CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css">
+
+    <style>
+        .navbar-orange {
+            background-color: #008373;
+            box-shadow: 0px 4px 8px;
+        }
+
+        .navbar-brand {
+            color: white;
+        }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-left: 2%;
+            margin-right: 2%;
+            margin-bottom: 5px;
+
+        }
+
+        .label-row label {
+            font-size: 20px;
+            padding: 0px;
+            margin-bottom: 0%;
+            margin-top: 0%;
+            color: inherit;
+            text-decoration: none;
+    
+        }
+
+        .btn {
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        input[type="date"] {
+            max-width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            cursor: default;
+        }
+
+        a:hover {
+            color: inherit;
+        }
+
+        .icon {
+        font-size: 50px; /* Adjust the font size as needed */
+        }
+        .data-item{
+            background-color: #b2f5ee;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-orange fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href='/MahiEHR/dashboard/'><i class="fas fa-arrow-left"></i> Appointment</a>
+            <input type="date" id="dateInput" name="dateInput" value="">
+        </div>
+    </nav>
+
+    <div class="d-flex justify-content-between" style="margin-top: 24%;">
+        <button class="btn btn-primary filter-btn" data-status="1" style="margin-left:1%;margin-right: 1%;background-color: #008373;">Uncompleted</button>
+        <button class="btn btn-primary filter-btn" data-status="2" style="background-color: #008373;">Partially Completed</button>
+        <button class="btn btn-primary filter-btn" data-status="3" style="margin-right: 1%;margin-left: 1%;background-color: #008373;">Completed</button>
+    </div>
+    <div id="data-container">
+         
+    </div>
+     <!-- Placeholder message for no appointments -->
+     <div id="noAppointmentsMessage" style="display: none;">
+        <p style="font-size: 20px;margin-top: 20px;color: rgb(194, 198, 194); background-color: #008373;">No appointments found for Today</p>
+    </div>
+
+
+     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+             // Declare the data variable outside the event listener function
+            // Get the current date and format it as 'YYYY-MM-DD'
+            var currentDate = new Date().toISOString().split('T')[0];
+            // Set the initial value of the date input
+            document.getElementById('dateInput').value = currentDate;
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const dataContainer = document.getElementById('data-container');
+    
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const status = parseInt(this.getAttribute('data-status'));
+                    filterData(status);
+                });
+            });
+    
+            // Function to fetch data based on date
+            function fetchData(selectedDate) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/MahiEHR/fetch_data/',
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}', // Include the CSRF token
+                        selectedDate: selectedDate,
+                    },
+                    success: function (response) {
+                        // Handle the API response data
+                        updateData(response);
+                    }
+                });
+            }
+    
+            // Fetch data based on default date (today)
+            var currentDate = new Date().toISOString().split('T')[0];
+            fetchData(currentDate);
+    
+            // Event listener for date input change
+            $('#dateInput').on('change', function () {
+                var selectedDate = $(this).val();
+                fetchData(selectedDate);
+            });
+    
+            // Function to filter data based on status
+            // function filterData(status) {
+            //     const dataItems = document.querySelectorAll('.data-item');
+            //     dataItems.forEach(item => {
+            //         if (status === 0 || parseInt(item.getAttribute('data-status')) === status) {
+            //             item.style.display = 'block';
+            //         } else {
+            //             item.style.display = 'none';
+            //         }
+            //     });
+            // }
+            function filterData(status) {
+                    const dataItems = document.querySelectorAll('.data-item');
+                    let appointmentFound = false;
+
+                    dataItems.forEach(item => {
+                        if (status === 0 || parseInt(item.getAttribute('data-status')) === status || (status === 3 && (parseInt(item.getAttribute('data-status')) === 3 || parseInt(item.getAttribute('data-status')) === 4))) {
+                            item.style.display = 'block';
+                            appointmentFound = true;
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+
+                    // Show "No appointments found" message if no appointments match the selected filter
+                    if (!appointmentFound) {
+                        const noAppointmentsMessage = document.getElementById('noAppointmentsMessage');
+                        noAppointmentsMessage.style.display = 'block';
+                    } else {
+                        const noAppointmentsMessage = document.getElementById('noAppointmentsMessage');
+                        noAppointmentsMessage.style.display = 'none';
+                    }
+                }
+             
+            // Function to update the data in the HTML
+            function updateData(data) {
+                if (data.length === 0) {
+                    // If no appointments are found, display the placeholder message
+                    document.getElementById('noAppointmentsMessage').style.display = 'block';
+                    // Hide the data container
+                    dataContainer.style.display = 'none';
+                } else {
+                // Assuming that data is an array of appointments
+                    const html = data.map(appointment => {
+                        return `
+                        
+                            <a href="/MahiEHR/initial_assesment/${appointment.appointment_id}">
+                                <div class="data-item" data-status="${appointment.appointment_status}">
+                                    <input type="hidden" name="appointment_id" value="${appointment.appointment_id}" />
+                                    <hr>
+                                    <div class="label-row">
+                                        <label for="label1" id="disabledLink" class="label-link">${appointment.appointment_name}</label>
+                                        <label for="label2" id="disabledLink" class="label-link"><i class="fa-solid fa-user-group" style="color: #008373;"></i> ${appointment.appointment_token}</label>
+                                    </div>
+                                    <div class="label-row">
+                                        ${appointment.appointment_gender !== 0 ? `<label  for="label1"><i class="fa-solid fa-person-dress" style="color: rgb(208, 91, 110); font-size: 30px;"></i></label>` : ''}
+                                        ${appointment.appointment_gender === 0 ? `<label  for="label1"><i class="fa-solid fa-person" style="color: blue; font-size: 30px;"></i></label>` : ''}
+                                        <label for="label2" style="margin-right: 66%;">${appointment.age} years</label>
+                                    </div>
+                                    <div class="label-row">
+                                        <label for="label1"><i class="fa-solid fa-phone"></i>${appointment.appointment_mobileno}</label>
+                                        <label for="label2" style="border-radius:7px;color:white;background-color: ${
+                                            appointment.appointment_status === 1 ? 'rgb(240, 53, 56)' :
+                                            (appointment.appointment_status === 2 ? 'rgb(240, 190, 53)' :
+                                            (appointment.appointment_status === 3 ? 'green' : 'green'))}">
+                                            ${appointment.appointment_status === 1 ? 'Uncompleted' :
+                                                (appointment.appointment_status === 2 ? 'Partially Completed' :
+                                                    // (appointment.appointment_status === 3 ? 'Completed' : ''))
+                                                    (appointment.appointment_status === 3 ? 'Completed' : (appointment.appointment_status === 4 ? 'Completed and Paid' : '')))}
+                                        </label>
+                                    </div>
+                                </div>
+                            </a>
+                        `;
+                    }).join('');
+                    // Set the updated HTML content
+                    dataContainer.innerHTML = html;
+                    dataContainer.style.display = 'block';
+                    // Hide the placeholder message
+                    document.getElementById('noAppointmentsMessage').style.display = 'none';
+                }
+            }
+        });
+    </script>
+
+ 
+
+
+</body>
+
+</html>

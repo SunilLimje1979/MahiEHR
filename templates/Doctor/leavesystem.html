@@ -1,0 +1,257 @@
+{% load static %}
+{% load pwa %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave System</title>
+    <link rel="manifest" href="{% static 'assets/manifest.json' %}"> 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css"/>
+    <link rel="shortcut icon" href="{% static 'assets/img/MAHI_Logo.png' %}">
+    <style> 
+        .navbar-orange {
+              background-color: #A52028;
+              box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+          }
+  
+          .form-container {
+              margin-top: 80px;
+              padding: 10px;
+          }
+  
+          .navbar-brand {
+              /* font-weight: bold; */
+              color: #FFFFFF;
+              /* font-size: 25px; */
+          }
+  
+          .form-control.custom-input-2{
+              border-color: black;
+              font-size: 14px;
+              width: 80%;
+              margin: 5px;
+          }
+          .form-control.custom-input-1 {
+            border-color: black;
+              font-size: 18px;      
+          }    
+          
+          .form-select {
+              border-color: black;
+              font-size: 18px;
+          }
+  
+          .btn-save {
+              margin-left: auto;
+              margin-right: auto;
+              display: block;
+          }
+
+           /* Custom styles for input boxes */
+        .timing-input {
+            width: 50px; /* Adjust the width as needed */
+            margin-bottom: 5px;
+        }
+       
+    </style>
+</head>
+
+<body>
+<!-- Leave System Form -->
+<form class="container form-container"  method="Post" >
+        {% csrf_token %}
+        <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light navbar-orange fixed-top">
+        <input type="hidden" name="avalibility_id" value="{{ avalibility_id }}">
+        <div class="container-fluid pl-3">
+                <a class="navbar-brand" href="/MahiEHR/leaves/" >
+                    <i class="fas fa-arrow-left"></i> Add Leave
+                </a>
+            <button type="submit" value="Submit" class="btn btn-light mx-3">
+                <i class="fas fa-save"></i> Add
+            </button>
+        </div>
+    </nav>
+             
+            <!-- <div>
+                 
+                <label for="leaveDate">Select Leave Date:</label>
+                <input type="date" id="leaveDate" name="leaveDate" onchange="fetchTimings()">
+            </div> -->
+            <!-- Date selection field with onchange event -->
+            <div class="row">
+                <div class="col-md-6 col-6 mb-3">
+                    <div class="form-floating">
+                        <input type="date" class="form-control custom-input-1" id="leaveDate" name="leaveDate" onchange="fetchTimings()" required>
+                        <label for="leaveDate">Select from Date:</label>
+                    </div>
+                </div>    
+                <div class="col-md-6 col-6 mb-3">
+                    <div class="form-floating">
+                        <input type="date" class="form-control custom-input-1" id="toDate" name="toDate" >
+                        <label for="toDate">Select To Date:</label>
+                    </div>
+                </div>    
+            </div>
+
+            <!-- Timings table -->
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Day</th>
+                        <th>Morning</th>
+                        <th>Afternoon</th>
+                        <th>Evening</th>
+                    </tr>
+                </thead>
+                <tbody id="timingsTableBody">
+                    <!-- Timings data will be dynamically populated here -->
+                </tbody>
+            </table>
+
+    <!-- Save Button (Bottom) -->
+    <div class="text-center mt-3">
+        <button type="submit" class="btn btn-primary btn-save" style="background-color: #A52028; border-color:#A52028;"><span class="fas fa-save" style="color: #FFFFFF;" ></span> Add
+        </button>
+    </div>
+</form>
+{%if request.session.subscription_status == 'inactive' %}
+ {% include "Doctor/popup.html" %}
+{%endif%}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+<script>
+    // Function to fetch timings based on selected date
+    function fetchTimings() {
+        // Get the selected date
+        const selectedDate = document.getElementById('leaveDate').value;
+
+        // Call your Django view using AJAX
+        $.ajax({
+            type: 'POST',
+            url: '/MahiEHR/fetch-timings/',
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',  // Include the CSRF token
+                selectedDate: selectedDate,
+            },
+            success: function(response) {
+                console.log(response);
+                if ('timings' in response && response.timings.length > 0) {
+                    // Get the first entry in the timings array
+                    var timing = response.timings[0];
+
+                    // Dynamically populate the timings table with a single row
+                    var tableBody = document.getElementById('timingsTableBody');
+                    tableBody.innerHTML = ''; // Clear the existing content
+
+                    var row = tableBody.insertRow();
+                    var cellDay = row.insertCell(0);
+                    var cellMorning = row.insertCell(1);
+                    var cellAfternoon = row.insertCell(2);
+                    var cellEvening = row.insertCell(3);
+
+                    cellDay.innerHTML = timing.day;
+                    
+                    // Create a hidden input field to store the day value
+                    var dayInput = document.createElement('input');
+                    dayInput.type = 'hidden';
+                    dayInput.value = timing.day;
+                    dayInput.name = 'Day';  // Setting the name attribute for the hidden input
+
+                    cellDay.appendChild(dayInput);
+
+                    // Create input boxes for Morning
+                    var morningStartInput = document.createElement('input');
+                    morningStartInput.type = 'number';
+                    morningStartInput.value = timing.morning_start;
+                    morningStartInput.placeholder = 'Start';
+                    morningStartInput.required = true;
+                    morningStartInput.className = 'form-control custom-input-2';
+                    morningStartInput.name="MorningStart";
+
+                    var morningEndInput = document.createElement('input');
+                    morningEndInput.type = 'number';
+                    morningEndInput.value = timing.morning_end;
+                    morningEndInput.placeholder = 'End';
+                    morningEndInput.required = true;
+                    morningEndInput.className = 'form-control custom-input-2';
+                    morningEndInput.name="MorningEnd";
+
+                    // Append Morning input boxes to the cell
+                    cellMorning.appendChild(morningStartInput);
+                    cellMorning.appendChild(morningEndInput);
+
+                            // Create input boxes for Afternoon
+                    var afternoonStartInput = document.createElement('input');
+                    afternoonStartInput.type = 'number';
+                    afternoonStartInput.value = timing.afternoon_start;
+                    afternoonStartInput.placeholder = 'Start';
+                    afternoonStartInput.required = true;
+                    afternoonStartInput.className = 'form-control custom-input-2';
+                    afternoonStartInput.name = 'AfternoonStart';
+
+                    var afternoonEndInput = document.createElement('input');
+                    afternoonEndInput.type = 'number';
+                    afternoonEndInput.value = timing.afternoon_end;
+                    afternoonEndInput.placeholder = 'End';
+                    afternoonEndInput.required = true;
+                    afternoonEndInput.className = 'form-control custom-input-2';
+                    afternoonEndInput.name = 'AfternoonEnd';
+
+                    // Append Afternoon input boxes to the cell
+                    cellAfternoon.appendChild(afternoonStartInput);
+                    cellAfternoon.appendChild(afternoonEndInput);
+
+                    // Create input boxes for Evening
+                    var eveningStartInput = document.createElement('input');
+                    eveningStartInput.type = 'number';
+                    eveningStartInput.value = timing.evening_start;
+                    eveningStartInput.placeholder = 'Start';
+                    eveningStartInput.required = true;
+                    eveningStartInput.className = 'form-control custom-input-2';
+                    eveningStartInput.name = 'EveningStart';
+
+                    var eveningEndInput = document.createElement('input');
+                    eveningEndInput.type = 'number';
+                    eveningEndInput.value = timing.evening_end;
+                    eveningEndInput.placeholder = 'End';
+                    eveningEndInput.required = true;
+                    eveningEndInput.className = 'form-control custom-input-2';
+                    eveningEndInput.name = 'EveningEnd';
+
+                    // Append Evening input boxes to the cell
+                    cellEvening.appendChild(eveningStartInput);
+                    cellEvening.appendChild(eveningEndInput);
+
+                } else {
+                    // Handle the case when there's an error in the response or no data
+                    console.error('Error fetching timings:', response.error_message);
+                }
+            },
+            error: function(error) {
+                console.log('Error:', error);
+            }
+        });
+    }
+
+        
+    // Get the current date in the format "YYYY-MM-DD"
+    var currentDate = new Date().toISOString().split('T')[0];
+
+    // Set the minimum allowed date for the date input
+    document.getElementById('leaveDate').min = currentDate;
+    document.getElementById('toDate').min = currentDate;
+
+</script>
+
+</script>
+
+
+</body>
+
+</html>

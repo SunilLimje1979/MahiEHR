@@ -1,0 +1,302 @@
+{% load static %}
+{% load pwa %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avaliability Details</title>
+    <link rel="manifest" href="{% static 'assets/manifest.json' %}"> 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,500;0,600;0,700;1,400&amp;display=swap"/>
+    <link rel="shortcut icon" href="{% static 'assets/img/MAHI_Logo.png' %}">
+    <style>
+        .navbar-orange {
+            background-color: #A52028;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .form-container {
+            margin-top: 80px;
+            padding: 10px;
+        }
+
+        .navbar-brand {
+            /* font-weight: bold; */
+            color: #FFFFFF;
+        }
+
+        .form-control {
+            border-color: black;
+            font-size: 12px;
+            width: 80%; /* Adjusted width */
+            margin: 5px; /* Adjusted margin */
+        }
+        /* .form-select {
+            border-color: black;
+            font-size: 14px;
+            width: 70%;  
+            margin: 5px;  
+        } */
+
+        .btn-save {
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+        }
+        /* .custom-file-label {
+            overflow: hidden;
+            white-space: nowrap;
+        } */
+
+        /* Style the "Choose File" button */
+        /* .custom-file-input {
+            padding: 0.01rem 0.01rem;
+        } */
+
+        /* Decrease width of each cell */
+        td {
+            width: 1%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Doctor Registration Form with Navigation Bar -->
+    <form class="container form-container"  method="Post">
+        {% csrf_token %}
+        <!-- Navigation Bar -->
+        <nav class="navbar navbar-expand-lg navbar-light navbar-orange fixed-top">
+            <input type="hidden" name="avalibility_id" value="{{ avalibility_id }}">
+            <div class="container-fluid pl-3">
+                {% if avalibility_id %}
+                    <a class="navbar-brand" href="/MahiEHR/settingdashboard/" >
+                        <i class="fas fa-arrow-left"></i> 
+                        Edit Avaliability
+                    </a>
+                {% else %}
+                    <span class="navbar-brand">Add Avaliability</span>
+                {% endif %}
+                <button type="submit" value="Submit" class="btn btn-light mx-3">
+                    <i class="fas fa-save"></i> 
+                    {% if avalibility_id %}
+                        Update
+                    {% else %}
+                        Save
+                    {% endif %}
+                </button>
+            </div>
+        </nav>
+
+        <table class="table table-bordered custom-table">
+            <thead>
+                <tr>
+                    <th>Day</th>
+                    <th>Morning</th>
+                    <th>Afternoon</th>
+                    <th>Evening</th>
+                    <!-- <th>Copy from Monday</th> -->
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Monday<br>
+                        <input type="checkbox" name="copyMondayToOthers">
+                        <small><i class="fas fa-copy"></i></small>
+                    </td>
+                    <td>
+                        <input type="number" name="mondayMorningStart" value="{{ data.1.availability_starttime}}" placeholder="Start" required class="form-control">
+                        <input type="number" name="mondayMorningEnd" value="{{ data.1.availability_endtime}}" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="mondayAfternoonStart" value="{{ data.2.availability_starttime}}" placeholder="Start" required class="form-control">
+                        <input type="number" name="mondayAfternoonEnd" value="{{ data.2.availability_endtime}}" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="mondayEveningStart" value="{{ data.3.availability_starttime}}" placeholder="Start" required class="form-control">
+                        <input type="number" name="mondayEveningEnd" value="{{ data.3.availability_endtime}}" placeholder="End" required class="form-control">
+                    </td>
+                </tr>
+                <!-- Repeat similar rows for Tuesday and Wednesday -->
+                <tr>
+                    <!-- Tuesday -->
+                    <td>Tuesday</td>
+                    <td>
+                        <input type="number" name="tuesdayMorningStart" value="{{ data.4.availability_starttime}}" placeholder="Start" required class="form-control">
+                        <input type="number" name="tuesdayMorningEnd" value="{{ data.4.availability_endtime}}" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="tuesdayAfternoonStart" value="{{ data.5.availability_starttime}}" placeholder="Start" required class="form-control">
+                        <input type="number" name="tuesdayAfternoonEnd" value="{{ data.5.availability_endtime}}" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="tuesdayEveningStart" value="{{ data.6.availability_starttime}}" placeholder="Start" required class="form-control">
+                        <input type="number" name="tuesdayEveningEnd" value="{{ data.6.availability_endtime}}" placeholder="End" required class="form-control">
+                    </td>
+                </tr>
+                <!-- Wednesday -->
+                <tr>
+                    <td>Wednesday</td>
+                    <td>
+                        <input type="number" name="wednesdayMorningStart" value="{{ data.7.availability_starttime}}" placeholder="Start" required class="form-control">
+                        <input type="number" name="wednesdayMorningEnd" value="{{ data.7.availability_endtime}}" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="wednesdayAfternoonStart" value="{{ data.8.availability_starttime}}" placeholder="Start" required class="form-control">
+                        <input type="number" name="wednesdayAfternoonEnd" value="{{ data.8.availability_endtime}}" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="wednesdayEveningStart" value="{{ data.9.availability_starttime}}" placeholder="Start" required class="form-control">
+                        <input type="number" name="wednesdayEveningEnd" value="{{ data.9.availability_endtime}}" placeholder="End" required class="form-control">
+                    </td>
+                </tr>
+                <!-- Thursday -->
+                <tr>
+                    <td>Thursday</td>
+                    <td>
+                        <input type="number" name="thursdayMorningStart" value="{{ data.10.availability_starttime}}" placeholder="Start" required class="form-control">
+                        <input type="number" name="thursdayMorningEnd" value="{{ data.10.availability_endtime}}" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="thursdayAfternoonStart" value="{{ data.11.availability_starttime}}" placeholder="Start" required class="form-control">
+                        <input type="number" name="thursdayAfternoonEnd" value="{{ data.11.availability_endtime}}" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="thursdayEveningStart" value="{{ data.12.availability_starttime}}" placeholder="Start" required class="form-control">
+                        <input type="number" name="thursdayEveningEnd" value="{{ data.12.availability_endtime}}" placeholder="End" required class="form-control">
+                    </td>
+                </tr>
+
+                <!-- Friday -->
+                <tr>
+                    <td>Friday</td>
+                    <td>
+                        <input type="number" name="fridayMorningStart" value="{{ data.13.availability_starttime}}" placeholder="Start" required class="form-control">
+                        <input type="number" name="fridayMorningEnd" value="{{ data.13.availability_endtime}}" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="fridayAfternoonStart" value="{{ data.14.availability_starttime}}" placeholder="Start" required class="form-control">
+                        <input type="number" name="fridayAfternoonEnd" value="{{ data.14.availability_endtime}}" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="fridayEveningStart" value="{{ data.15.availability_starttime}}" placeholder="Start" required class="form-control">
+                        <input type="number" name="fridayEveningEnd" value="{{ data.15.availability_endtime}}" placeholder="End" required class="form-control">
+                    </td>
+                </tr>
+
+                <!-- Saturday -->
+                <tr>
+                    <td>Saturday</td>
+                    <td>
+                        <input type="number" name="saturdayMorningStart" value="{{ data.16.availability_starttime}}" placeholder="Start" required class="form-control">
+                        <input type="number" name="saturdayMorningEnd" value="{{ data.16.availability_endtime}}" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="saturdayAfternoonStart" value="{{ data.17.availability_starttime}}" placeholder="Start" required class="form-control">
+                        <input type="number" name="saturdayAfternoonEnd" value="{{ data.17.availability_endtime}}" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="saturdayEveningStart" value="{{ data.18.availability_starttime}}" placeholder="Start" required class="form-control">
+                        <input type="number" name="saturdayEveningEnd" value="{{ data.18.availability_endtime}}" placeholder="End" required class="form-control">
+                    </td>
+                </tr>
+
+                <!-- Sunday -->
+                <tr>
+                    <td>Sunday</td>
+                    <td>
+                        <input type="number" name="sundayMorningStart" value="{{ data.19.availability_starttime}}" placeholder="Start" required class="form-control">
+                        <input type="number" name="sundayMorningEnd" value="{{ data.19.availability_endtime}}" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="sundayAfternoonStart" value="{{ data.20.availability_starttime}}" placeholder="Start" required class="form-control">
+                        <input type="number" name="sundayAfternoonEnd" value="{{ data.20.availability_endtime}}" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="sundayEveningStart" value="{{ data.21.availability_starttime}}" placeholder="Start" required class="form-control">
+                        <input type="number" name="sundayEveningEnd" value="{{ data.21.availability_endtime}}" placeholder="End" required class="form-control">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Save Button (Bottom) -->
+        <div class="text-center mt-3">
+            <button type="submit" class="btn btn-primary btn-save" style="background-color: #A52028; border-color:#A52028;"><span class="fas fa-save" style="color: #FFFFFF;" ></span>
+                {% if avalibility_id %}
+                   Update
+                {% else %}
+                    Save
+               {% endif %}
+            </button>
+        </div>
+    </form>
+    {%if request.session.subscription_status == 'inactive' %}
+        {% include "Doctor/popup.html" %}
+    {%endif%}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script>
+        document.getElementsByName('copyMondayToOthers')[0].addEventListener('change', function() {
+            // Get Monday time slots
+            const mondayMorningStart = document.getElementsByName('mondayMorningStart')[0].value;
+            const mondayMorningEnd = document.getElementsByName('mondayMorningEnd')[0].value;
+            const mondayAfternoonStart = document.getElementsByName('mondayAfternoonStart')[0].value;
+            const mondayAfternoonEnd = document.getElementsByName('mondayAfternoonEnd')[0].value;
+            const mondayEveningStart = document.getElementsByName('mondayEveningStart')[0].value;
+            const mondayEveningEnd = document.getElementsByName('mondayEveningEnd')[0].value;
+    
+            // Set time slots for Tuesday
+            document.getElementsByName('tuesdayMorningStart')[0].value = this.checked ? mondayMorningStart : '';
+            document.getElementsByName('tuesdayMorningEnd')[0].value = this.checked ? mondayMorningEnd : '';
+            document.getElementsByName('tuesdayAfternoonStart')[0].value = this.checked ? mondayAfternoonStart : '';
+            document.getElementsByName('tuesdayAfternoonEnd')[0].value = this.checked ? mondayAfternoonEnd : '';
+            document.getElementsByName('tuesdayEveningStart')[0].value = this.checked ? mondayEveningStart : '';
+            document.getElementsByName('tuesdayEveningEnd')[0].value = this.checked ? mondayEveningEnd : '';
+    
+            // Set time slots for Wednesday
+            document.getElementsByName('wednesdayMorningStart')[0].value = this.checked ? mondayMorningStart : '';
+            document.getElementsByName('wednesdayMorningEnd')[0].value = this.checked ? mondayMorningEnd : '';
+            document.getElementsByName('wednesdayAfternoonStart')[0].value = this.checked ? mondayAfternoonStart : '';
+            document.getElementsByName('wednesdayAfternoonEnd')[0].value = this.checked ? mondayAfternoonEnd : '';
+            document.getElementsByName('wednesdayEveningStart')[0].value = this.checked ? mondayEveningStart : '';
+            document.getElementsByName('wednesdayEveningEnd')[0].value = this.checked ? mondayEveningEnd : '';
+    
+            // Set time slots for Thursday
+            document.getElementsByName('thursdayMorningStart')[0].value = this.checked ? mondayMorningStart : '';
+            document.getElementsByName('thursdayMorningEnd')[0].value = this.checked ? mondayMorningEnd : '';
+            document.getElementsByName('thursdayAfternoonStart')[0].value = this.checked ? mondayAfternoonStart : '';
+            document.getElementsByName('thursdayAfternoonEnd')[0].value = this.checked ? mondayAfternoonEnd : '';
+            document.getElementsByName('thursdayEveningStart')[0].value = this.checked ? mondayEveningStart : '';
+            document.getElementsByName('thursdayEveningEnd')[0].value = this.checked ? mondayEveningEnd : '';
+
+            // Set time slots for Friday
+            document.getElementsByName('fridayMorningStart')[0].value = this.checked ? mondayMorningStart : '';
+            document.getElementsByName('fridayMorningEnd')[0].value = this.checked ? mondayMorningEnd : '';
+            document.getElementsByName('fridayAfternoonStart')[0].value = this.checked ? mondayAfternoonStart : '';
+            document.getElementsByName('fridayAfternoonEnd')[0].value = this.checked ? mondayAfternoonEnd : '';
+            document.getElementsByName('fridayEveningStart')[0].value = this.checked ? mondayEveningStart : '';
+            document.getElementsByName('fridayEveningEnd')[0].value = this.checked ? mondayEveningEnd : '';
+
+            // Set time slots for Saturday
+            document.getElementsByName('saturdayMorningStart')[0].value = this.checked ? mondayMorningStart : '';
+            document.getElementsByName('saturdayMorningEnd')[0].value = this.checked ? mondayMorningEnd : '';
+            document.getElementsByName('saturdayAfternoonStart')[0].value = this.checked ? mondayAfternoonStart : '';
+            document.getElementsByName('saturdayAfternoonEnd')[0].value = this.checked ? mondayAfternoonEnd : '';
+            document.getElementsByName('saturdayEveningStart')[0].value = this.checked ? mondayEveningStart : '';
+            document.getElementsByName('saturdayEveningEnd')[0].value = this.checked ? mondayEveningEnd : '';
+
+            // Set time slots for Sunday
+            document.getElementsByName('sundayMorningStart')[0].value = this.checked ? mondayMorningStart : '';
+            document.getElementsByName('sundayMorningEnd')[0].value = this.checked ? mondayMorningEnd : '';
+            document.getElementsByName('sundayAfternoonStart')[0].value = this.checked ? mondayAfternoonStart : '';
+            document.getElementsByName('sundayAfternoonEnd')[0].value = this.checked ? mondayAfternoonEnd : '';
+            document.getElementsByName('sundayEveningStart')[0].value = this.checked ? mondayEveningStart : '';
+            document.getElementsByName('sundayEveningEnd')[0].value = this.checked ? mondayEveningEnd : '';
+        });
+    </script>
+</body>
+</html>

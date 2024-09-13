@@ -1,0 +1,574 @@
+{% load static %}
+{% load pwa %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient</title>
+    <link rel="manifest" href="{% static 'assets/manifest.json' %}"> 
+    <link rel="shortcut icon" href="{% static 'assets/img/MAHI_Logo.png' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,500;0,600;0,700;1,400&amp;display=swap"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
+    <script>
+        // Function to show a popup message
+        function showPopup(message) {
+            alert(message); // You can customize this to show a more user-friendly popup
+        }
+    </script>
+    <style>
+        .navbar-orange {
+            background-color: #A52028;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .form-container {
+            margin-top: 80px;
+            padding: 10px;
+        }
+
+        .navbar-brand {
+            /* font-weight: bold; */
+            color: #FFFFFF;
+            /* font-size: 25px; */
+        }
+
+        .form-control {
+            border-color: black;
+            font-size: 18px;
+        }
+        .form-select {
+            border-color: black;
+            font-size: 18px;
+        }
+
+        .btn-save {
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+        }
+        .custom-file-label {
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        /* Style the "Choose File" button */
+        .custom-file-input {
+            padding: 0.01rem 0.01rem;
+        }
+
+        /* Style for the checkbox */
+    .form-check-input {
+        border: 2px solid #000; /* Dark border */
+        width: 20px; /* Increase the size of the checkbox */
+        height: 20px; /* Increase the size of the checkbox */
+    }
+
+    /* Style for the label */
+    .form-check-label {
+        font-weight: bold; /* Bold text */
+        font-size: 0.9em; /* Increase the font size */
+    }
+
+     /* Custom CSS for select2 */
+     .select2-container--default .select2-selection--single {
+        border: 1px solid black;
+        border-radius: .25rem;
+        height: calc(2.50rem + 15px);
+        background-color: #fff;
+        font-size: 18px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: calc(1.65rem + 40px);
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: calc(2.50rem + 40px);
+            margin-left: 4px;
+        
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            border-color: #000 transparent transparent transparent;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            top: 6px;
+            right: 8px;
+        }
+        .select2-container--default .select2-dropdown {
+            max-height: 750px;  
+            overflow-y: auto; 
+        }
+    </style>
+
+</head>
+
+<body>
+
+  
+    <form class="container form-container" method="Post">
+        {% csrf_token %}
+        
+        <nav class="navbar navbar-expand-lg navbar-light navbar-orange fixed-top">
+           
+            <div class="container-fluid pl-3">
+                    <a class="navbar-brand" href="{% url 'all_patient' %}" >
+                        <i class="fas fa-arrow-left"></i> 
+                        {% if patient %}
+                            Patient Profile
+                        {%else%}
+                            Add Patient
+                        {%endif%}
+                    </a>
+
+                <button type="submit" value="Submit" class="btn btn-light mx-3">
+                    <i class="fas fa-save"></i> 
+                    {% if patient %}
+                      Update
+                    {% else %}
+                      Save
+                    {% endif %}
+                </button>
+            </div>
+        </nav>
+
+     
+        <div class="row">
+            <div class="col-md-6 col-6 mb-3">
+                <div class="form-floating">
+                    <input type="text" class="form-control" id="floatingfirstname" name="patient_firstname" value="{{patient.patient_firstname}}" placeholder="First Name" {%if not patient%} required {%endif%}>
+                    <label for="floatingfirstname">First Name</label>
+                </div>
+            </div>
+            <div class="col-md-6 col-6 mb-3">
+                <div class="form-floating">
+                    <input type="text" class="form-control" id="floatinglastname" name="patient_lastname" value="{{patient.patient_lastname}}" placeholder="Last Name" {%if not patient%} required {%endif%}>
+                    <label for="floatinglastname">Last Name</label>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="row">
+            <div class="col-md-6 col-6 mb-3">
+                <div class="form-floating">
+                    <input type="text" class="form-control" name="patient_fateherhusbandname" {% if patient.patient_fateherhusbandname is not None %}  value="{{ patient.patient_fateherhusbandname }}" {% endif %}  placeholder="Middle Name">
+                    <label for="patient_fateherhusbandname">Middle Name</label>
+                </div>
+            </div>
+            <div class="col-md-6 col-6 mb-3">
+                <div class="form-floating">
+                    <input type="text" class="form-control" name="patient_mobileno" value="{{patient.patient_mobileno}}"  placeholder="Mobile Number" pattern="[0-9]{10}" title="Please enter a valid 10-digit mobile number" {%if patient%} readonly {%else%} required {%endif%}>
+                    <label for="patient_mobileno">Mobile Number</label>
+                </div>
+            </div>
+             
+        </div>
+
+     
+        <div class="row">
+            <div class="col-md-6 col-6 mb-3">
+                <div class="form-floating">
+                    <select class="form-select" name="patient_gender" aria-label="Floating label select example" {%if not patient%} required {%endif%}>
+                        <option value="" disabled selected hidden>Select</option>
+                        <option value="0" {% if patient.patient_gender == 0 %}selected{% endif %}>Male</option>
+                        <option value="1" {% if patient.patient_gender == 1 %}selected{% endif %}>Female</option>
+                    </select>
+                    <label for="patient_gender">Gender</label>
+                </div>
+            </div>
+            <div class="col-md-6 col-6 mb-3">
+                <div class="form-floating">
+                    <select name="patient_maritalstatus" class="form-select" aria-label="Floating label select example">
+                        <option value="" disabled selected hidden>Select</option>
+                        <option value="1" {% if patient.patient_maritalstatus == 1 %}selected{% endif %}>Single</option>
+                        <option value="2" {% if patient.patient_maritalstatus == 2 %}selected{% endif %}>Married</option>
+                    </select>
+                    <label for="patient_maritalstatus">Marital Status</label>
+                </div>
+            </div>
+        </div>
+
+      
+        <div class="row">
+            <div class="col-md-6 col-6 mb-3">
+                <div class="form-floating">
+                    <input type="date" class="form-control" name="dob" value="{{ patient.dob}}" {%if not patient%} required {%endif%}>
+                    <label for="dob">Date of Birth</label>
+                </div>
+            </div>
+            <div class="col-md-6 col-6 mb-3">
+                <div class="form-floating">
+                    <select class="form-control" name="patient_bloodgroup">
+                        <option value="" disabled selected hidden>Select</option>
+                        <option value="1" {% if patient.patient_bloodgroup == 1 %}selected{% endif %}>A+</option>
+                        <option value="2" {% if patient.patient_bloodgroup == 2 %}selected{% endif %}>A-</option>
+                        <option value="3" {% if patient.patient_bloodgroup == 3 %}selected{% endif %}>B+</option>
+                        <option value="4" {% if patient.patient_bloodgroup == 4 %}selected{% endif %}>B-</option>
+                        <option value="5" {% if patient.patient_bloodgroup == 5 %}selected{% endif %}>AB+</option>
+                        <option value="6" {% if patient.patient_bloodgroup == 6 %}selected{% endif %}>AB-</option>
+                        <option value="7" {% if patient.patient_bloodgroup == 7 %}selected{% endif %}>O+</option>
+                        <option value="8" {% if patient.patient_bloodgroup == 8 %}selected{% endif %}>O-</option>
+                    </select>
+                    <label for="patient_bloodgroup">Blood Group</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 col-12 mb-3">
+                <div class="form-floating">
+                    <textarea class="form-control" name="patient_address"  placeholder="Address" rows="3">{%if patient.patient_address %} {{ patient.patient_address }} {%endif%}</textarea>
+                    <label for="patient_address">Address</label>
+                </div>
+            </div>
+        </div>
+
+       
+        <div class="row">
+            <div class="col-md-6 col-6 mb-3">
+                <div class="form-floating">
+                    <select name="patient_countryid" class="form-control form-select" aria-label="Floating label select example" id="country">
+                        <option value="" disabled selected hidden>Select</option>
+                        {% for country in countries %}
+                        <option value="{{ country.id }}" {% if patient.patient_countryid == country.id %}selected{% elif not patient.patient_countryid and country.name == 'India' %}selected{% endif %}>{{ country.name }}</option>
+                        {% endfor %}
+                        <!-- <option value="1" {% if patient.patient_countryid == 1 %}selected{% endif %}>India</option> -->
+                    </select>
+                    <label for="patient_countryid">Country</label>
+                </div>
+            </div>
+            <div class="col-md-6 col-6 mb-3">
+                <div class="form-floating">
+                    <select name="patient_stateid" class="form-select" aria-label="Floating label select example" id="state">
+                        <option value="" disabled selected hidden>Select</option>
+                        {% for state in states %}
+                        <option value="{{ state.id }}" {% if patient.patient_stateid == state.id %}selected{% elif not patient.patient_stateid and state.name == 'Maharashtra' %}selected{% endif %}>{{ state.name }}</option>
+                        {% endfor %}
+                        <!-- <option value="1" {% if patient.patient_stateid == 1 %}selected{% endif %}>Maharashtra</option> -->
+                    </select>
+                    <label for="patient_stateid">State</label>
+                </div>
+            </div>
+        </div>
+
+ 
+        <div class="row">
+            <div class="col-md-6 col-6 mb-3">
+                <div class="form-floating">
+                    <select name="patient_cityid" class="form-select" aria-label="Floating label select example" id="city">
+                        <option value="" disabled selected hidden>Select</option>
+                        {% for city in cities %}
+                            <option value="{{ city.id }}" {% if patient.patient_cityid == city.id %}selected{% endif %}>{{ city.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <label for="patient_cityid">City</label>
+                </div>
+            </div>
+            <div class="col-md-6 col-6 mb-3">
+                <div class="form-floating">
+                    <input type="number" class="form-control" name="patient_universalhealthid" {% if patient.patient_universalhealthid != 0 %} value="{{ patient.patient_universalhealthid }}" {% endif %}   placeholder="healthid">
+                    <label for="patient_universalhealthid">Health Id</label>
+                </div>
+            </div>
+        </div>
+
+       
+        <div class="row">
+            <div class="col-md-6 col-6 mb-3">
+                <div class="form-floating">
+                    <input type="text" class="form-control" name="patient_aadharnumber" {% if patient.patient_aadharnumber is not None %} value="{{ patient.patient_aadharnumber }}" {% endif %}  pattern="[0-9]{12}" title="Please enter a valid 12-digit Aadhar number" placeholder="Aadhar Number" >
+                    <label for="patient_aadharnumber">Aadhar Number</label>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+                <label for="aadharUpload" class="custom-file-label">Upload Aadhar</label>
+                <input type="file" class="form-control custom-file-input"  id="aadharUpload">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 col-12 mb-3">
+                <div class="form-floating">
+                    <textarea class="form-control" name="remark" placeholder="Remark" rows="3">{% if patient.remark %}{{ patient.remark }}{% endif %}</textarea>
+                    <label for="remark">Remark</label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 col-6 mb-3">
+                <div class="form-floating">
+                    <input type="text" class="form-control" name="patient_emergencycontact" {% if patient.patient_emergencycontact != '0' %}value="{{ patient.patient_emergencycontact }}"{% endif %}  placeholder="Mobile Number" pattern="[0-9]{10}" title="Please enter a valid 10-digit mobile number">
+                    <label for="patient_emergencycontact">Emergency Contact</label>
+                </div>
+            </div>
+            {%if not patient%} 
+                <div class="col-md-6 col-6 mb-3 mt-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="bookAppointment" name="bookAppointment">
+                        <label class="form-check-label" for="bookAppointment">
+                            Book Appointment
+                        </label>
+                    </div>
+                </div>
+            {%endif%}
+        </div>
+         
+     
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="allergySelect" class="form-label">Select Allergy</label>
+                <select id="allergySelect" class="form-select" name="allergy">
+                    <option value="" disabled selected hidden>Select</option>
+                    {% for allergy in allergy_data %}
+                        <option value="{{ allergy.allergy_id }}">{{ allergy.allergy_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label for="allergyDescription">Additional Comment</label>
+                <input type="text" id="allergyDescription" class="form-control" name="allergy_description">
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <button type="button" class="btn btn-primary" onclick="addAllergy()">Add Allergy</button>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <table class="table" id="allergyTable">
+                    <thead>
+                        <tr>
+                            <th>Allergy</th>
+                            <th>Description</th>
+                            <th>Remove</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for allergy in allergy_list %}
+                        <tr>
+                            <td>{{ allergy.allergy_name }}</td>
+                            <td>{{ allergy.allergy_details }}</td>
+                            <td>
+                                <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this, '{{ allergy.patient_allergy_id }}', true)">Remove</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="diseaseSelect" class="form-label">Select Disease</label>
+                <select id="diseaseSelect" class="form-select" name="disease">
+                    <option value="" disabled selected hidden>Select</option>
+                    {% for disease in disease_data %}
+                        <option value="{{ disease.disease_id }}">{{ disease.disease_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label for="diseaseDescription" class="form-label">Additional Comment</label>
+                <input type="text" id="diseaseDescription" class="form-control" name="disease_description">
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <button type="button" class="btn btn-primary" onclick="addDisease()">Add Disease</button>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <table class="table" id="diseaseTable">
+                    <thead>
+                        <tr>
+                            <th>Disease</th>
+                            <th>Description</th>
+                            <th>Remove</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for disease in disease_list %}
+                        <tr>
+                            <td>{{ disease.disease_name }}</td>
+                            <td>{{ disease.disease_details }}</td>
+                            <td>
+                                <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this, '{{ disease.patient_disease_id }}', false)">Remove</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <input type="hidden" id="removedAllergies" name="removed_allergies" value="">
+        <input type="hidden" id="removedDiseases" name="removed_diseases" value="">
+
+        <div class="text-center mt-3">
+            <button type="submit" class="btn btn-primary btn-save" style="background-color: #A52028; border-color:#A52028;"><span class="fas fa-save" style="color: #FFFFFF;" ></span>
+                {% if patient %}
+                   Update
+                {% else %}
+                   Save
+                {% endif %}
+            </button>
+        </div>
+    </form>
+    {%if request.session.subscription_status == 'inactive' %}
+        {% include "Doctor/popup.html" %}
+    {%endif%}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('#country').change(function() {
+                var country_id = $(this).val();
+                $.ajax({
+                    url: '{% url "get_states" %}',
+                    data: {
+                        'country_id': country_id
+                    },
+                    success: function(data) {
+                        $('#state').html('');
+                        $('#state').append('<option value="" disabled selected hidden>Select</option>');
+                        data.forEach(function(state) {
+                            $('#state').append('<option value="' + state.id + '">' + state.name + '</option>');
+                        });
+                        $('#city').html('<option value="" disabled selected hidden>Select</option>'); // Clear cities
+                    }
+                });
+            });
+
+            $('#state').change(function() {
+                var state_id = $(this).val();
+                $.ajax({
+                    url: '{% url "get_cities" %}',
+                    data: {
+                        'state_id': state_id
+                    },
+                    success: function(data) {
+                        $('#city').html('');
+                        $('#city').append('<option value="" disabled selected hidden>Select</option>');
+                        data.forEach(function(city) {
+                            $('#city').append('<option value="' + city.id + '">' + city.name + '</option>');
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+
+    <script>
+        // Initialize Select2
+        $(document).ready(function() {
+            $('#country').select2();
+        });
+
+        $(document).ready(function() {
+            $('#state').select2();
+        });
+
+        $(document).ready(function() {
+            $('#city').select2();
+        });
+    </script>
+
+     <script>
+        // Function to remove a row from the table and update hidden fields
+        function removeRow(button, patientId, isAllergy) {
+            const row = button.parentNode.parentNode;
+            const hiddenField = isAllergy ? document.getElementById('removedAllergies') : document.getElementById('removedDiseases');
+    
+            hiddenField.value += patientId + ',';
+    
+            row.parentNode.removeChild(row);
+        }
+    
+        // Function to add a row to the allergy table
+        function addAllergy() {
+            const allergySelect = document.getElementById('allergySelect');
+            const allergyDescription = document.getElementById('allergyDescription');
+            const selectedAllergy = allergySelect.options[allergySelect.selectedIndex];
+            const allergyId = selectedAllergy.value;
+            const allergyName = selectedAllergy.text;
+    
+            if (!allergyId) {
+                alert('Please select an allergy.');
+                return;
+            }
+    
+            const allergyTable = document.getElementById('allergyTable');
+            const row = allergyTable.insertRow();
+            const cell1 = row.insertCell(0);
+            const cell2 = row.insertCell(1);
+            const cell3 = row.insertCell(2);
+    
+            cell1.innerText = allergyName;
+            cell2.innerText = allergyDescription.value;
+            cell3.innerHTML = `<button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this, '${allergyId}', true)">Remove</button>`;
+    
+            // Add hidden inputs for allergy details
+            const hiddenAllergyId = document.createElement('input');
+            hiddenAllergyId.type = 'hidden';
+            hiddenAllergyId.name = 'allergies[]';
+            hiddenAllergyId.value = JSON.stringify({allergy_id: allergyId, allergy_description: allergyDescription.value});
+            row.appendChild(hiddenAllergyId);
+    
+            // Reset the select and textarea
+            allergySelect.selectedIndex = 0;
+            allergyDescription.value = '';
+        }
+    
+        // Function to add a row to the disease table
+        function addDisease() {
+            const diseaseSelect = document.getElementById('diseaseSelect');
+            const diseaseDescription = document.getElementById('diseaseDescription');
+            const selectedDisease = diseaseSelect.options[diseaseSelect.selectedIndex];
+            const diseaseId = selectedDisease.value;
+            const diseaseName = selectedDisease.text;
+    
+            if (!diseaseId) {
+                alert('Please select a disease.');
+                return;
+            }
+    
+            const diseaseTable = document.getElementById('diseaseTable');
+            const row = diseaseTable.insertRow();
+            const cell1 = row.insertCell(0);
+            const cell2 = row.insertCell(1);
+            const cell3 = row.insertCell(2);
+    
+            cell1.innerText = diseaseName;
+            cell2.innerText = diseaseDescription.value;
+            cell3.innerHTML = `<button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this, '${diseaseId}', false)">Remove</button>`;
+    
+            // Add hidden inputs for disease details
+            const hiddenDiseaseId = document.createElement('input');
+            hiddenDiseaseId.type = 'hidden';
+            hiddenDiseaseId.name = 'diseases[]';
+            hiddenDiseaseId.value = JSON.stringify({disease_id: diseaseId, disease_description: diseaseDescription.value});
+            row.appendChild(hiddenDiseaseId);
+    
+            // Reset the select and textarea
+            diseaseSelect.selectedIndex = 0;
+            diseaseDescription.value = '';
+        }
+    </script>
+
+
+</body>
+
+</html> 
+
+ 

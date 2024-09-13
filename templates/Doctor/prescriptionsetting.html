@@ -1,0 +1,403 @@
+{% load static %}
+{% load pwa %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prescription Settings</title>
+    <link rel="manifest" href="{% static 'assets/manifest.json' %}"> 
+    <link rel="shortcut icon" href="{% static 'assets/img/MAHI_Logo.png' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,500;0,600;0,700;1,400&amp;display=swap"/>
+    <style>
+        .navbar-orange {
+            background-color: #A52028;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .form-container {
+            margin-top: 80px;
+            padding: 10px;
+        }
+
+        .navbar-brand {
+            /* font-weight: bold; */
+            color: #FFFFFF;
+            font-size: 25px;
+        }
+
+        .form-control {
+            border-color: black;
+            font-size: 18px;
+        }
+        .form-select {
+            border-color: black;
+            font-size: 18px;
+        }
+
+        .btn-save {
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+        }
+        .custom-file-label {
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        /* Style the "Choose File" button */
+        .custom-file-input {
+            padding: 0.01rem 0.01rem;
+        }
+
+        .form-group{
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Doctor Registration Form with Navigation Bar -->
+    <form class="container form-container" method="POST" {%if prescription_settings %} action="{% url 'update_prescription_setting' %}" {%else%} action="{% url 'prescription_setting' %}" {%endif%} enctype="multipart/form-data">
+        {% csrf_token %}
+        <!-- Navigation Bar -->
+        <nav class="navbar navbar-expand-lg navbar-light navbar-orange fixed-top">
+            <input type="hidden" name="prescription_id" value="{{ prescription_id }}">
+            <div class="container-fluid pl-3">
+                    <a class="navbar-brand" href="/MahiEHR/settingdashboard/" >
+                        <i class="fas fa-arrow-left"></i> 
+                            Print Format
+                    </a>
+
+                <button type="submit" value="Submit" class="btn btn-light mx-3">
+                    <i class="fas fa-save"></i>
+                    {% if prescription_settings %}
+                      Update
+                    {% else %}
+                      Save
+                    {% endif %}
+                </button>
+            </div>
+        </nav>
+
+        <!-- Paper Size Dropdown -->
+        <div class="form-group">
+            <label for="paperSize">Paper Size</label>
+            <select class="form-select" id="paperSize" name="paperSize" required>
+                <option value="" disabled selected hidden>Select</option>
+                <option value="1" {% if prescription_settings.paper_size == 1 %}selected{% endif %}>A4 Portrait</option>
+                <option value="2" {% if prescription_settings.paper_size == 2 %}selected{% endif %}>A4/2 Landscape</option>
+            </select>
+        </div>
+
+        <!-- Logo Alignment Dropdown -->
+        <div class="form-group">
+            <label for="logoAlignment"> Clinic Logo Alignment</label>
+            <select class="form-select" id="logoAlignment" name="logoAlignment" required>
+                <option value="" disabled selected hidden>Select</option>
+                <option value="1" {% if prescription_settings.clinic_logo_alignment == 1 %}selected{% endif %}>Left</option>
+                <option value="2" {% if prescription_settings.clinic_logo_alignment == 2 %}selected{% endif %}>Center</option>
+                <option value="3" {% if prescription_settings.clinic_logo_alignment == 3 %}selected{% endif %}>Right</option>
+            </select>
+        </div>
+
+        <!-- Header Type Dropdown -->
+        <div class="form-group">
+            <label for="headerType">Header Type</label>
+            <select class="form-select" id="headerType" name="headerType" required>
+                <option value="" disabled selected hidden>Select</option>
+                <option value="1" {% if prescription_settings.header_type == 1 %}selected{% endif %}>Auto Header</option>
+                <option value="2" {% if prescription_settings.header_type == 2 %}selected{% endif %}>Header Image</option>
+                <option value="3" {% if prescription_settings.header_type == 3 %}selected{% endif %}>Blank Header</option>
+            </select>
+        </div>
+
+         <!-- Image Upload Field -->
+         <!-- <div class="form-group image-upload" id="imageUploadField" style="display:none;">
+            <label for="headerImage">Upload Header Image</label>
+            <input type="file" class="form-control" id="headerImage" name="headerImage">
+        </div> -->
+
+        <!-- Height Field -->
+        <!-- <div class="form-group height-field" id="heightField" style="display:none;">
+            <label for="headerHeight">Header Top Margin</label>
+            <input type="text" class="form-control" id="headerHeight" name="headerHeight">
+        </div> -->
+        <!-- Image Upload Field -->
+        <div class="form-group image-upload" id="imageUploadField" {% if prescription_settings.header_type != 2 %}style="display:none;"{% endif %}>
+            <label for="headerImage">{% if prescription_settings %}Update Header Image {%else%}Upload Header Image {%endif%}</label>
+            <input type="file" class="form-control" id="headerImage" name="headerImage" accept="image/jpeg, image/png">
+            {% if prescription_settings.header_image %}
+                <img src="https://www.drishtis.app/doctor{{ prescription_settings.header_image }}?t={{ timestamp }}" alt="Header Image" style="max-width: 100%; height: auto; margin-top: 10px;">
+            {% endif %}
+        </div>
+
+        <!-- Height Field -->
+        <!-- <div class="form-group height-field" id="heightField" {% if prescription_settings.header_type != 3 %}style="display:none;"{% endif %}>
+            <label for="headerHeight" id="headerHeightLabel">Header Top Margin</label>
+            <input type="text" class="form-control" id="headerHeight" name="headerHeight" value="{{ prescription_settings.header_top_margin|default_if_none:'' }}">
+        </div> -->
+        <div class="form-group height-field" id="heightField" {% if prescription_settings.header_type != 2 and prescription_settings.header_type != 3 %}style="display:none;"{% endif %}>
+            <label for="headerHeight" id="headerHeightLabel">
+                {% if prescription_settings.header_type == 2 %}
+                    Height (inches)
+                {% else %}
+                    Header Top Margin (inches)
+                {% endif %}
+            </label>
+            <input type="text" class="form-control" id="headerHeight" name="headerHeight" value="{{ prescription_settings.header_top_margin|default_if_none:'' }}">
+        </div>
+        
+
+         <!-- Auto Header Options Container (Initially Hidden) -->
+        <!-- <div id="autoHeaderOptionsContainer" style="display: none;">
+            <div class="accordion" id="autoHeaderOptions">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingOption1">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOption1" aria-expanded="true" aria-controls="collapseOption1">
+                            Check Options
+                        </button>
+                    </h2>
+                    <div id="collapseOption1" class="accordion-collapse collapse show" aria-labelledby="headingOption1" data-bs-parent="#autoHeaderOptions">
+                        <div class="accordion-body">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="autoHeaderOptions" value="clinic_name" id="checkboxOption1" checked>
+                                <label class="form-check-label" for="checkboxOption1">
+                                    Clinic Name
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="autoHeaderOptions" value="clinic_address" id="checkboxOption2" checked>
+                                <label class="form-check-label" for="checkboxOption2">
+                                    Clinic Address
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="autoHeaderOptions" value="doctor_name" id="checkboxOption3" checked>
+                                <label class="form-check-label" for="checkboxOption3">
+                                    Doctor Name
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="autoHeaderOptions" value="doctor_degree" id="checkboxOption3" checked>
+                                <label class="form-check-label" for="checkboxOption3">
+                                    Doctor Degree
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="autoHeaderOptions" value="doctor_speciality" id="checkboxOption5" checked>
+                                <label class="form-check-label" for="checkboxOption5">
+                                    Doctor Speciality
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="autoHeaderOptions" value="doctor_availability" id="checkboxOption6" checked>
+                                <label class="form-check-label" for="checkboxOption6">
+                                    Doctor Availability
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="autoHeaderOptions" value="clinic_services" id="checkboxOption7" checked>
+                                <label class="form-check-label" for="checkboxOption7">
+                                    Clinic Services
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="autoHeaderOptions" value="clinic_logo" id="checkboxOption8" checked>
+                                <label class="form-check-label" for="checkboxOption8">
+                                    Clinic Logo
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="autoHeaderOptions" value="clinic_mobile_number" id="checkboxOption9" checked>
+                                <label class="form-check-label" for="checkboxOption9">
+                                    Clinic Mobile Number
+                                </label>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+                 
+            </div>
+        </div> -->
+
+        <div id="autoHeaderOptionsContainer" {% if not prescription_settings or prescription_settings.header_type != 1 %}style="display: none;"{% endif %}>
+            <div class="accordion" id="autoHeaderOptions">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingOption1">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOption1" aria-expanded="true" aria-controls="collapseOption1">
+                            Check Options
+                        </button>
+                    </h2>
+                    <div id="collapseOption1" class="accordion-collapse collapse show" aria-labelledby="headingOption1" data-bs-parent="#autoHeaderOptions">
+                        <div class="accordion-body">
+                            <!-- Clinic Name -->
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="autoHeaderOptions" value="clinic_name" id="checkboxClinicName"
+                                    {% if not prescription_settings or prescription_settings.clinic_name == 1 %}
+                                        checked
+                                    {% endif %}
+                                >
+                                <label class="form-check-label" for="checkboxClinicName">
+                                    Clinic Name
+                                </label>
+                            </div>
+                            <!-- Clinic Address -->
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="autoHeaderOptions" value="clinic_address" id="checkboxClinicAddress"
+                                    {% if not prescription_settings or prescription_settings.clinic_address == 1 %}
+                                        checked
+                                    {% endif %}
+                                >
+                                <label class="form-check-label" for="checkboxClinicAddress">
+                                    Clinic Address
+                                </label>
+                            </div>
+                            <!-- Doctor Name -->
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="autoHeaderOptions" value="doctor_name" id="checkboxDoctorName"
+                                    {% if not prescription_settings or prescription_settings.doctor_name == 1 %}
+                                        checked
+                                    {% endif %}
+                                >
+                                <label class="form-check-label" for="checkboxDoctorName">
+                                    Doctor Name
+                                </label>
+                            </div>
+                            <!-- Doctor Degree -->
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="autoHeaderOptions" value="doctor_degree" id="checkboxDoctorDegree"
+                                    {% if not prescription_settings or prescription_settings.doctor_degree == 1 %}
+                                        checked
+                                    {% endif %}
+                                >
+                                <label class="form-check-label" for="checkboxDoctorDegree">
+                                    Doctor Degree
+                                </label>
+                            </div>
+                            <!-- Doctor Speciality -->
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="autoHeaderOptions" value="doctor_speciality" id="checkboxDoctorSpeciality"
+                                    {% if not prescription_settings or prescription_settings.doctor_speciality == 1 %}
+                                        checked
+                                    {% endif %}
+                                >
+                                <label class="form-check-label" for="checkboxDoctorSpeciality">
+                                    Doctor Speciality
+                                </label>
+                            </div>
+                            <!-- Doctor Availability -->
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="autoHeaderOptions" value="doctor_availability" id="checkboxDoctorAvailability"
+                                    {% if not prescription_settings or prescription_settings.doctor_availability == 1 %}
+                                        checked
+                                    {% endif %}
+                                >
+                                <label class="form-check-label" for="checkboxDoctorAvailability">
+                                    Doctor Availability
+                                </label>
+                            </div>
+                            <!-- Clinic Services -->
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="autoHeaderOptions" value="clinic_services" id="checkboxClinicServices"
+                                    {% if not prescription_settings or prescription_settings.clinic_services == 1 %}
+                                        checked
+                                    {% endif %}
+                                >
+                                <label class="form-check-label" for="checkboxClinicServices">
+                                    Clinic Services
+                                </label>
+                            </div>
+                            <!-- Clinic Logo -->
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="autoHeaderOptions" value="clinic_logo" id="checkboxClinicLogo"
+                                    {% if not prescription_settings or prescription_settings.clinic_logo == 1 %}
+                                        checked
+                                    {% endif %}
+                                >
+                                <label class="form-check-label" for="checkboxClinicLogo">
+                                    Clinic Logo
+                                </label>
+                            </div>
+                            <!-- Clinic Mobile Number -->
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="autoHeaderOptions" value="clinic_mobile_number" id="checkboxClinicMobileNumber"
+                                    {% if not prescription_settings or prescription_settings.clinic_mobile_number == 1 %}
+                                        checked
+                                    {% endif %}
+                                >
+                                <label class="form-check-label" for="checkboxClinicMobileNumber">
+                                    Clinic Mobile Number
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+       
+        <!-- Save Button (Bottom) -->
+        <div class="text-center mt-3">
+            <button type="submit" class="btn btn-primary btn-save" style="background-color: #A52028; border-color:#A52028;" ><span class="fas fa-save" style="color: #FFFFFF;" ></span>
+                {% if prescription_settings %}
+                   Update
+                {% else %}
+                   Save
+                {% endif %}
+            </button>
+        </div>
+    </form>
+    {%if request.session.subscription_status == 'inactive' %}
+        {% include "Doctor/popup.html" %}
+    {%endif%}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+    <script>
+        document.getElementById('headerType').addEventListener('change', function() {
+            var imageUploadField = document.getElementById('imageUploadField');
+            var heightField = document.getElementById('heightField');
+            var headerHeightLabel = document.getElementById('headerHeightLabel');
+
+            if (this.value === '2') {
+                imageUploadField.style.display = 'block';
+                heightField.style.display = 'block';
+                headerHeightLabel.textContent = 'Height (inches)';
+            } else if (this.value === '3') {
+                imageUploadField.style.display = 'none';
+                heightField.style.display = 'block';
+                headerHeightLabel.textContent = 'Header Top Margin (inches)';
+            } else {
+                imageUploadField.style.display = 'none';
+                heightField.style.display = 'none';
+            }
+        });
+    </script>
+
+    <script>
+        // Function to show/hide auto header options based on header type selection
+        function toggleAutoHeaderOptions() {
+            var headerType = document.getElementById('headerType').value;
+            var autoHeaderOptionsContainer = document.getElementById('autoHeaderOptionsContainer');
+            if (headerType === '1') {
+                autoHeaderOptionsContainer.style.display = 'block';
+            } else {
+                autoHeaderOptionsContainer.style.display = 'none';
+            }
+        }
+
+        // Event listener for header type dropdown change
+        document.getElementById('headerType').addEventListener('change', toggleAutoHeaderOptions);
+
+        // Call toggleAutoHeaderOptions initially to set initial visibility based on dropdown value
+        toggleAutoHeaderOptions();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avaliability Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,500;0,600;0,700;1,400&amp;display=swap"/>
+    <style>
+        .navbar-orange {
+            background-color: #008373;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .form-container {
+            margin-top: 80px;
+            padding: 10px;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            color: #FFFFFF;
+        }
+
+        .form-control {
+            border-color: black;
+            font-size: 12px;
+            width: 80%; /* Adjusted width */
+            margin: 5px; /* Adjusted margin */
+        }
+        /* .form-select {
+            border-color: black;
+            font-size: 14px;
+            width: 70%;  
+            margin: 5px;  
+        } */
+
+        .btn-save {
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+        }
+        /* .custom-file-label {
+            overflow: hidden;
+            white-space: nowrap;
+        } */
+
+        /* Style the "Choose File" button */
+        /* .custom-file-input {
+            padding: 0.01rem 0.01rem;
+        } */
+
+        /* Decrease width of each cell */
+        td {
+            width: 1%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Doctor Registration Form with Navigation Bar -->
+    <form class="container form-container" method="Post">
+        {% csrf_token %}
+        <!-- Navigation Bar -->
+        <nav class="navbar navbar-expand-lg navbar-light navbar-orange fixed-top">
+            <div class="container-fluid pl-3">
+                <a class="navbar-brand" >
+                    <i class="fas fa-arrow-left"></i> Add Time Slots
+                </a>
+                <button type="submit" value="Submit" class="btn btn-light mx-3">
+                    <i class="fas fa-save"></i> Save
+                </button>
+            </div>
+        </nav>
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Day</th>
+                    <th>Morning</th>
+                    <th>Afternoon</th>
+                    <th>Evening</th>
+                    <!-- <th>Copy from Monday</th> -->
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Monday<br>
+                        <input type="checkbox" name="copyMondayToOthers">
+                        <small><i class="fas fa-copy"></i></small>
+                    </td>
+                    <td>
+                        <input type="number" name="mondayMorningStart" placeholder="Start" required class="form-control">
+                        <input type="number" name="mondayMorningEnd" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="mondayAfternoonStart" placeholder="Start" required class="form-control">
+                        <input type="number" name="mondayAfternoonEnd" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="mondayEveningStart" placeholder="Start" required class="form-control">
+                        <input type="number" name="mondayEveningEnd" placeholder="End" required class="form-control">
+                    </td>
+                </tr>
+                <!-- Repeat similar rows for Tuesday and Wednesday -->
+                <tr>
+                    <!-- Tuesday -->
+                    <td>Tuesday</td>
+                    <td>
+                        <input type="number" name="tuesdayMorningStart" placeholder="Start" required class="form-control">
+                        <input type="number" name="tuesdayMorningEnd" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="tuesdayAfternoonStart" placeholder="Start" required class="form-control">
+                        <input type="number" name="tuesdayAfternoonEnd" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="tuesdayEveningStart" placeholder="Start" required class="form-control">
+                        <input type="number" name="tuesdayEveningEnd" placeholder="End" required class="form-control">
+                    </td>
+                </tr>
+                <!-- Wednesday -->
+                <tr>
+                    <td>Wednesday</td>
+                    <td>
+                        <input type="number" name="wednesdayMorningStart" placeholder="Start" required class="form-control">
+                        <input type="number" name="wednesdayMorningEnd" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="wednesdayAfternoonStart" placeholder="Start" required class="form-control">
+                        <input type="number" name="wednesdayAfternoonEnd" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="wednesdayEveningStart" placeholder="Start" required class="form-control">
+                        <input type="number" name="wednesdayEveningEnd" placeholder="End" required class="form-control">
+                    </td>
+                </tr>
+                <!-- Thursday -->
+                <tr>
+                    <td>Thursday</td>
+                    <td>
+                        <input type="number" name="thursdayMorningStart" placeholder="Start" required class="form-control">
+                        <input type="number" name="thursdayMorningEnd" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="thursdayAfternoonStart" placeholder="Start" required class="form-control">
+                        <input type="number" name="thursdayAfternoonEnd" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="thursdayEveningStart" placeholder="Start" required class="form-control">
+                        <input type="number" name="thursdayEveningEnd" placeholder="End" required class="form-control">
+                    </td>
+                </tr>
+
+                <!-- Friday -->
+                <tr>
+                    <td>Friday</td>
+                    <td>
+                        <input type="number" name="fridayMorningStart" placeholder="Start" required class="form-control">
+                        <input type="number" name="fridayMorningEnd" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="fridayAfternoonStart" placeholder="Start" required class="form-control">
+                        <input type="number" name="fridayAfternoonEnd" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="fridayEveningStart" placeholder="Start" required class="form-control">
+                        <input type="number" name="fridayEveningEnd" placeholder="End" required class="form-control">
+                    </td>
+                </tr>
+
+                <!-- Saturday -->
+                <tr>
+                    <td>Saturday</td>
+                    <td>
+                        <input type="number" name="saturdayMorningStart" placeholder="Start" required class="form-control">
+                        <input type="number" name="saturdayMorningEnd" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="saturdayAfternoonStart" placeholder="Start" required class="form-control">
+                        <input type="number" name="saturdayAfternoonEnd" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="saturdayEveningStart" placeholder="Start" required class="form-control">
+                        <input type="number" name="saturdayEveningEnd" placeholder="End" required class="form-control">
+                    </td>
+                </tr>
+
+                <!-- Sunday -->
+                <tr>
+                    <td>Sunday</td>
+                    <td>
+                        <input type="number" name="sundayMorningStart" placeholder="Start" required class="form-control">
+                        <input type="number" name="sundayMorningEnd" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="sundayAfternoonStart" placeholder="Start" required class="form-control">
+                        <input type="number" name="sundayAfternoonEnd" placeholder="End" required class="form-control">
+                    </td>
+                    <td>
+                        <input type="number" name="sundayEveningStart" placeholder="Start" required class="form-control">
+                        <input type="number" name="sundayEveningEnd" placeholder="End" required class="form-control">
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+
+        <!-- Save Button (Bottom) -->
+        <div class="text-center mt-3">
+            <button type="submit" class="btn btn-primary btn-save" style="background-color: #008373;">Save</button>
+        </div>
+    </form>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script>
+        document.getElementsByName('copyMondayToOthers')[0].addEventListener('change', function() {
+            // Get Monday time slots
+            const mondayMorningStart = document.getElementsByName('mondayMorningStart')[0].value;
+            const mondayMorningEnd = document.getElementsByName('mondayMorningEnd')[0].value;
+            const mondayAfternoonStart = document.getElementsByName('mondayAfternoonStart')[0].value;
+            const mondayAfternoonEnd = document.getElementsByName('mondayAfternoonEnd')[0].value;
+            const mondayEveningStart = document.getElementsByName('mondayEveningStart')[0].value;
+            const mondayEveningEnd = document.getElementsByName('mondayEveningEnd')[0].value;
+    
+            // Set time slots for Tuesday
+            document.getElementsByName('tuesdayMorningStart')[0].value = this.checked ? mondayMorningStart : '';
+            document.getElementsByName('tuesdayMorningEnd')[0].value = this.checked ? mondayMorningEnd : '';
+            document.getElementsByName('tuesdayAfternoonStart')[0].value = this.checked ? mondayAfternoonStart : '';
+            document.getElementsByName('tuesdayAfternoonEnd')[0].value = this.checked ? mondayAfternoonEnd : '';
+            document.getElementsByName('tuesdayEveningStart')[0].value = this.checked ? mondayEveningStart : '';
+            document.getElementsByName('tuesdayEveningEnd')[0].value = this.checked ? mondayEveningEnd : '';
+    
+            // Set time slots for Wednesday
+            document.getElementsByName('wednesdayMorningStart')[0].value = this.checked ? mondayMorningStart : '';
+            document.getElementsByName('wednesdayMorningEnd')[0].value = this.checked ? mondayMorningEnd : '';
+            document.getElementsByName('wednesdayAfternoonStart')[0].value = this.checked ? mondayAfternoonStart : '';
+            document.getElementsByName('wednesdayAfternoonEnd')[0].value = this.checked ? mondayAfternoonEnd : '';
+            document.getElementsByName('wednesdayEveningStart')[0].value = this.checked ? mondayEveningStart : '';
+            document.getElementsByName('wednesdayEveningEnd')[0].value = this.checked ? mondayEveningEnd : '';
+    
+            // Set time slots for Thursday
+            document.getElementsByName('thursdayMorningStart')[0].value = this.checked ? mondayMorningStart : '';
+            document.getElementsByName('thursdayMorningEnd')[0].value = this.checked ? mondayMorningEnd : '';
+            document.getElementsByName('thursdayAfternoonStart')[0].value = this.checked ? mondayAfternoonStart : '';
+            document.getElementsByName('thursdayAfternoonEnd')[0].value = this.checked ? mondayAfternoonEnd : '';
+            document.getElementsByName('thursdayEveningStart')[0].value = this.checked ? mondayEveningStart : '';
+            document.getElementsByName('thursdayEveningEnd')[0].value = this.checked ? mondayEveningEnd : '';
+
+            // Set time slots for Friday
+            document.getElementsByName('fridayMorningStart')[0].value = this.checked ? mondayMorningStart : '';
+            document.getElementsByName('fridayMorningEnd')[0].value = this.checked ? mondayMorningEnd : '';
+            document.getElementsByName('fridayAfternoonStart')[0].value = this.checked ? mondayAfternoonStart : '';
+            document.getElementsByName('fridayAfternoonEnd')[0].value = this.checked ? mondayAfternoonEnd : '';
+            document.getElementsByName('fridayEveningStart')[0].value = this.checked ? mondayEveningStart : '';
+            document.getElementsByName('fridayEveningEnd')[0].value = this.checked ? mondayEveningEnd : '';
+
+            // Set time slots for Saturday
+            document.getElementsByName('saturdayMorningStart')[0].value = this.checked ? mondayMorningStart : '';
+            document.getElementsByName('saturdayMorningEnd')[0].value = this.checked ? mondayMorningEnd : '';
+            document.getElementsByName('saturdayAfternoonStart')[0].value = this.checked ? mondayAfternoonStart : '';
+            document.getElementsByName('saturdayAfternoonEnd')[0].value = this.checked ? mondayAfternoonEnd : '';
+            document.getElementsByName('saturdayEveningStart')[0].value = this.checked ? mondayEveningStart : '';
+            document.getElementsByName('saturdayEveningEnd')[0].value = this.checked ? mondayEveningEnd : '';
+
+            // Set time slots for Sunday
+            document.getElementsByName('sundayMorningStart')[0].value = this.checked ? mondayMorningStart : '';
+            document.getElementsByName('sundayMorningEnd')[0].value = this.checked ? mondayMorningEnd : '';
+            document.getElementsByName('sundayAfternoonStart')[0].value = this.checked ? mondayAfternoonStart : '';
+            document.getElementsByName('sundayAfternoonEnd')[0].value = this.checked ? mondayAfternoonEnd : '';
+            document.getElementsByName('sundayEveningStart')[0].value = this.checked ? mondayEveningStart : '';
+            document.getElementsByName('sundayEveningEnd')[0].value = this.checked ? mondayEveningEnd : '';
+        });
+    </script>
+</body>
+</html>

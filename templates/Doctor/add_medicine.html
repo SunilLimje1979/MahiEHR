@@ -1,0 +1,249 @@
+{% load static %}
+{% load pwa %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicine Details</title>
+    <link rel="manifest" href="{% static 'assets/manifest.json' %}"> 
+    <link rel="shortcut icon" href="{% static 'assets/img/MAHI_Logo.png' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+        crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,500;0,600;0,700;1,400&amp;display=swap" />
+    <style>
+        .navbar-orange {
+            background-color:#A52028;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .form-container {
+            margin-top: 80px;
+            padding: 10px;
+        }
+
+        .navbar-brand {
+            color: #FFFFFF;
+        }
+
+        .form-control,
+        .form-select {
+            font-size: 18px;
+            border-color: black;
+        }
+
+        .btn-save {
+            margin-top: 10px;
+        }
+
+        .custom-file-label {
+            overflow: hidden;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- insert medicine details -->
+    <form class="container form-container" {% if medicine %}action="{% url 'update_medicine' medicine.doctor_medicine_id %}"{% else %}action="{% url 'insert_medicine' %}"{% endif %} method="post">
+        {% csrf_token %}
+        <!-- Navigation Bar -->
+        <input type="hidden" value="" name="doctor_medicine_id">
+        <nav class="navbar navbar-expand-lg navbar-light navbar-orange fixed-top">
+            <div class="container-fluid pl-3">
+                <a class="navbar-brand" href="/MahiEHR/get_all_medicines/">
+                    <i class="fas fa-arrow-left"></i>
+                        {% if medicine %}
+                          Update Medicine
+                       {% else %}
+                          Insert Medicine
+                       {% endif %}
+                </a>
+                <button type="submit" value="Submit" class="btn btn-light mx-3" id="saveButton">
+                    <i class="fas fa-save"></i>
+                        {% if medicine %}
+                           Update
+                        {% else %}
+                           Save
+                        {% endif %}
+                </button>
+            </div>
+        </nav>
+        <!-- Form content -->
+        <div class="row">
+            <div class="col-md-6 col-6 mb-3">
+                <div class="form-floating">
+                    <input type="text" class="form-control" value="{{medicine.medicine_code}}"  name="Medicine_Code" placeholder="" required>
+                    <label for="Medicine_Code">Medicine Code</label>
+                </div>
+            </div>
+            <div class="col-md-6 col-6 mb-3">
+                <div class="form-floating">
+                    <input type="text" class="form-control" value="{{medicine.medicine_name}}" name="Medicine_Name" placeholder=""   required>
+                    <label for="Medicine_Name">Medicine Name</label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 col-6 mb-3">
+                <div class="form-floating">
+                    <select class="form-select" id="medicineFormSelect" name="Medicine_form" aria-label="Floating label select example" required>
+                        <option value="" disabled selected hidden>Select</option>
+                        <option value="1" {% if medicine.medicine_form == 1 %}selected{% endif %}>Tab</option>
+                        <option value="2" {% if medicine.medicine_form == 2 %}selected{% endif %}> Syp</option>
+                        <option value="3"{% if medicine.medicine_form == 3 %}selected{% endif %}> Pwd</option>
+                    </select>
+                    <label for="medicine_form">Medicine form</label>
+                </div>
+            </div>
+        
+            <div class="col-md-6 col-6 mb-3">
+                <div class="form-floating">
+                  <select class="form-select" id="medicineFrequencySelect" name="Medicine_Frequency" aria-label="Floating label select example" required>
+                    <option value="" disabled selected hidden>Select</option>
+                    <option value="BDS" {% if medicine and medicine.medicine_frequency == 'BDS' %}selected{% endif %}>BDS</option>
+                    <option value="TDS" {% if medicine and medicine.medicine_frequency == 'TDS' %}selected{% endif %}>TDS</option>
+                    <option value="HS" {% if medicine and medicine.medicine_frequency == 'HS' %}selected{% endif %}>HS</option>
+                    <option value="OD" {% if medicine and medicine.medicine_frequency == 'OD' %}selected{% endif %}>OD</option>
+                  </select>
+                    <label for="Medicine_Frequency">Frequency</label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 col-6 mb-3">
+              <div class="form-floating">
+                  <input type="text" class="form-control" VALUE="{{medicine.medicine_duration}}" name="Medicine_Duration" placeholder=""   required>
+                  <label for="Medicine_Duration">Duration</label>
+              </div>
+          </div>
+        
+            <div class="col-md-6 col-6 mb-3">
+                <div class="form-floating">
+                    <!-- <select class="form-select" id="medicineDosageSelect" name="Medicine_Dosages" aria-label="Floating label select example" required>
+                        <option value="" disabled selected hidden>Select</option>
+                    </select> -->
+                    <select class="form-select" id="medicineDosageSelect" name="Medicine_Dosages" aria-label="Floating label select example" required>
+                      {% if medicine %}<option value="" disabled hidden>Select</option>{%else%}<option value="" disabled selected hidden>Select</option>{%endif%}
+                      {% if medicine and medicine.medicine_frequency == 'HS' %}
+                          <option value="0--0--1" selected>0--0--1</option>
+                      {% elif medicine and medicine.medicine_frequency == 'TDS' %}
+                          <option value="1--1--1" selected>1--1--1</option>
+                      {% elif medicine and medicine.medicine_frequency == 'BDS' %}
+                          <option value="0--1--1" {% if medicine.medicine_dosages == '0--1--1' %}selected{% endif %}>0--1--1</option>
+                          <option value="1--0--1" {% if medicine.medicine_dosages == '1--0--1' %}selected{% endif %}>1--0--1</option>
+                          <option value="1--1--0" {% if medicine.medicine_dosages == '1--1--0' %}selected{% endif %}>1--1--0</option>
+                      {% elif medicine and medicine.medicine_frequency == 'OD' %}
+                            <option value="0--1--0" {% if medicine.medicine_dosages == '0--1--0' %}selected{% endif %}>0--1--0</option>
+                            <option value="1--0--0" {% if medicine.medicine_dosages == '1--0--0' %}selected{% endif %}>1--0--0</option>       
+                      {% endif %}
+                  </select>
+                    <label for="Medicine_Dosages">Dosages</label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 col-6 mb-3">
+              <div class="form-floating">
+                  <input type="text" class="form-control" name="Medicine_Manufacture" value="{{medicine.medicine_manufacture}}"   placeholder="" required>
+                  <label for="Medicine_Manufacture">Manufacture</label>
+              </div>
+          </div>
+
+          <div class="col-md-6 col-6 mb-3">
+              <div class="form-floating">
+                  <input type="number" class="form-control" name="Medicine_Packsize" value="{{medicine.medicine_packsize}}"   placeholder="Aadhar Number" required>
+                  <label for="Medicine_Packsize">Packsize</label>
+              </div>
+          </div>
+      </div>
+      <div class="row">
+          <div class="col-md-6 col-6 mb-3">
+              <div class="form-floating">
+                  <input type="text" class="form-control" name="Medicine_Preservation" value="{{medicine.medicine_preservation}}"   placeholder="" required>
+                  <label for="Medicine_Preservation">Preservation</label>
+              </div>
+          </div>
+      
+          <div class="col-md-6 col-6 mb-3">
+              <div class="form-floating">
+                  <input type="number" class="form-control" name="Medicine_Minstock" value="{{medicine.medicine_minstock}}"  placeholder=" " required>
+                  <label for="Medicine_Minstock">Minstock</label>
+              </div>
+          </div>
+      </div>
+      <div class="row">
+          <div class="col-md-6 col-6 mb-3">
+              <div class="form-floating">
+                  <input type="text" class="form-control" name="Medicine_price" value="{{medicine.price}}"  placeholder="Price" required>
+                  <label for="Medicine_price">Price</label>
+              </div>
+          </div>
+
+          <div class="col-md-6 col-6 mb-3">
+              <div class="form-floating">
+                  <input type="number" class="form-control" name="Medicine_GST" value="{{medicine.medicine_gst}}"  placeholder="" required>
+                  <label for="Medicine_GST">GST (%)</label>
+              </div>
+          </div>
+      </div>
+      <div class="row">
+          <div class="col-md-6 col-12 mb-3">
+              <div class="form-floating">
+                  <input type="text" class="form-control" name="Medicine_Content_name"  value="{{medicine.medicine_content_name}}"  placeholder="" required>
+                  <label for="Medicine_Content_name">Generic name</label>
+              </div>
+          </div>
+      </div>
+
+        <!-- Save Button (Bottom) -->
+        <div class="text-center mt-3">
+            <button type="submit" class="btn btn-primary btn-save" style="background-color: #A52028; border-color:#A52028;" ><span
+                    class="fas fa-save" style="color: #FFFFFF;"></span>
+                    {% if medicine %}
+                      Update
+                    {% else %}
+                      Save
+                    {% endif %}
+            </button>
+        </div>
+    </form>
+    {%if request.session.subscription_status == 'inactive' %}
+        {% include "Doctor/popup.html" %}
+    {%endif%}
+
+    <script>
+        const frequencySelect = document.getElementById('medicineFrequencySelect');
+        const dosageSelect = document.getElementById('medicineDosageSelect');
+
+        frequencySelect.addEventListener('change', function () {
+            const selectedFrequency = frequencySelect.value;
+            if (selectedFrequency === 'HS') {
+                dosageSelect.innerHTML = '<option value="0--0--1">0--0--1</option>';
+            } else if (selectedFrequency === 'TDS') {
+                dosageSelect.innerHTML = '<option value="1--1--1">1--1--1</option>';
+            } else if (selectedFrequency === 'BDS') {
+                dosageSelect.innerHTML = `
+                    <option value="1--0--1">1--0--1</option>
+                    <option value="0--1--1">0--1--1</option>
+                    <option value="1--1--0">1--1--0</option>
+                    `;
+            } else if (selectedFrequency === 'OD') {
+                dosageSelect.innerHTML = `
+                    <option value="1--0--0">1--0--0</option>
+                    <option value="0--1--0">0--1--0</option>
+                `;
+            }
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

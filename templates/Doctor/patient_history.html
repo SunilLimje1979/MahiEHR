@@ -1,0 +1,198 @@
+{% load static %}
+{% load pwa %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient History</title>
+    <link rel="manifest" href="{% static 'assets/manifest.json' %}"> 
+    <link rel="shortcut icon" href="{% static 'assets/img/MAHI_Logo.png' %}">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css"/>
+
+    <style>
+        p{
+            margin: 0;
+
+        }
+        .navbar-orange {
+            background-color: #A52028;
+            box-shadow: 0px 4px 8px;
+        }
+        .navbar-brand {
+            color: #ffffff;
+        }
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card {
+            margin-top: 25px;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .medicine-item {
+            margin-bottom: 10px;
+        }
+        .lab-item {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-orange fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'get_all_doctor_appointments' %}">
+                <i class="fas fa-arrow-left"></i> Patient History
+            </a>
+        </div>
+    </nav>
+    {%if data1 %}
+    <div class="container" style="margin-top: 80px;">
+        <div class="card">
+            <div class="row">
+                <input type="hidden" name="appointment_id" value={{data1.appointment_id}} />
+                <div class="label-row">
+                  <label for="label1" style="font-size: 20px;">Patient: {{ data1.appointment_name }}</label>
+                  <label for="label2"style="font-size: 20px; "><i class="fa-solid fa-user-group" style="color: #A52028"></i> {{data1.appointment_token}}</label>
+                </div>
+                <div class="label-row">
+                  <div style="font-size: 20px;">
+                      {% if data1.appointment_gender == 0 %}
+                          SEX: M
+                      {% else %}
+                          SEX: F
+                      {% endif %}
+                  </div>
+                  <div style="font-size: 20px;">
+                    Balance: {{data1.outstanding}} &#8377;
+                    <!-- Balance: 456765435556 &#8377; -->
+                  </div>
+                </div>
+              
+                <div class="label-row">
+                    <div style="font-size: 20px;">
+                      {% if data1.age %}
+                        Age: {{ data1.age }}
+                      {% else %}
+                        Age:  
+                      {% endif %}
+                    </div>
+                </div>
+                    <div class="label-row">
+                            <label for="label1"style="font-size: 20px;">Mobile: {{data1.appointment_mobileno}}</label>
+            
+                            <label for="label2" style="font-size: 20px;">
+                            <!-- <i class="fa-solid fa-circle-user"></i> -->
+                            {% if data1.appointment_status == 1 %}
+                                Open
+                            {% elif data1.appointment_status == 2 %}
+                                In Process
+                            {% elif data1.appointment_status >= 3 %}
+                                Completed
+                            {% endif %}
+                            </label>
+                    </div>  
+                </div>
+                <hr>
+       
+     
+
+            <!-- Consultation Details -->
+            {%if all_data %}
+            {% for consultation in all_data %}
+                <div class="row ">
+                    <div class="col-12">
+                        <h5>Date: {{ consultation.consultation_datetime }}</h5>
+                        <!-- <p>Consultation Status: 
+                            {% if consultation.consultation_status == 1 %}
+                                Open
+                            {% elif consultation.consultation_status == 2 %}
+                                In Process
+                            {% elif consultation.consultation_status >= 3 %}
+                                Completed
+                            {% endif %}
+                        </p> -->
+                        <p><i class="fa-solid fa-stethoscope" style="color:#008373;"></i> {{consultation.symptoms_data.findings}}</p>
+                        <p><i class="fa-solid fa-check" style="color: deepskyblue;"></i> {{consultation.symptoms_data.advice}}</p>
+                        <p><i class="fa-solid fa-check" style="color: deepskyblue;"></i> {{ consultation.instructions }}</p>
+                         
+                    </div>
+                </div>
+
+                <!-- Medicine Details -->
+                <div class="row mt-2">
+                    <div class="col-12">
+                        {% if consultation.medicines %}<h6 style="margin: 0;">Rx:</h6>{%endif%}
+                        {% for medicine in consultation.medicines %}
+                            <div class="medicine-item" style="margin: 0;">
+                                <p>
+                                    {% if medicine.medicine_form == '1' %}
+                                    Tab
+                                 {% elif medicine.medicine_form == '2' %}
+                                     Syp
+                                 {% elif medicine.medicine_form == '3' %}
+                                     Pwd
+                                 {% else %}
+                                     Unknown Mode
+                                 {% endif %}&nbsp;
+                                  {{ medicine.medicine_name }}&nbsp;&nbsp;
+                                  {{ medicine.medicine_doses }}&nbsp;&nbsp;
+                                  <!-- {% if medicine.medicine_form == '1' %}
+                                       Tab
+                                    {% elif medicine.medicine_form == '2' %}
+                                        Syp
+                                    {% elif medicine.medicine_form == '3' %}
+                                        Pwd
+                                    {% else %}
+                                        Unknown Mode
+                                    {% endif %}&nbsp;&nbsp; -->
+                                  {{ medicine.medicine_duration }} days
+                                </p>
+                            </div>
+                        {% empty %}
+                            <!-- <p>No medicine prescribed for this consultation.</p> -->
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Lab Details -->
+                <div class="row mt-1">
+                    <div class="col-12">
+                        <!-- <h6>Tests:</h6> -->
+                        {% if consultation.labs %}
+                            <h6 style="margin: 0;">Tests:</h6>
+                            {% for lab in consultation.labs %}
+                                <div class="lab-item" style="margin: 0;">
+                                    <p>{{ lab }}</p>
+                                </div>
+                            {% endfor %}
+                        
+                        {% endif %}
+                    </div>
+                </div>
+                <hr>
+            {% endfor %}
+            {%else%}
+            <div class="container">
+                <h1>No Previous History Found</h1>
+            </div>
+            {%endif%}
+        </div>
+    </div>
+    {%else%}
+       <div class="container" style="margin-top: 80px;">
+        <h1>No Patient details found</h1>
+       </div>
+    {%endif%}
+
+    <!-- Bootstrap JS (Place this at the end of the body for faster page load) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

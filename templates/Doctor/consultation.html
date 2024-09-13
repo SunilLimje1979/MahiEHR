@@ -1,0 +1,1369 @@
+{% load static %}
+{% load pwa %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultation_application</title>
+    <link rel="manifest" href="{% static 'assets/manifest.json' %}"> 
+    <link rel="shortcut icon" href="{% static 'assets/img/MAHI_Logo.png' %}">
+    
+
+    <!-- !-- Bootstrap CSS --> 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,500;0,600;0,700;1,400&amp;display=swap"/>
+    <!-- <link rel="stylesheet" href="{% static 'assets/plugins/bootstrap/css/bootstrap.min.css' %}"/>
+    <link rel="stylesheet" href="{% static 'assets/plugins/fontawesome/css/fontawesome.min.css' %}"/>
+    <link rel="stylesheet" href="{% static 'assets/plugins/fontawesome/css/all.min.css' %}"/>
+    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}" /> -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+     
+    
+    <!-- Bootstrap Select CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.18/dist/css/bootstrap-select.min.css">
+
+    <style>
+      .navbar-orange {
+          background-color:#A52028;
+          box-shadow: 0px 4px 8px;
+        }
+        .label-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .label-row label {
+        font-size: 20px; /* Adjust font size as needed */
+      }
+      .input-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        align-items: center;
+      }
+
+      .input-row label {
+        flex: 1;
+        text-align: center;
+        padding-right: 0px;
+        font-size: 20px;
+      }
+
+      .input-row input {
+        flex: 2;
+        width: 100%;
+        margin: 5px;
+        padding: 5px;
+        box-sizing: border-box;
+      }
+
+      .row {
+        display: flex;
+        align-items: right;
+      }
+
+      .row label {
+        flex: 1; /* This will make the label take up 1/3 of the row width */
+        margin-right: 10px; /* Adjust margin as needed */
+      }
+
+      .row input {
+        flex: 1; /* This will make the input field take up 2/3 of the row width */
+        /* Add any additional styling here */
+        margin-right: 10px;
+      }
+      /* styles.css */
+        #navbar, #title {
+          display: block;
+        }
+
+        /* Hide navbar and title when printing */
+        @media print {
+          .navbar, #title {
+            display: none;
+          }
+        }
+
+          /* Custom CSS for select2 */
+        .select2-container--default .select2-selection--single {
+          border: 1px solid #ced4da;
+          border-radius: .25rem;
+          height: calc(2.50rem + 2px);
+          background-color: #fff;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: calc(1.65rem + 2px);
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: calc(2.50rem + 2px);
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            border-color: #000 transparent transparent transparent;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            top: 6px;
+            right: 8px;
+        }
+        .select2-container--default .select2-dropdown {
+            max-height: 750px; /* Adjust the maximum height as needed */
+            overflow-y: auto; /* Enable vertical scrollbar if needed */
+        }
+
+         /* Loader styles */
+         #loader {
+            position: fixed;
+            left: 30%;
+            top: 30%;
+            transform: translate(-50%, -50%);
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 16px solid #f5873e;
+            width: 120px;
+            height: 120px;
+            -webkit-animation: spin 2s linear infinite;
+            animation: spin 2s linear infinite;
+            display: none;
+            z-index: 1000;
+        }
+
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+            }
+
+            100% {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        
+    </style>
+  </head>
+
+  <body>
+    <div id="overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999;"></div>
+    <div id="loader"></div>
+    <form id="myForm" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <nav class="navbar navbar-expand-lg navbar-light navbar-orange fixed-top">
+            <div class="container-fluid pl-3">
+            {% if consult_data.consultation_status != 3 and consult_data.consultation_status != 2 %}
+               {% if request.session.subscription_status == 'active' %}
+                    <a class="navbar-brand"  href="#" style="color:#ffffff ;"><i class=""></i>
+                        </i> Consultation
+                    </a>
+                {%else%}
+                    <a class="navbar-brand" style="color: white;"  href="{% url 'get_all_doctor_appointments' %}"><i class="fas fa-arrow-left" style="color: #fff;"></i> Consultation</a>
+                {%endif%}
+                    
+                <div class="d-flex justify-content-end">
+        
+                <button type="submit" class="btn btn-light mx-3" id="saveButton" onclick="saveData()" style="background-color:#ffff ; color:#000000">
+                    <i class="fas fa-save"></i> 
+                      {%if consult_data%}
+                        Update
+                      {%else%}
+                        Save 
+                      {%endif%}        
+                </button>
+            {%else%}
+                <a class="navbar-brand" style="color: white;"  href="{% url 'get_all_doctor_appointments' %}"><i class="fas fa-arrow-left" style="color: #fff;"></i> Consultation</a>
+            {%endif%}
+            </div>
+        </nav>
+        <!--initial Assesment---------------------------------------------------------------->
+        
+        
+        <div class="container mb-2" style="margin-top:20%;">
+          <div class="card " style="padding: 1%;">
+                
+                <div class="row">
+                  <!-- {{data1}}
+                  {{data2}} -->
+                  <!-- {{data3}} -->
+                  <!-- {{get_patient_by_appointment_id}} -->
+                </div>
+                <div class="label-row">
+                  <label for="label1" style="font-size: 20px;">Patient: {{ get_patient_by_appointment_id.appointment_name }}</label>
+                  <label for="label2"style="font-size: 20px; "><i class="fa-solid fa-user-group" style="color: #A52028;"></i> {{get_patient_by_appointment_id.appointment_token}}</label>
+                </div>
+                <!-- <div class="label-row">
+                  <label for="label2">{% if get_patient_by_appointment_id.appointment_gender is 0%}<i class="fa-solid fa-person" style="color: blue; font-size: 30px;"></i>{%else%}<i class="fa-solid fa-person-dress" style="color: rgb(208, 91, 110); font-size: 25px;"></i>{%endif%} 
+                    
+                  </label>
+                  <label for="label2" style="margin-right: 67%;">{{get_patient_by_appointment_id.age}} years</label>
+                 
+                </div> -->
+                <div class="label-row">
+                  <div style="font-size: 20px;">
+                      {% if get_patient_by_appointment_id.appointment_gender == 0 %}
+                          SEX: M
+                      {% else %}
+                          SEX: F
+                      {% endif %}
+                  </div>
+                  <div style="font-size: 20px;">
+                    Balance: {{outstanding}} &#8377;
+                    <!-- Balance: 48378573878 &#8377; -->
+                </div>
+                </div>
+                <div class="label-row">
+                  <div style="font-size: 20px;">
+                    {% if get_patient_by_appointment_id.age %}
+                      Age: {{ get_patient_by_appointment_id.age }}
+                    {% else %}
+                      Age:  
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="label-row mb-2">
+                  <label for="label2">Mobile: {{get_patient_by_appointment_id.appointment_mobileno}}{{patient_info.appointment_mobileno}}</label>
+                  <!-- <label for="label2"><i class="fa-solid fa-circle-user"></i> {{get_patient_by_appointment_id.appointment_status}}{{patient.appointment_status}}</label> -->
+                  <label for="label2" style="font-size: 20px;">
+                    <i class="fa-solid fa-circle-user"></i>
+                    {% if get_patient_by_appointment_id.appointment_status == 1 %}
+                        Open
+                    {% elif get_patient_by_appointment_id.appointment_status == 2 %}
+                        In Process
+                    {% elif get_patient_by_appointment_id.appointment_status >= 3 %}
+                        Completed
+                    {% endif %}
+                  </label>
+                </div>
+                <div class="d-flex justify-content-between mb-2 ">
+                  <label for="" class="col-5" style="font-size: 20px;"> Referred By </label>
+                  <input type="text" class="form-control form-control-sm me-2"   name="referred_by_doctor" value="{{consult_data.referred_by_doctor}}" style="margin-left: 1%; margin-right: 0%; font-size: 16px;"  required>
+                  </div>
+                <div class="d-flex justify-content-between">
+                  <label for="" class="col-5" style="font-size: 20px;">Referred To</label>
+                  <input type="text"  class="form-control form-control-sm me-2" name="referred_to_doctor" value="{{consult_data.referred_to_doctor}}" style="margin-left: 1%; margin-right: 0%; font-size: 16px;"   required>
+                </div>
+                
+                
+                <hr>
+                <div class="col">
+                  <div class="d-flex justify-content-between">
+                   <label for="Name" class=" times-new-roman fw-bold mb-2" style="font-size:20px;">Clinical Examinations</label>
+                   <!-- <button class="btn btn-primary btn-lg">save</button> -->
+                 </div> 
+                </div>
+                
+                {% for i in get_patient_boimterics_vitals %}
+               <input type ="hidden" value="{{i.doctor_id}}" name ="Doctor_Id"/>
+               <input type ="hidden" value="{{i.patient_id }}" name ="Patient_Id"/>
+               <input type = "hidden" value="{{i.patient_status}}" name = "Patient_Status"/>
+               <!-- <input type=" hiden" value="{{i.consultation_id}}" name ="consultation_id"/> -->
+               <input type ="hidden" value="{{get_patient_by_appointment_id.appointment_datetime}}" name = "Consultation_DateTime"/>
+               
+                <div class="d-flex flex-start">
+                  <label for="inputWeight" class="col-5" style="font-size: 18px;">Weight</label>
+                  <input type="number" id="inputWeight" class="form-control form-control-sm me-2" style="width: 150px; font-size: 16px;" name="weight" value="{{i.weight}}" placeholder=" " required>
+                  <label for="inputWeight" style="font-size: 18px;">Kg</label>
+                </div>
+                <div class="d-flex flex-start mt-2">
+                  <label for="" class="col-5" style="font-size: 18px;">Height</label>
+                  <input type="text" id="inputHeight" class="form-control form-control-sm me-2" name="height" placeholder=" " value="{{i.height}}" required style="margin-right:01% ; font-size: 16px;" >
+                  <label for="inputHeight" style="font-size: 18px;">cm</label>
+                </div>
+                <div class="d-flex flex-start mt-2">
+                  <label for="" class="col-5" style="font-size: 18px;">BMI</label>
+                  <input type="text" id="inputBMI" class="form-control form-control-sm me-2 " name="bmi" placeholder=" " value="{{ i.bmi}}" readonly style="margin-right:01% ;font-size: 16px;" >
+                  <label for="inputBMI" style="font-size: 18px;">kg/m&sup2;</label>
+                </div>
+                <div class="d-flex flex-start mt-2">
+                  <label for="input1" class="col-5" style="font-size: 18px;">Temperature</label>
+                  <input type="number" id="input2" class="form-control form-control-sm me-2" style="width: 150px; font-size: 16px;" name="temp" value="{{i.patient_temparature}}" placeholder=" " required >
+                  <label for="input1" style="font-size: 18px;">(°F)</label>
+                </div>
+                <div class="d-flex flex-start mt-2">
+                  <label for="input1" class="col-5" style="font-size: 18px;">Blood Pressure</label>
+                  <input type="number" id="input1" class="form-control form-control-sm me-1" style="width: 60px; font-size: 16px;" name="bp_s" value="{{i.patient_bpsystolic}}" placeholder=" " required>
+                  <label for="input1" class="me-1" style="font-size: 20px;">/</label>
+                  <input type="number" id="input2" class="form-control form-control-sm me-1" style="width: 60px; font-size: 16px;" name="bp_d" value="{{i.patient_bpdistolic}}" placeholder=" " required>
+                  <label for="input1" style="font-size: 17px;">Sis/Dia</label>
+                </div>
+    
+                
+                <div class="d-flex flex-start mt-2">
+                  <label for="Heart_rate" class="col-5" style="font-size: 18px;">Heart Rate</label>
+                  <input type="number" id="inputField" class="form-control form-control-sm me-1" style="width: 120px;font-size: 16px;" name="heart_rate" value="{{i.patient_heartratepluse}}" placeholder=" " required  style="margin-right:01% ;" >
+                  <label for="" class=" p-1" style="font-size: 18px;">Per/min</label>
+                </div>
+
+                <div class="d-flex flex-start mt-2">
+                  <label for="" class="col-5" style="font-size: 18px;">Respiratory Rate</label>
+                  <input type="number" id="inputField" class="form-control form-control-sm me-2" name="respiratory_rate" value="{{i.patient_respiratoryrate}}" placeholder=" " required style="margin-right:01% ; font-size: 16px;" >
+                </div>
+
+                <div class="d-flex flex-start mt-2">
+                  <label for="" class="col-5" style="font-size: 18px;">Pain Scale</label>
+                  <select id="inputField" class="form-control form-control-sm me-2" name="pain_scale" required style="margin-right: 1%; font-size: 16px;">
+                      <option value="" disabled selected>Select Pain Scale</option>
+                      {% for value in pain_scale_range %}
+                          <option value="{{ value }}" {% if value == i.patient_painscale %} selected {% endif %}>{{ value }}</option>
+                      {% endfor %}
+                  </select>
+                </div>
+
+                <div class="d-flex flex-start mt-2">
+                  <label for="" class="col-5" style="font-size: 18px;">Chest</label>
+                  <input type="text" id="inputField" class="form-control form-control-sm me-2" name="chest" placeholder=" " value="{{i.patient_chest}}" required  style="margin-right:1% ;font-size: 16px;">
+                </div>
+                <div class="d-flex flex-start mt-2">
+                  <label for="" class="col-5" style="font-size: 18px;">ECG</label>
+                  <textarea id="inputField" class="form-control form-control-sm me-2" name="ecg" placeholder=" " required style="margin-right: 1%; font-size: 16px; height: 50px;">{{ i.patient_ecg }}</textarea>
+                </div>
+                </div>
+                {%endfor%}
+              </div>
+            </div>
+          </div>
+        </div>
+         <!------------- Complain------------ -->
+        <div class="container mb-2" >
+          <div class="card "  style="padding: 1%;">
+              <div class="row">
+                  <div class="col ">
+                    <div class="d-flex justify-content-between">
+                      <label for="Name" class="col-sm-8 col-form-label times-new-roman fw-bold" style="font-size:20px;">Complaint</label>
+                      
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="form-group">
+                      <textarea type="text" placeholder="Type here" class="form-control" name="complaint_details" rows="4" required>{{symptoms_data.symtoms}}</textarea>
+                  </div>
+                </div>
+          </div>
+        </div>
+      </div>
+        <!-- KCO     -->
+        <div class="container mb-2">
+          <div class="card" style="padding: 1%;">
+              <div class="pt-3">
+                  <div class="col-12 mb-2">
+                      <!-- {{kco}} -->
+                      <div class="d-flex justify-content-between mb-2">
+                          <label for="" class="fw-bold times-new-roman" style="margin-right:2%;font-size: 20px;">KCO</label>
+                          <select class="form-control search form-select" id="kco" required  onchange="UpdateKCOTextArea()">
+                              <option value="Kco" disabled selected hidden>None</option>
+                              <option value="clear">Clear</option>
+                             
+                              {% for i in kco %}
+                              <option value="{{ i.datacodevalue }}">{{ i.datacodedescription }}</option>
+                              {% endfor %}
+                          </select>
+                      </div>
+                  </div>
+                  <div class="col-12">
+                      <div class="form-group">
+                          <textarea type="text" name="kco" id="selectedKCOTextArea" placeholder="display selected options here" class="form-control" rows="4" required >{{symptoms_data.kco}}</textarea>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+        <!-- Diagnosis -->
+        
+        <div class="container mb-2" >
+            <div class="card "  style="padding: 1%;">
+                <div class="row">
+                    <div class="col ">
+                      <div class="d-flex justify-content-between">
+                        <label for="Name" class="col-sm-8 col-form-label times-new-roman fw-bold" style="font-size:20px;">Diagnosis</label>
+                        
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-12">
+                    <div class="form-group">
+                        <textarea type="text" placeholder="Type here" class="form-control" name="Diagnosis"  rows="4" required>{{ symptoms_data.findings }}</textarea>
+                    </div>
+                  </div>
+            </div>
+          </div>
+        </div>
+          <!-- Advice -->
+        <div class="container mb-2" style="margin-bottom:0%;">
+          <div class="card" style="padding: 1%;">
+          <!-- <div class="pt-3"> -->
+              <div class="col-12 mb-2">
+                <div class="d-flex justify-content-between mb-2">
+                  <label for="" class="  fw-bold times-new-roman" style="margin-right:2% ;font-size: 20px;">Advice</label>
+                  <select class="form-control search form-select" name="advice" id="advice"  required  onchange="updateAdviceTextArea()" >
+                    <option value="Adv" disabled selected hidden>Advice</option>
+                    <option value="clear">Clear</option>
+                    {% for a in advice %}
+                    <option value="{{a.datacodevalue}}">{{a.datacodedescription}}</option>
+                    {%endfor%}
+                  </select>
+              </div>
+              </div>
+              <div class="col-12">
+                  <div class="form-group">
+                      <textarea type="text" name="advice" placeholder="Display here selected options" class="form-control" id="selectedAdviceTextArea" rows="4" required>{{symptoms_data.advice}}</textarea>
+                  </div>
+              </div>
+          </div>
+          </div>
+      </div>
+
+    <!-- Treatment -->
+      <div class="container mb-2">
+        <div class="card p-3">
+            <h2 class="fw-bold mb-1">Treatment</h2>
+            <div class="table-responsive mb-2">
+              <table class="table">
+                  <thead>
+                      <tr>
+                          <th>Medicine</th>
+                          <th>Mode</th>
+                          <th>Days</th>
+                          <th>Dosages</th>
+                          <th>Instructions</th>
+                          <th>Remove</th>
+                      </tr>
+                  </thead>
+                  <tbody id="medicineTableBody">
+                      <!-- Dynamically populated rows will go here -->
+                      {% for i in medic_list %}
+                      <tr>
+                          <td>{{ i.medicine_name }}</td>
+                          <td>
+                              {% if i.medicine_form == '1' %}
+                                  Tab
+                              {% elif i.medicine_form == '2' %}
+                                  Syp
+                              {% elif i.medicine_form == '3' %}
+                                  Pwd
+                              {% else %}
+                                  Unknown Mode
+                              {% endif %}
+                          </td>
+                          <td>{{ i.medicine_duration }}</td>
+                          <td>{{ i.medicine_doses }}</td>
+                          <!-- <td>{{ i.medicine_instruction_id }}</td> -->
+                          <td data-instruction-id="{{ i.medicine_instruction_id }}">{{ i.instruction_text }}</td>
+                          <td><button class="btn btn-danger btn-sm removeBtn">Remove</button></td>
+                      </tr>
+                      {% endfor %}
+                  </tbody>
+              </table>
+          </div>
+
+            <!-- Form for adding medicine details -->
+            <div class="mb-3">
+                <!-- Search input for the dropdown -->
+                <!-- <input type="text" id="dropdownMedicineSearch" class="form-control mb-2" placeholder="Search medicine name"> -->
+                <!-- <label for="medicineSelect" class="form-label">Medicine</label> -->
+                <select class="form-select" id="medicineSelect" size="1">
+                    <option value="" disabled selected hidden>Select Medicine</option>
+                    <!-- Populate options dynamically -->
+                    {% for m in all_medicines %}
+                    <option value="{{ m.medicine_name }}" 
+                            data-form="{{ m.medicine_form }}"
+                            data-duration="{{ m.medicine_duration }}"
+                            data-dosages="{{ m.medicine_dosages }}">
+                        {{ m.medicine_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="row mb-3">
+                <!-- First Row -->
+                <div class="col-3">
+                    <!-- <label for="modeField" class="form-label">Mode</label> -->
+                    <input type="text" class="form-control" id="modeField" readonly>
+                </div>
+                <div class="col-2">
+                    <label for="daysField"  class="form-label mt-1">Days:</label>
+                </div>
+                <div class="col-3">
+                    <input type="text" class="form-control" id="daysField" readonly>
+                </div>
+                <div class="col-4">
+                    <input type="text" class="form-control" id="dosagesField" readonly>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <!-- Second Row -->
+                <div class="col-5">
+                  <select class="form-select" id="languageSelect">
+                    <option value="EN">English</option>
+                    <option value="MA">Marathi</option>
+                    <option value="HI">Hindi</option>
+                  </select>
+                </div>
+                <div class="col-7">
+                  <select class="form-select" id="instructionsSelect">
+                    <option value="" disabled selected hidden>Select Instructions</option>
+                    {% for inst in medicine_instruction %}
+                    <option value="{{ inst.doctor_instruction_id }}">{{ inst.instruction_text }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+            </div>
+
+            <button id="addMedicineBtn" class="btn btn-primary">Add Medicine</button>
+
+            <!-- Table to display added medicine details -->
+            <!-- <div class="table-responsive mt-4">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Medicine</th>
+                            <th>Mode</th>
+                            <th>Days</th>
+                            <th>Dosages</th>
+                            <th>Instructions</th>
+                            <th>Remove</th>
+                        </tr>
+                    </thead>
+                    <tbody id="medicineTableBody">
+                       
+                        {% for i in medic_list %}
+                        <tr>
+                            <td>{{ i.medicine_name }}</td>
+                            <td>
+                                {% if i.medicine_form == '1' %}
+                                    Tab
+                                {% elif i.medicine_form == '2' %}
+                                    Syp
+                                {% elif i.medicine_form == '3' %}
+                                    Pwd
+                                {% else %}
+                                    Unknown Mode
+                                {% endif %}
+                            </td>
+                            <td>{{ i.medicine_duration }}</td>
+                            <td>{{ i.medicine_doses }}</td>
+                            <td>{{ i.medicine_instruction_id }}</td>
+                            <td><button class="btn btn-danger btn-sm removeBtn">Remove</button></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div> -->
+
+            <!-- Hidden fields for storing form data -->
+            <input type="hidden" id="Medicine_input" name="Medicine">
+            <input type="hidden" id="Mode_input" name="Mode">
+            <input type="hidden" id="Days_input" name="days">
+            <input type="hidden" id="Dosage_input" name="dosage">
+            <input type="hidden" id="Language_input" name="Language">
+            <input type="hidden" id="Instructions_input" name="Instructions">
+        </div>
+      </div>
+      <!-- Lab Investigation -->
+      <div class="container mb-2" style="margin-bottom:0%;">
+        <div class="card" style="padding: 1%;">
+          <div class="col-12 mb-2">
+            <div class="d-flex justify-content-between">
+              <label for="Lab Investigation" class="times-new-roman fw-bold" style="font-size:20px;">Lab Investigation</label>
+            </div>
+            <div class="col-12 mb-2" >
+              <div class="form-group">
+                <textarea id="selectedOptions" type="text" placeholder="Display here selected options" class="form-control" name="lab_tests" rows="4" >{% for i in lab_list %}{{i}}{% if not forloop.last %}&#10;{% endif %}{% endfor %}</textarea>
+              </div>
+            </div> 
+            <div class="form-group">
+               <!-- Search input for the dropdown -->
+              <!-- <input type="text" id="dropdownSearch" class="form-control mb-2" placeholder="Search lab name"> -->
+
+               <!-- {{lab_investigation_report}}  -->
+              <select class="form-control search form-select" name="labOptions"   onchange="updateTextArea()" id="labDropdown" size="1">
+                <option value="" disabled selected hidden>Select Lab</option>
+                <option value="clear">Clear Selection</option>
+            
+                {% for lab in lab_investigation_report  %}
+                <option value="{{lab.investigation_name}}">{{lab.investigation_name}}</option>
+                {%endfor%}
+                <!-- <option value="{{lab_investigation_report.investigation_name}}">{{lab_investigation_report.investigation_name}}</option> -->
+                <!-- <option value="{{lab_investigation_report.investigation_name}}">{{lab_investigation_report.investigation_category}}</option> -->
+
+                
+                <!-- {% for i in lab_investigation_report %} -->
+                <!-- {%endfor%} -->
+                <!-- <option value="{{lab_test_report}}">{{lab_test_report}}</option> -->
+                <!-- <option value="{{lab_investigation_report}}">{{lab_investigation_report}}</option> -->
+
+
+                <!-- <option value="Two">Two</option>
+                <option value="Three">Three</option> -->
+              </select>
+            </div>
+          </div>
+          <!-- <div class="col-12">
+            <div class="form-group">
+              <textarea id="selectedOptions" type="text" placeholder="Display here selected options" class="form-control" name="lab_tests" rows="4" >{% for i in lab_list %}{{i}}{% if not forloop.last %}&#10;{% endif %}{% endfor %}</textarea>
+            </div>
+          </div>  -->
+        </div>
+      </div>
+      <div class="container mb-2" style="margin-bottom:0%;">
+        <div class="card"  style="padding: 1%;" >
+        <div class="pt-2 ">
+          <div class="col-12">
+            <div class="d-flex justify-content-between mb-2">
+              <label for="followup_days" class="fw-bold times-new-roman fs-5" style="margin-right: 2%; font-size: 10px; width: 305px;">Follow-Up Days</label>
+              <input type="number" id="followup_days" class="form-control" min="1" value="">
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+                <label for="" class="  fw-bold times-new-roman fs-5" style="margin-right:2% ;" style="font-size:20px;">FollowUp</label>
+                <input type="datetime-local" id="followup_datetime" name="followup_datetime" value="{{consult_data.followup_datetime}}" class="form-control">
+            </div>
+            
+          </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+      <div class="container mb-2 " style="margin-bottom:0% ">
+      <div class="card "  style="padding: 1%;">
+              <div class="col-12">
+                <div class="d-flex justify-content-between">
+                  <label for="Instructions" class="times-new-roman fw-bold" style="font-size:20px;">Instructions</label>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="form-group">
+                    <textarea type="text" placeholder="Add Prescription" class="form-control" name="Prescription" rows="4" required>{%if prescription %}{{prescription}}{%endif%}</textarea>
+                </div>
+              </div>
+          </div>
+        
+        </div>
+
+      <div class="container mb-2" style="margin-bottom:0%;">
+      <div class="card" style="padding: 1%;">
+      <!-- <div class="pt-3"> -->
+          <div class="col mb-2">
+            <div class="d-flex justify-content-between mb-2">
+              <label for="" class="  fw-bold times-new-roman"  style="max-width:60%; font-size: 20px;">Consultation Fees <i class="fa fa-inr"></i></label>
+              <input type="number" class="form-control" name="Fess" value="{% if consult_data.consultation_fees %}{{ consult_data.consultation_fees }}{% else %}{{ default_fees }}{% endif %}" placeholder="Amount" style="max-width:40%;" />
+          </div>
+          </div>
+          
+      </div>
+      </div>
+      </div>
+    {% if pharmadata %}
+        <div class="container mt-3">
+            <div class="card" style="padding: 1%;">
+                <div class="form-group">
+                    <label for="options" class="times-new-roman fw-bold" style="font-size:20px;">Select Pharmacists</label>
+                    <select id="options" name="options[]" class="selectpicker form-control" multiple data-live-search="true">
+                        {% for pharma in pharmadata %}
+                        <option value="{{pharma.pharmacist_id}}" selected>{{pharma.pharmacist_details.shop_name}}</option>
+                        {%endfor%}
+                    </select>
+                </div>
+            </div>
+        </div>
+    {%endif%}
+    
+    
+  
+      <div class="container mb-5 ">
+      <!-- <h1>Print and Save Example</h1> -->
+      <div class="row mt-3 " style="margin-bottom:1%">
+      <div class="d-flex justify-content-between">
+    {% if consult_data.consultation_status != 3 and consult_data.consultation_status != 2  %}
+        <button type="submit" class="btn btn-primary mx-3" id="SaveButton"  onclick="saveData()" style="background-color: #A52028; border-color:#A52028; color:white ;display: block;">
+          <i class="fas fa-save"></i> 
+            {% if consult_data %}
+              Update
+            {%else%}
+              Save 
+            {%endif%}        
+        </button>
+     
+        <button id="backToAppointmentBtn"  class="btn btn-primary" style="display: none;background-color: #A52028;"><i class="fa-solid fa-circle-arrow-left"></i> Appointment</button>
+        <!-- <button class="btn btn-success" onclick="printPage()">Print & save</button>
+        <button class="btn btn-primary" onclick="savePage()">Print</button> -->
+        {%if consult_data%}
+        <!-- <button class="btn btn-success" onclick="savePage()">Complete</button> -->
+        <button id="completeBtn" class="btn btn-success">Complete</button>
+        <button id="printBtn" class="btn btn-primary" style="display: none;background-color:#A52028;">Print</button>
+        <button id="paidBtn" class="btn btn-primary" style="display: none;background-color: #A52028;">Paid</button>
+        <div id="pdfViewer"></div>
+        {%endif%}
+    {%endif%}
+      </div>
+      </div>
+      <div class="row mb-5">
+      <div class="d-flex justify-content-end mb-5" >
+        <!-- <button class="btn btn-danger" onclick="savePage()">Close</button> -->
+      </div>
+     </div>
+      </div>
+  
+      
+      </div>
+      </div>
+    </form>
+    {%if request.session.subscription_status == 'inactive' and consult_data.consultation_status != 3 %}
+        {% include "Doctor/popup.html" %}
+    {%endif%}
+     
+     
+    
+
+    <!-- <script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
+    <script src="{% static 'assets/js/popper.min.js' %}"></script>
+    <script src="{% static 'assets/plugins/bootstrap/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'assets/js/script.js' %}"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Handle form submission
+    $('#myForm').on('submit', function(e) {
+        $('.btn').prop('disabled', true); // Disable the save button
+        $('#loader').show(); // Show the loader
+        $('#overlay').show(); // Show the overlay to disable the page
+    });
+</script> 
+    
+<script>
+  function UpdateKCOTextArea() {
+      var SelectElement = document.getElementById('kco');
+      var TextArea = document.getElementById('selectedKCOTextArea');
+      var SelectedOption = SelectElement.value;
+
+      if (SelectedOption === "clear") {
+          TextArea.value = ""; // Clear the text area
+      } else {
+          var ExistingOptions = TextArea.value.split('\n');
+          if (!ExistingOptions.includes(SelectedOption)) {
+              TextArea.value += (TextArea.value ? '\n' : '') + SelectedOption;
+          }
+      }
+  }
+</script>
+<script>
+  function updateAdviceTextArea() {
+      var ADVICEELEMENT = document.getElementById('advice');
+      var TEXTAREA = document.getElementById('selectedAdviceTextArea');
+      var SELECTDOPTION = ADVICEELEMENT.value;
+
+      if (SELECTDOPTION === "clear") {
+          TEXTAREA.value = ""; // Clear the text area
+      } else {
+          var EXISTINGOPTION = TEXTAREA.value.split('\n');
+          if (!EXISTINGOPTION.includes(SELECTDOPTION)) {
+              TEXTAREA.value += (TEXTAREA.value ? '\n' : '') + SELECTDOPTION;
+          }
+      }
+  }
+</script>
+
+<script>
+  function updateTextArea() {
+      var selectElement = document.querySelector('select[name="labOptions"]');
+      var textArea = document.getElementById('selectedOptions');
+      var selectedOption = selectElement.value;
+      if (selectedOption === "clear") {
+          textArea.value = ""; // Clear the text area
+      } else {
+          var existingText = textArea.value;
+          if (!existingText.includes(selectedOption)) {
+              if (existingText.length > 0) {
+                  // Append a newline before adding the new option
+                  textArea.value += '\n' + selectedOption;
+              } else {
+                  textArea.value += selectedOption;
+              }
+          }
+      }
+      // Reset the search input and dropdown
+      // var searchInput = document.getElementById('dropdownSearch');
+      // searchInput.value = '';
+      // const options = selectElement.querySelectorAll('option');
+      // options.forEach(option => option.style.display = '');
+      // selectElement.size = 1; // Close the dropdown
+  }
+
+  // document.getElementById('dropdownSearch').addEventListener('input', function () {
+  //     const searchValue = this.value.toLowerCase();
+  //     const dropdown = document.getElementById('labDropdown');
+  //     const options = dropdown.querySelectorAll('option');
+
+  //     if (searchValue === '') {
+  //         options.forEach(option => option.style.display = '');
+  //         dropdown.size = 1; // Close the dropdown if search is cleared
+  //     } else {
+  //         options.forEach(function (option) {
+  //             if (option.value.toLowerCase().includes(searchValue) || option.value === "" || option.value === "clear") {
+  //                 option.style.display = '';
+  //             } else {
+  //                 option.style.display = 'none';
+  //             }
+  //         });
+
+  //         // Open the dropdown by setting size based on filtered options
+  //         const visibleOptions = Array.from(options).filter(option => option.style.display === '');
+  //         dropdown.size = visibleOptions.length > 1 ? visibleOptions.length : 2;
+  //     }
+  // });
+
+  function saveData() {
+      // Display loading circle on the button
+      const saveButton = document.getElementById('saveButton');
+      saveButton.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving...';
+
+      // Simulate saving process (you would replace this with your actual saving logic)
+      setTimeout(function () {
+          // After saving is done, revert the button text
+          saveButton.innerHTML = 'Save';
+      }, 5000); // Assuming saving process takes 5 seconds
+  }
+</script>
+
+
+  <script>
+
+    document.getElementById('backToAppointmentBtn').addEventListener('click', function(event) {
+        event.preventDefault(); // Prevent the default action
+        location.href = '/MahiEHR/get_all_doctor_appointments'; // Navigate to the specified URL
+    });
+
+    document.getElementById('completeBtn').addEventListener('click', function() {
+        // Send AJAX request to backend API to fetch the PDF link
+        event.preventDefault(); 
+        fetch('/MahiEHR/get_pdf_link/')
+        .then(response => response.json())
+        .then(data => {
+            // Check if the response contains the PDF link
+            if (data && data.pdf_link) {
+                // Show the Print button
+                document.getElementById('printBtn').style.display = 'block';
+                // Show the Paid button
+                document.getElementById('paidBtn').style.display = 'block';
+                // hide  the complete button
+                document.getElementById('completeBtn').style.display = 'none';
+                // Show the Back to Appointment button
+                document.getElementById('backToAppointmentBtn').style.display = 'block';
+                // hide  the update to Appointment button
+                document.getElementById('saveButton').style.display = 'none';
+                document.getElementById('SaveButton').style.display = 'none';
+                
+                // Store the PDF link in a variable
+                const pdfLink = data.pdf_link;
+                
+                // Attach the PDF link to the print button
+                document.getElementById('printBtn').dataset.pdfLink = pdfLink;
+            } else {
+                alert('Failed to fetch PDF link.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to fetch PDF link.');
+        });
+    });
+    
+    document.getElementById('printBtn').addEventListener('click', function() {
+        // Open the PDF link in a new tab for printing
+        event.preventDefault(); 
+        const pdfLink = this.dataset.pdfLink;
+        if (pdfLink) {
+            const link = document.createElement("a");
+            link.href = pdfLink;
+            link.target="_blank";
+            link.download = "prescription_document.pdf"; // Specify the filename here
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            // window.open(pdfLink, '_blank');
+        } else {
+            alert('PDF link not available.');
+        }
+    });
+
+    document.getElementById('paidBtn').addEventListener('click', function() {
+       // Send AJAX request to backend API to fetch the PDF link
+       event.preventDefault(); 
+       fetch('/MahiEHR/paid/')
+        .then(response => response.json())
+        .then(data => {
+            // Check the response from the server
+            if (data.message === 'Payment successful') {
+                // Display a success message on the page
+                alert('Payment done successfully!');
+            } else {
+                // Display an error message if payment failed
+                alert('Payment failed. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Payment not done');
+        });
+    });
+         
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+
+<script>
+    // Initialize Select2
+    $(document).ready(function() {
+        $('#labDropdown').select2();
+    });
+</script>
+
+
+
+<!-- <script>
+  // Initialize Select2
+  $(document).ready(function() {
+      $('#medicineSelect').select2();
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+      const medicineSelect = document.getElementById('medicineSelect');
+      const modeField = document.getElementById('modeField');
+      const daysField = document.getElementById('daysField');
+      const dosagesField = document.getElementById('dosagesField');
+      const languageSelect = document.getElementById('languageSelect');
+      const instructionsSelect = document.getElementById('instructionsSelect');
+      const addMedicineBtn = document.getElementById('addMedicineBtn');
+      const medicineTableBody = document.getElementById('medicineTableBody');
+      const Medicine_input = document.getElementById('Medicine_input');
+      const Mode_input = document.getElementById('Mode_input');
+      const Days_input = document.getElementById('Days_input');
+      const Dosage_input = document.getElementById('Dosage_input');
+      const Language_input = document.getElementById('Language_input');
+      const Instructions_input = document.getElementById('Instructions_input');
+
+      // Initialize hidden fields with existing medicine list data
+      updateHiddenInputValues();
+
+      // Event listener for when a medicine is selected
+      $('#medicineSelect').on('change', function() {
+          const selectedOption = this.options[this.selectedIndex];
+          const form = selectedOption.getAttribute('data-form');
+          const duration = selectedOption.getAttribute('data-duration');
+          const dosages = selectedOption.getAttribute('data-dosages');
+
+          // Update fields in the form based on selected medicine
+          modeField.value = getModeLabel(form);
+          daysField.value = duration;
+          dosagesField.value = dosages;
+      });
+
+      // Event listener for adding medicine
+      addMedicineBtn.addEventListener('click', (event) => {
+          event.preventDefault(); // Prevent default form submission behavior
+
+          const selectedMedicine = medicineSelect.value;
+          const selectedOption = medicineSelect.options[medicineSelect.selectedIndex];
+          const mode = selectedOption.getAttribute('data-form'); // Get mode from selected option
+          const days = daysField.value;
+          const dosage = dosagesField.value;
+          const instructions = instructionsSelect.value;
+          const instructionsText = instructionsSelect.options[instructionsSelect.selectedIndex].text;
+          const language = languageSelect.value;
+
+          // Add row to the medicine table
+          const newRow = medicineTableBody.insertRow();
+          newRow.innerHTML = `
+              <td>${selectedMedicine}</td>
+              <td>${getModeLabel(mode)}</td>
+              <td>${days}</td>
+              <td>${dosage}</td>
+              <td data-instruction="${instructions}" data-language="${language}">${instructionsText}</td>
+              <td><button class="btn btn-danger btn-sm removeBtn">Remove</button></td>
+          `;
+
+          // Update hidden input values after adding medicine
+          updateHiddenInputValues();
+
+          // Clear the form fields after adding medicine
+          resetForm();
+      });
+
+      // Event delegation to handle remove button clicks
+      medicineTableBody.addEventListener('click', (event) => {
+          if (event.target.classList.contains('removeBtn')) {
+              const row = event.target.closest('tr');
+              medicineTableBody.removeChild(row);
+
+              // Update hidden input values after removal
+              updateHiddenInputValues();
+          }
+      });
+
+      // Function to update hidden input values after adding/removing a row
+      function updateHiddenInputValues() {
+          const medicineRows = Array.from(medicineTableBody.getElementsByTagName('tr'));
+          const medicines = [];
+          const modes = [];
+          const days = [];
+          const dosages = [];
+          const instructions = [];
+          const languages = [];
+
+          medicineRows.forEach(row => {
+              const cells = row.cells;
+              medicines.push(cells[0].textContent);
+              modes.push(getModeValue(cells[1].textContent));
+              days.push(cells[2].textContent);
+              dosages.push(cells[3].textContent);
+              instructions.push(cells[4].getAttribute('data-instruction')); // Get instructions from the 5th cell
+              languages.push(cells[4].getAttribute('data-language')); // Get language from the 5th cell
+          });
+
+          // console.log(instructions);
+
+          // Join arrays into comma-separated strings for hidden input values
+          Medicine_input.value = medicines.join(',');
+          Mode_input.value = modes.join(',');
+          Days_input.value = days.join(',');
+          Dosage_input.value = dosages.join(',');
+          Instructions_input.value = instructions.join(',');
+          Language_input.value = languages.join(',');
+      }
+
+      // Function to get mode label based on mode value
+      function getModeLabel(value) {
+          switch (value) {
+              case '1':
+                  return 'Tab';
+              case '2':
+                  return 'Syp';
+              case '3':
+                  return 'Pwd';
+              default:
+                  return 'Unknown';
+          }
+      }
+
+      // Function to get mode value based on mode label
+      function getModeValue(label) {
+          label = label.trim(); // Trim whitespace from the label
+          switch (label) {
+              case 'Tab':
+                  return 1;
+              case 'Syp':
+                  return 2;
+              case 'Pwd':
+                  return 3;
+              default:
+                  return 0;
+          }
+      }
+
+      // Function to reset the form fields
+      function resetForm() {
+          medicineSelect.selectedIndex = 0;
+          modeField.value = '';
+          daysField.value = '';
+          dosagesField.value = '';
+          languageSelect.selectedIndex = 0;
+          instructionsSelect.selectedIndex = 0;
+      }
+  });
+</script> -->
+<script>
+    // Initialize Select2
+$(document).ready(function() {
+    $('#medicineSelect').select2();
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const medicineSelect = document.getElementById('medicineSelect');
+    const modeField = document.getElementById('modeField');
+    const daysField = document.getElementById('daysField');
+    const dosagesField = document.getElementById('dosagesField');
+    const languageSelect = document.getElementById('languageSelect');
+    const instructionsSelect = document.getElementById('instructionsSelect');
+    const addMedicineBtn = document.getElementById('addMedicineBtn');
+    const medicineTableBody = document.getElementById('medicineTableBody');
+    const Medicine_input = document.getElementById('Medicine_input');
+    const Mode_input = document.getElementById('Mode_input');
+    const Days_input = document.getElementById('Days_input');
+    const Dosage_input = document.getElementById('Dosage_input');
+    const Language_input = document.getElementById('Language_input');
+    const Instructions_input = document.getElementById('Instructions_input');
+
+    // Initialize hidden fields with existing medicine list data
+    updateHiddenInputValues();
+
+    // Event listener for when a medicine is selected
+    $('#medicineSelect').on('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const form = selectedOption.getAttribute('data-form');
+        const duration = selectedOption.getAttribute('data-duration');
+        const dosages = selectedOption.getAttribute('data-dosages');
+
+        // Update fields in the form based on selected medicine
+        modeField.value = getModeLabel(form);
+        daysField.value = duration;
+        dosagesField.value = dosages;
+    });
+
+    // Event listener for adding medicine
+    addMedicineBtn.addEventListener('click', (event) => {
+        event.preventDefault(); // Prevent default form submission behavior
+
+        const selectedMedicine = medicineSelect.value;
+        const selectedOption = medicineSelect.options[medicineSelect.selectedIndex];
+        const mode = selectedOption.getAttribute('data-form'); // Get mode from selected option
+        const days = daysField.value;
+        const dosage = dosagesField.value;
+        const instructions = instructionsSelect.value;
+        const instructionsText = instructionsSelect.options[instructionsSelect.selectedIndex].text;
+        const language = languageSelect.value;
+
+        // Add row to the medicine table
+        const newRow = medicineTableBody.insertRow();
+        newRow.innerHTML = `
+            <td>${selectedMedicine}</td>
+            <td>${getModeLabel(mode)}</td>
+            <td>${days}</td>
+            <td>${dosage}</td>
+            <td data-instruction-id="${instructions}">${instructionsText}</td>
+            <td><button class="btn btn-danger btn-sm removeBtn">Remove</button></td>
+        `;
+
+        // Update hidden input values after adding medicine
+        updateHiddenInputValues();
+
+        // Clear the form fields after adding medicine
+        resetForm();
+    });
+
+    // Event delegation to handle remove button clicks
+    medicineTableBody.addEventListener('click', (event) => {
+        if (event.target.classList.contains('removeBtn')) {
+            const row = event.target.closest('tr');
+            medicineTableBody.removeChild(row);
+
+            // Update hidden input values after removal
+            updateHiddenInputValues();
+        }
+    });
+
+    // Function to update hidden input values after adding/removing a row
+    function updateHiddenInputValues() {
+        const medicineRows = Array.from(medicineTableBody.getElementsByTagName('tr'));
+        const medicines = [];
+        const modes = [];
+        const days = [];
+        const dosages = [];
+        const instructions = [];
+
+        medicineRows.forEach(row => {
+            const cells = row.cells;
+            medicines.push(cells[0].textContent);
+            modes.push(getModeValue(cells[1].textContent));
+            days.push(cells[2].textContent);
+            dosages.push(cells[3].textContent);
+            instructions.push(cells[4].getAttribute('data-instruction-id')); // Get instruction ID from the 5th cell
+        });
+
+        // Join arrays into comma-separated strings for hidden input values
+        Medicine_input.value = medicines.join(',');
+        Mode_input.value = modes.join(',');
+        Days_input.value = days.join(',');
+        Dosage_input.value = dosages.join(',');
+        Instructions_input.value = instructions.join(',');
+        Language_input.value = ''; // Since we're no longer tracking languages
+    }
+
+    // Function to get mode label based on mode value
+    function getModeLabel(value) {
+        switch (value) {
+            case '1':
+                return 'Tab';
+            case '2':
+                return 'Syp';
+            case '3':
+                return 'Pwd';
+            default:
+                return 'Unknown';
+        }
+    }
+
+    // Function to get mode value based on mode label
+    function getModeValue(label) {
+        label = label.trim(); // Trim whitespace from the label
+        switch (label) {
+            case 'Tab':
+                return 1;
+            case 'Syp':
+                return 2;
+            case 'Pwd':
+                return 3;
+            default:
+                return 0;
+        }
+    }
+
+    // Function to reset the form fields
+    function resetForm() {
+        medicineSelect.selectedIndex = 0;
+        modeField.value = '';
+        daysField.value = '';
+        dosagesField.value = '';
+        languageSelect.selectedIndex = 0;
+        instructionsSelect.selectedIndex = 0;
+    }
+});
+
+</script>
+
+<script>
+  // Get the input elements
+  const daysInput = document.getElementById('followup_days');
+  const datetimeInput = document.getElementById('followup_datetime');
+
+  // Add an event listener to the days input
+  daysInput.addEventListener('input', () => {
+      const days = parseInt(daysInput.value) || 0; // Get the number of days, default to 0 if empty or invalid
+      if (days >= 0) {
+          // Calculate the follow-up date by adding the specified days to the current date
+          const currentDate = new Date();
+          const followupDate = new Date(currentDate.getTime() + days * 24 * 60 * 60 * 1000); // Calculate future date
+
+          // Format the follow-up date for the datetime-local input
+          const formattedDate = followupDate.toISOString().slice(0, 16); // Format: "YYYY-MM-DDTHH:mm"
+
+          // Set the value of the datetime input
+          datetimeInput.value = formattedDate;
+          datetimeInput.disabled = false; // Enable the input once a valid date is calculated
+      } else {
+          // If days input is invalid, disable datetime input
+          datetimeInput.value = '';
+          datetimeInput.disabled = true;
+      }
+  });
+</script>
+
+<script>
+  // Function to calculate BMI
+  function calculateBMI() {
+      // Get the values of weight and height
+      let weight = document.getElementById('inputWeight').value;
+      let height = document.getElementById('inputHeight').value;
+      
+      // Convert height from cm to meters
+      height /= 100;
+      
+      // Calculate BMI
+      let bmi = (weight / (height * height)).toFixed(2); // Rounded to 2 decimal places
+      
+      // Display BMI in the BMI input field
+      document.getElementById('inputBMI').value = bmi;
+  }
+  
+  // Event listener for input fields
+  document.getElementById('inputWeight').addEventListener('input', calculateBMI);
+  document.getElementById('inputHeight').addEventListener('input', calculateBMI);
+</script>
+
+<!-- <script>
+  document.getElementById('dropdownSearch').addEventListener('input', function () {
+            const searchValue = this.value.toLowerCase();
+            const dropdown = document.getElementById('labDropdown');
+            const options = dropdown.querySelectorAll('option');
+
+            options.forEach(function (option) {
+                if (option.value.toLowerCase().includes(searchValue) || option.value === "" || option.value === "clear") {
+                    option.style.display = '';
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+            // Open the dropdown by setting size based on filtered options
+            const visibleOptions = Array.from(options).filter(option => option.style.display === '');
+            dropdown.size = visibleOptions.length > 1 ? visibleOptions.length : 2;
+        });
+</script> -->
+<!-- <script>
+document.getElementById('dropdownSearch').addEventListener('input', function () {
+  const searchValue = this.value.toLowerCase();
+  const dropdown = document.getElementById('labDropdown');
+  const options = dropdown.querySelectorAll('option');
+
+  if (searchValue === '') {
+      dropdown.size = 1; // Close the dropdown if search is cleared
+  } else {
+      options.forEach(function (option) {
+          if (option.value.toLowerCase().includes(searchValue) || option.value === "" || option.value === "clear") {
+              option.style.display = '';
+          } else {
+              option.style.display = 'none';
+          }
+      });
+
+      // Open the dropdown by setting size based on filtered options
+      const visibleOptions = Array.from(options).filter(option => option.style.display === '');
+      dropdown.size = visibleOptions.length > 1 ? visibleOptions.length : 2;
+  }
+});
+</script> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<script>
+        // Initialize Select2
+        $(document).ready(function() {
+            $('#medicineSelect').select2();
+        });
+</script>
+
+
+    
+<!-- Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+
+<!-- Bootstrap Select JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.18/dist/js/bootstrap-select.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('.selectpicker').selectpicker();
+    });
+</script>
+ 
+
+</body>
+</html>

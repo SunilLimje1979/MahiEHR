@@ -1,0 +1,19 @@
+{
+    "name": "Medical and Health Initiative By Durgsampada Digital Media Pvt Ltd",
+    "short_name": "MAHI-EHR",
+    "description": "MahiEHR Web App",
+    "dir": "auto",
+    "lang": "en-US",
+    "display": "standalone",
+    "orientation": "any",
+    "start_url": "/MahiEHR/login/",
+    "background_color": "#FFFFFF",
+    "theme_color": "#A52028",
+    "icons": [
+        {
+        "src": "/static/assets/img/MAHI_Logo.png",
+        "sizes": "512x512",
+        "type": "image/png"
+        }
+    ]
+}
