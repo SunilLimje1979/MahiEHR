@@ -11,7 +11,7 @@
     "theme_color": "#A52028",
     "icons": [
         {
-        "src": "/static/assets/img/MAHI_Logo.png",
+        "src": "/static/assets/img/mahi.png",
         "sizes": "512x512",
         "type": "image/png"
         }
