@@ -241,19 +241,19 @@
             let doctorToken = localStorage.getItem("doctor_token");
             console.log(doctorToken);
             let signUpButton = document.querySelector("#registerBtn");
-            let downloadAppButton = document.querySelector("#install");
+            {% comment %} let downloadAppButton = document.querySelector("#install"); {% endcomment %}
             let signuptext =document.querySelector('#signuptext');
     
             if (doctorToken && doctorToken !=='0' ) {
                 // Hide the Sign Up button and show the Download as Mobile App button
                 signUpButton.style.display = "none";
                 signuptext.style.display = "none";
-                downloadAppButton.removeAttribute("hidden");
+                {% comment %} downloadAppButton.removeAttribute("hidden"); {% endcomment %}
             } else {
                 // Show the Sign Up button and hide the Download as Mobile App button
                 signUpButton.style.display = "block";
                 signuptext.style.display = "block";
-                downloadAppButton.setAttribute("hidden", "");
+                {% comment %} downloadAppButton.setAttribute("hidden", ""); {% endcomment %}
             }
         });
     </script>
