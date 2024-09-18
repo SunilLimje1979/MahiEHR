@@ -3651,7 +3651,7 @@ def approvePharmacy(request):
                 else:
                     return HttpResponse("No Details found for Pharmacist token")
             else:
-                return redirect(opdlogin1)
+                return redirect(login)
         
         else:
             print(pharmacy_token)

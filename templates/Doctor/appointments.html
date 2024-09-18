@@ -79,8 +79,13 @@
         font-size: 50px; /* Adjust the font size as needed */
         }
         .data-item{
-            background-color: #f2a979;
-            border-radius: 10px;
+            background-color:white;
+            border-radius: 9px;
+            border: 1px solid #ff7f50; /* Added a colored border */
+            margin-bottom: 10px;
+            /* Enhanced shadow effect */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); 
+            
         }
          /* Custom CSS for Appointment Statistics */
         .card-body {
@@ -177,7 +182,7 @@
         </div>
     </div>
     {% if role == 'Doctor' %}
-    <div class="card mt-2">
+    <div class="card mt-2 mb-2">
         <div class="card-body" style="padding-top: 0;padding-bottom: 0;padding-left: 0;">
             <h5 class="card-title" style="display: inline-block;">Collection: </h5> <span id="totalAmount"></span>
             <div class="row"> 
@@ -191,7 +196,7 @@
         </div>
     </div>
     {%endif%}
-    <div id="data-container">
+    <div id="data-container" >
          
     </div>
      
@@ -299,7 +304,7 @@
                                  
                                 <div class="data-item" data-status="${appointment.appointment_status}">
                                     <input type="hidden" name="appointment_id" value="${appointment.appointment_id}" />
-                                    <hr>
+                                    
                                     <div class="label-row">
                                         <label for="label1" id="disabledLink" class="label-link"><i class="fa-solid fa-circle-info me-1" style=" font-size: 20px;cursor: pointer;" onclick="handleInfoIconClick(event)" data-appointment-id="${appointment.appointment_id}"></i>${appointment.appointment_name}</label>
                                         <label for="label2" id="disabledLink" class="label-link"><i class="fa-solid fa-user-group" style="color: #008373;"></i> ${appointment.appointment_token}</label>
@@ -323,7 +328,7 @@
                                         ` : ''}
                                         </div>
                                         <div>
-                                        <label for="label2" style="border-radius:7px;color:white;background-color: ${
+                                        <label for="label2" style="font-size: 15px;border-radius:3px;color:white;background-color: ${
                                             appointment.appointment_status === 1 ? 'rgb(240, 53, 56)' :
                                             (appointment.appointment_status === 2 ? 'rgb(240, 190, 53)' :
                                             (appointment.appointment_status === 3 ? 'green' : 'green'))}">
