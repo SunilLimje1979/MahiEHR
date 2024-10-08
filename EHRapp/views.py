@@ -748,8 +748,8 @@ def pdf_view(request):
         scriptoption_res=requests.post(scriptoption_url,json=scriptoption_data)
         print(chatscript_res.text)
         print(scriptoption_res.text)
-        messages.success(request, 'Thank You For Registeration')
-        messages.success(request,"Your 15 days Trial Plan is Activated ")
+        messages.success(request, "Thank you for registering! Please click 'Continue' to proceed.")
+        messages.success(request,"Your 30 days Trial Plan is Activated ")
         return redirect(subscriptioninfo)
 
         
@@ -765,6 +765,7 @@ def subscriptioninfo(request):
     
     else:
         master_subscription_id = request.POST['selectedPlan']
+        print(master_subscription_id)
         sub_url="http://13.233.211.102/masters/api/insert_doctor_subscription/"
         api_data={
                 "doctor_id": request.session['doctor_id'],

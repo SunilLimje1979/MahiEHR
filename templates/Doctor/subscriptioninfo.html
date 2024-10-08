@@ -131,7 +131,7 @@
                         setTimeout(function() {
                             messagesContainer.style.display = 'none';
                         }, 500);
-                    }, 2000);
+                    }, 2400);
                 }
             });
         </script>
@@ -140,7 +140,7 @@
         <div class="row row-cols-1 row-cols-md-2 g-1">
             {% for plan in plans %}
             <div class="col">
-                <div class="card {% if plan.master_subscription_id == 1 %}selected{% endif %}" data-id="{{ plan.master_subscription_id }}" onclick="selectPlan(this)">
+                <div class="card {% if plan.master_subscription_id == 2 %}selected{% endif %}" data-id="{{ plan.master_subscription_id }}" onclick="selectPlan(this)">
                     <div class="card-body">
                         <h5 class="card-title">{{ plan.name }}</h5>
                         <p class="card-text">Price: {{ plan.price }}</p>
@@ -151,7 +151,7 @@
             {% endfor %}
         </div>
 
-        <input type="hidden" id="selectedPlan" name="selectedPlan" value="1">
+        <input type="hidden" id="selectedPlan" name="selectedPlan" value="2">
 
         <div class="text-center mt-4">
             <button type="submit" class="btn btn-primary btn-save" id="continue" style="background-color: #A52028; border-color:#A52028;" ><span class="fas fa-save" style="color: #FFFFFF;"></span>
