@@ -2164,7 +2164,7 @@ def Consultation(request,id):
                     "patient_labtestid": 1,#investigation_id
                     "patient_labtestreport": "Sample Report",
                     "patient_labtestsample": 3,
-                    "patient_labtestreport_check": 1,
+                    "patient_labtestreport_check": 0,
                     "lattest_extrafield1": 42,
                     "isdeleted":0
                 }
