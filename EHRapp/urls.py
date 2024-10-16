@@ -74,5 +74,9 @@ urlpatterns = [
     path('get_all_pharmacist/',get_all_pharmacist,name='get_all_pharmacist'),
     path('toggle_pharmacist_status/',toggle_pharmacist_status,name='toggle_pharmacist_status'),
     path('Add_pharmacist/',Add_pharmacist,name='Add_pharmacist'),
+    path('approveLaboratory/',approveLaboratory,name='approveLaboratory'),
+    path('get_all_laboratory/',get_all_laboratory,name='get_all_laboratory'),
+    path('toggle_laboratory_status/',toggle_laboratory_status,name='toggle_laboratory_status'),
+    path('Add_laboratory/',Add_laboratory,name='Add_laboratory'),
 
 ]

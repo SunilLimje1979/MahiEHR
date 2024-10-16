@@ -1633,6 +1633,16 @@ def Consultation(request,id):
         
         else:
             pharmadata=[]
+        
+        ################################All Active Laboratory##################
+        laboratory_res= requests.post('http://13.233.211.102/medicalrecord/api/get_doctor_laboratory_bydoctorid/',json={"doctor_id":request.session['doctor_id'],"Status":0})
+        print(laboratory_res.text)
+        if(laboratory_res.json().get('message_code')==1000):
+            laboratorydata = laboratory_res.json().get('message_data')
+            print("1642",laboratorydata) 
+        
+        else:
+            laboratorydata=[]
 
 
         return render(request, 'Doctor/consultation.html', {"get_patient_by_appointment_id":get_patient_by_appointment_id,
@@ -1641,9 +1651,10 @@ def Consultation(request,id):
                     "medicine_instruction":medicine_instruction,'consult_data':consult_data,'symptoms_data':symptoms_data,
                     'lab_list':lab_list,'medic_list':medic_list,'prescription':prescription_data['prescription_details'],
                     'default_fees':default_fees,'pain_scale_range': range(1, 11),'outstanding':outstanding,'pharmadata':pharmadata,
+                    'laboratorydata':laboratorydata,
                 })
-    else:  
-             
+    else: 
+                   
 ########################## insert consultaions ########################################
             # Get_Patient_Boimterics_Vitals(requests,request.session['appointment_id'])
             # print("in consult",get_patient_boimterics_vitals)
@@ -1844,6 +1855,19 @@ def Consultation(request,id):
 
                 labs=request.POST['lab_tests']
                 labsdata_list = [labs.strip() for labs in labs.split('\n') if labs.strip()]
+                if(labsdata_list):
+                    #############################laboratory details##############################
+                    selected_laboratorytid = request.POST.getlist('laboratoryoptions[]')  # Fetch selected options as a list 
+                    if(selected_laboratorytid):
+                        for laboratoryid in selected_laboratorytid:
+                            laboratoryapi_data={
+                                "doctor_id": request.session["doctor_id"],
+                                "patient_id": patient_id,
+                                "laboratory_id": int(laboratoryid),
+                                "prescription_id":prescription_id
+                            }
+                            laboratoryapi_res = requests.post('http://13.233.211.102/medicalrecord/api/insert_prescribe_laboratory/',json=laboratoryapi_data)
+                            print(laboratoryapi_res.text)
                 print('from screen',labsdata_list)
                 patientlab_url="http://13.233.211.102/medicalrecord/api/get_patient_labinvestigations_by_consultation_id/"
                 api_para={"consultation_id":request.session['consultation_id']}
@@ -1876,7 +1900,7 @@ def Consultation(request,id):
                     "patient_labtestid": 1,#investigation_id
                     "patient_labtestreport": "Sample Report",
                     "patient_labtestsample": 3,
-                    "patient_labtestreport_check": 1,
+                    "patient_labtestreport_check": 0,#1
                     "lattest_extrafield1": 42,
                     "isdeleted":0
                     }
@@ -2148,6 +2172,19 @@ def Consultation(request,id):
                         labs_data['labinvestigation_category']=category
                         lab_response=requests.post(lab_url,json=labs_data)
                     print(lab_response.text)
+
+                    #############################Pharmacist details##############################
+                    selected_laboratorytid = request.POST.getlist('laboratoryoptions[]')  # Fetch selected options as a list 
+                    if(selected_laboratorytid):
+                        for laboratoryid in selected_laboratorytid:
+                            laboratoryapi_data={
+                                "doctor_id": request.session["doctor_id"],
+                                "patient_id": patient_id,
+                                "laboratory_id": int(laboratoryid),
+                                "prescription_id":prescription_id
+                            }
+                            laboratoryapi_res = requests.post('http://13.233.211.102/medicalrecord/api/insert_prescribe_laboratory/',json=laboratoryapi_data)
+                            print(laboratoryapi_res.text)
                 else:
                     print("no labs found")
                 
@@ -3749,7 +3786,121 @@ def Add_pharmacist(request):
             messages.error(request, 'failed to Add Pharmacist try one more time')
 
         return redirect(get_all_pharmacist)
- 
+
+
+
+###############################Laboratory
+def approveLaboratory(request):
+    if(request.method=='GET'):
+        laboratory_token=request.GET.get("laboratory_token")
+        if(laboratory_token):
+            print(laboratory_token)
+            if('doctor_id' in request.session):
+                api_res= requests.post('http://13.233.211.102/medicalrecord/api/get_laboratory_details_bytoken/',json={'laboratory_token':laboratory_token})
+                print(api_res.text)
+                if(api_res.json().get('message_code')==1000):
+                    laboratory = api_res.json().get('message_data')
+                    return render(request,'Doctor/approveLaboratory.html',{'laboratory':laboratory})
+                else:
+                    return HttpResponse("No Details found for Laboratory token")
+            else:
+                return redirect(login)
+        
+        else:
+            print(laboratory_token)
+            return HttpResponse('No Laboratory token')
+    
+    else:
+        laboratory_id = request.POST['laboratory_id']
+        api_res = requests.post('http://13.233.211.102/medicalrecord/api/insert_doctor_laboratory_link/',json={'doctor_id':request.session['doctor_id'],'location_id':request.session['location_id'],'laboratory_id':laboratory_id})
+        print(api_res.text)
+        if(api_res.json().get('message_code')==1000):
+           messages.success(request, 'Laboratory Approved successfully!')
+           print('Approved')
+        
+        elif(api_res.json().get('message_code')==1001):
+            messages.success(request, 'Laboratory Already Approved!')
+
+        else:
+            messages.error(request, 'failed to approve try to contact Support')
+            #return HttpResponse("failed to approve try to contact Support")
+
+
+        return redirect(get_all_laboratory)
+    
+
+def get_all_laboratory(request):
+    api_res = requests.post('http://13.233.211.102/medicalrecord/api/get_doctor_laboratory_bydoctorid/',json={'doctor_id':request.session['doctor_id']})
+    print(api_res.text)
+    if(api_res.json().get('message_code')==1000):
+        labs = api_res.json().get('message_data')
+        print(labs)
+    else:
+        labs=[]
+        messages.error(request,'No Laboratory is Approved..')
+    
+
+    return render(request,'Doctor/get_all_laboratory.html',{'labs':labs})
+
+
+def Add_laboratory(request):
+    if(request.method=='GET'):
+        return render(request,'Doctor/add_laboratory.html')
+    
+    else:
+        form_data=request.POST
+        print(form_data)
+        api_data = {
+            "laboratory_name": form_data.get('laboratory_name'),
+            "laboratory_address": form_data.get('laboratory_address'),
+            "laboratory_contact_number": form_data.get('laboratory_contact_number'),
+            "laboratory_owner_name": form_data.get('laboratory_owner_name'),
+            "laboratory_owner_number":form_data.get('laboratory_owner_number'),
+            "laboratory_username": form_data.get('username'),
+            "laboratory_password": form_data.get('password'),
+            "laboratory_type": form_data.get('laboratory_type'), # 1 means external and 2 means internal
+        }
+        print(api_data)
+        api_res = requests.post('http://13.233.211.102/medicalrecord/api/insert_laboratory/',json=api_data)
+        print(api_res.text)
+        if(api_res.json().get('message_code')==1000):
+            laboratory_id = api_res.json().get('message_data').get('laboratory_id')
+            approve_res = requests.post('http://13.233.211.102/medicalrecord/api/insert_doctor_laboratory_link/',json={'doctor_id':request.session['doctor_id'],'location_id':request.session['location_id'],'laboratory_id':laboratory_id})
+            print(approve_res.text)
+            if(approve_res.json().get('message_code')==1000):
+                messages.success(request, 'Laboratory Added and Approved successfully!')
+                print('Approved')
+
+            else:
+                messages.error(request, 'failed to approve try to do By Scanning QR Code')
+  
+        else:
+            messages.error(request, 'failed to Add Pharmacist try one more time')
+
+        return redirect(get_all_laboratory)
+    
+@csrf_exempt
+def toggle_laboratory_status(request):
+    response_data = {
+        'message_code': 999,
+        'message_text': 'Error occurred.'
+    }
+
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            doctorlaboratory_id = data.get('doctorlaboratory_id')
+            new_status = data.get('status')
+            print(doctorlaboratory_id,new_status)
+
+            api_res = requests.post('http://13.233.211.102/medicalrecord/api/update_doctor_laboratory_status/',json={'doctorlaboratory_id':doctorlaboratory_id,'status':new_status})
+            print(api_res.text)
+            response_data= api_res.json()
+
+        except Exception as e:
+            response_data['message_text'] = str(e)
+
+    return JsonResponse(response_data)
     
 
 

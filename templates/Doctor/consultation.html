@@ -689,6 +689,21 @@
             </div>
         </div>
     {%endif%}
+
+    {% if laboratorydata %}
+        <div id="laboratorydropdown" class="container mt-3" {%if lab_list %}style="display:block" {%else%}style="display:none" {%endif%}>
+            <div class="card" style="padding: 1%;">
+                <div class="form-group">
+                    <label for="options" class="times-new-roman fw-bold" style="font-size:20px;">Select Laboratory</label>
+                    <select id="laboratoryoptions" name="laboratoryoptions[]" class="selectpicker form-control" multiple data-live-search="true">
+                        {% for laboratory in laboratorydata %}
+                        <option value="{{laboratory.laboratory_id}}" selected>{{laboratory.laboratory_details.laboratory_name}}</option>
+                        {%endfor%}
+                    </select>
+                </div>
+            </div>
+        </div>
+    {%endif%}
     
     
   
@@ -800,7 +815,8 @@
       var textArea = document.getElementById('selectedOptions');
       var selectedOption = selectElement.value;
       if (selectedOption === "clear") {
-          textArea.value = ""; // Clear the text area
+        textArea.value = ""; // Clear the text area
+        document.getElementById('laboratorydropdown').style.display = 'none';
       } else {
           var existingText = textArea.value;
           if (!existingText.includes(selectedOption)) {
@@ -810,6 +826,7 @@
               } else {
                   textArea.value += selectedOption;
               }
+              document.getElementById('laboratorydropdown').style.display = 'block';
           }
       }
       // Reset the search input and dropdown
