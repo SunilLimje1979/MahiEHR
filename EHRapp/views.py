@@ -241,6 +241,7 @@ def doctorReg(request):
             # Extract doctor_id from the response
             doctor_id = api_response.get("message_data", {}).get("doctor_id")
             request.session['doctor_id'] = doctor_id
+            request.session['doctor']=api_data
             request.session.save()
             # print(response.status_code)
 
@@ -472,6 +473,7 @@ def addClinic(request):
             # Extract location id from the response
             location_id = api_response.get("message_data", {}).get("doctor_location_id")
             request.session['location_id'] =location_id
+            request.session['clinic']=api_data
             request.session.save()
 
             if response.status_code == 200:
@@ -706,12 +708,16 @@ def pdf_view(request):
    if(request.method=="GET"):
     if('doctor_login_token' in request.session):
         doctor_token= request.session.get('doctor_login_token')
+        doctor = request.session.get('doctor')
+        clinic = request.session.get('clinic')
         print(doctor_token)
     else:
         doctor_token = 0
-        print(doctor_token)
+        doctor=0
+        clinic=0
+        print("712",doctor_token)
 
-    return render(request, 'Doctor/pdf_view.html',{'doctor_token':doctor_token})
+    return render(request, 'Doctor/pdf_view.html',{'doctor_token':doctor_token,'doctor':doctor,'clinic':clinic})
    
    else:
         api_data={"doctor_location_id":request.session['location_id']}

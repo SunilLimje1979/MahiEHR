@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,500;0,600;0,700;1,400&amp;display=swap"/>
     <style>
         .form-container {
-            margin-top: 450px;
+            margin-top: 20px;
             padding: 10px;
         }
 
@@ -92,13 +92,18 @@
                 font-size: 16px;
             }
         }
+
+        /* Additional card styling */
+        .details-card {
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 
 <body>
     <div id="loader"></div>
     <div class="overlay-message" id="loaderMessage" style="color: green;">Please sit back and relax while we process your Details...</div>
-    <form class="container form-container" method="POST" id="regconfirm">
+    <form class="container form-container" method="POST" id="regconfirm" {% if doctor == 0 %}style="margin-top: 300px;" {%endif%}>
         {% csrf_token %}
 
         <!-- <object
@@ -120,6 +125,24 @@
             </iframe>
         </object> -->
         <!-- <iframe src="http://13.233.211.102/medicalrecord/static/clinicpdfs/2316_xrYPc09.pdf"></iframe> -->
+         <!-- Card showing basic details of the doctor and clinic -->
+        {% if doctor %}
+        <div class="card details-card">
+            <div class="card-header text-white" style="background-color: #008373;">
+                Doctor & Clinic Details
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Doctor Information</h5>
+                <p class="card-text">{{ doctor.doctor_firstname }} {{ doctor.doctor_lastname }}</p>
+                <p class="card-text">{{doctor.doctor_address }}</p>
+                <p class="card-text">{{doctor.doctor_mobileno}}</p>
+                
+                <h5 class="card-title">Clinic Information</h5>
+                <p class="card-text">{{ clinic.location_title }}</p>
+                <p class="card-text">{{clinic.location_address }}</p>
+            </div>
+        </div>
+        {%endif%}
         <!-- Save Button (Bottom) -->
         <div class="text-center mt-3">
             <button type="submit" class="btn btn-primary btn-save" style="background-color: #008373;">
@@ -140,6 +163,7 @@
         localStorage.setItem('doctor_token', doctorToken);
         //localStorage.removeItem("doctor_token");
 
+
         // Handle form submission
         $('#regconfirm').on('submit', function(e) {
             $('.btn-save').prop('disabled', true); // Disable the save button
@@ -147,6 +171,7 @@
             $('#loaderMessage').show(); // Show the message
         });
     </script>
+
  
 </body>
 
