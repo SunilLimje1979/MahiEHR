@@ -101,14 +101,53 @@
             max-height: 750px;  
             overflow-y: auto; 
         }
+
+        /* Loader styles */
+         #loader {
+            position: fixed;
+            left: 30%;
+            top: 30%;
+            transform: translate(-50%, -50%);
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 16px solid #f5873e;
+            width: 120px;
+            height: 120px;
+            -webkit-animation: spin 2s linear infinite;
+            animation: spin 2s linear infinite;
+            display: none;
+            z-index: 1000;
+        }
+
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+            }
+
+            100% {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
     </style>
 
 </head>
 
 <body>
 
-  
-    <form class="container form-container" method="Post">
+    <div id="overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999;"></div>
+    <div id="loader"></div>
+    <form id="myForm" class="container form-container" method="Post">
         {% csrf_token %}
         
         <nav class="navbar navbar-expand-lg navbar-light navbar-orange fixed-top">
@@ -565,6 +604,14 @@
             diseaseDescription.value = '';
         }
     </script>
+    <script>
+        // Handle form submission
+        $('#myForm').on('submit', function(e) {
+            $('.btn').prop('disabled', true); // Disable the save button
+            $('#loader').show(); // Show the loader
+            $('#overlay').show(); // Show the overlay to disable the page
+        });
+    </script> 
 
 
 </body>
