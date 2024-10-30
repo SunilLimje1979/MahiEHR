@@ -78,5 +78,7 @@ urlpatterns = [
     path('get_all_laboratory/',get_all_laboratory,name='get_all_laboratory'),
     path('toggle_laboratory_status/',toggle_laboratory_status,name='toggle_laboratory_status'),
     path('Add_laboratory/',Add_laboratory,name='Add_laboratory'),
+    path('showDeals/',showDeals,name='showDeals'),
+    path('handle_deal_action/',handle_deal_action, name='handle_deal_action'),
 
 ]

@@ -81,7 +81,14 @@
 
     <!-- Search bar -->
     <div class="container">
-        <input type="text" id="searchInput" class="form-control search-bar" placeholder="Search deals by title, company, keywords, or mobile number">
+        <!-- <input type="text" id="searchInput" class="form-control search-bar" placeholder="Search deals by title, company, keywords, or mobile number"> -->
+        <div class="input-group search-bar">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search deals by title, company, keywords, or mobile number">
+            <span class="input-group-text">
+                <i class="fas fa-heart filter-like" style="cursor: pointer; color: grey;" data-active="false"></i>
+                <i class="fas fa-star filter-interest" style="cursor: pointer; color: grey;margin-left: 10px;" data-active="false"></i>
+            </span>
+        </div>
     </div>
 
     <!-- Deals container -->
@@ -225,6 +232,49 @@
             });
         });
     </script>
-    
+    <script>
+        $(document).ready(function() {
+            let filterByLike = false;
+            let filterByInterest = false;
+
+            // Toggle "Like" filter
+            $(".filter-like").on("click", function() {
+                filterByLike = !filterByLike;  // Toggle the filter state
+                $(this).css("color", filterByLike ? "red" : "grey");  // Update icon color
+                $(this).data("active", filterByLike);
+                filterDeals();
+            });
+
+            // Toggle "Interest" filter
+            $(".filter-interest").on("click", function() {
+                filterByInterest = !filterByInterest;  // Toggle the filter state
+                $(this).css("color", filterByInterest ? "orange" : "grey");  // Update icon color
+                $(this).data("active", filterByInterest);
+                filterDeals();
+            });
+
+            // Filter deals based on search and icons
+            $("#searchInput").on("keyup", function() {
+                filterDeals();
+            });
+
+            function filterDeals() {
+                const searchValue = $("#searchInput").val().toLowerCase();
+
+                $(".deal-card").each(function() {
+                    const dealData = $(this).data("deal").toString().toLowerCase();
+                    const isLiked = $(this).find(".like-icon").data("deal-like") === 1;
+                    const isInterested = $(this).find(".interest-icon").data("deal-interest") === 1;
+
+                    // Apply filter conditions
+                    const matchesSearch = dealData.includes(searchValue);
+                    const matchesLike = !filterByLike || (filterByLike && isLiked);
+                    const matchesInterest = !filterByInterest || (filterByInterest && isInterested);
+
+                    $(this).toggle(matchesSearch && matchesLike && matchesInterest);
+                });
+            }
+        });
+    </script>
 </body>
 </html>
