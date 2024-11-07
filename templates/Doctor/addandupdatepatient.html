@@ -139,6 +139,8 @@
             }
         }
 
+         
+
     </style>
 
 </head>
@@ -357,14 +359,15 @@
          
      
         <div class="row mb-3">
-            <div class="col-md-6">
-                <label for="allergySelect" class="form-label">Select Allergy</label>
+            <div class="form-floating col-md-6">
+                {% comment %} <label for="allergySelect" class="form-label">Select Allergy</label> {% endcomment %}
                 <select id="allergySelect" class="form-select" name="allergy">
                     <option value="" disabled selected hidden>Select</option>
                     {% for allergy in allergy_data %}
                         <option value="{{ allergy.allergy_id }}">{{ allergy.allergy_name }}</option>
                     {% endfor %}
                 </select>
+                <label for="allergySelect" class="form-label">Select Allergy</label>
             </div>
             <div class="col-md-6">
                 <label for="allergyDescription">Additional Comment</label>
@@ -403,14 +406,14 @@
         </div>
 
         <div class="row mb-3">
-            <div class="col-md-6">
-                <label for="diseaseSelect" class="form-label">Select Disease</label>
+            <div class="form-floating col-md-6">
                 <select id="diseaseSelect" class="form-select" name="disease">
                     <option value="" disabled selected hidden>Select</option>
                     {% for disease in disease_data %}
                         <option value="{{ disease.disease_id }}">{{ disease.disease_name }}</option>
                     {% endfor %}
                 </select>
+                <label for="diseaseSelect" class="form-label">Select Disease</label>
             </div>
             <div class="col-md-6">
                 <label for="diseaseDescription" class="form-label">Additional Comment</label>
@@ -612,6 +615,18 @@
             $('#overlay').show(); // Show the overlay to disable the page
         });
     </script> 
+
+    <script>
+        // Initialize Select2
+        $(document).ready(function() {
+            $('#diseaseSelect').select2();
+        });
+
+        // Initialize Select2
+        $(document).ready(function() {
+            $('#allergySelect').select2();
+        });
+    </script>
 
 
 </body>

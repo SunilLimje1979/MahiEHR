@@ -14,6 +14,9 @@
         crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,500;0,600;0,700;1,400&amp;display=swap" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
     <style>
         .navbar-orange {
             background-color: #A52028;
@@ -42,6 +45,31 @@
         .custom-file-label {
             overflow: hidden;
             white-space: nowrap;
+        }
+
+        /* Custom CSS for select2 */
+        .select2-container--default .select2-selection--single {
+          border: 1px solid #ced4da;
+          border-radius: .25rem;
+          height: calc(2.50rem + 2px);
+          background-color: #fff;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: calc(1.65rem + 2px);
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: calc(2.50rem + 2px);
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            border-color: #000 transparent transparent transparent;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            top: 6px;
+            right: 8px;
+        }
+        .select2-container--default .select2-dropdown {
+            max-height: 750px; /* Adjust the maximum height as needed */
+            overflow-y: auto; /* Enable vertical scrollbar if needed */
         }
     </style>
 </head>
@@ -84,14 +112,14 @@
         </div>
         <div class="row">
             <div class="col-md-6 col-12 mb-3">
-                <div class="form-floating">
-                    <select class="form-select" id="typeSelect" name="disease_type" aria-label="Floating label select example" required>
-                        <option value="" disabled selected hidden>Select</option>
+                <div class="">
+                    {% comment %} <label for="disease_type">Disease Type</label> {% endcomment %}
+                    <select class="form-select" id="typeSelect" name="disease_type"  required>
+                        <option value="" disabled selected hidden>Select Disease Type</option>
                         {% for key, value in types.items %}
                             <option value="{{ key }}"{% if disease.disease_type == key %} selected{% endif %}>{{ value }}</option>
                         {% endfor %}
                     </select>
-                    <label for="disease_type">Disease Type</label>
                 </div>
             </div>
 
@@ -118,6 +146,13 @@
         integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
         crossorigin="anonymous"></script>
 
+    
+        <script>
+            // Initialize Select2
+            $(document).ready(function() {
+                $('#typeSelect').select2();
+            });
+        </script>
 
 
 </body>
