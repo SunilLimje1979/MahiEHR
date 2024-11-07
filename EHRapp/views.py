@@ -39,6 +39,35 @@ patient_biometric_id= 0
 data1 = []
 patient_info = []
 consultation =[]
+disease_type_mapping = {
+    1: "Skin",
+    2: "Food",
+    3: "Air",
+    4: "Cardiology",
+    5:"Pulmonology",
+    6:"Gastroenterology",
+    7:"Endocrinology",
+    8:"Nephrology/Urology",
+    9:"Hematology/Oncology",
+    10:"Infectious Diseases",
+    11:"Immunology/Rheumatology",
+    12:"Neurology",
+    13:"Psychiatry"
+}
+
+allergy_type_mapping = {
+    1: "Skin",
+    2: "Food",
+    3: "Air",
+    4: "Anaphylaxis",
+    5:"Asthma",
+    6:"Contact",
+    7:"Eczema (atopic dermatitis)",
+    8:"Food allergies",
+    9:"Urticaria",
+    10:"Insect sting allergy",
+    11:"Medication allergy",
+}
 
 def generate_random_string():
     # Generate a UUID
@@ -48,7 +77,7 @@ def generate_random_string():
     return custom_uuid
 
 def opdlogin(request,token):
-    print(token)
+    # # print(token)
     api_data={"doctor_login_token":token}
     #api_url=" http://127.0.0.1:8002/doctor/api/get_doctor_profileby_token/"
     api_url="http://13.233.211.102/doctor/api/get_doctor_profileby_token/"
@@ -58,7 +87,7 @@ def opdlogin(request,token):
         request.session['token']=token
         return redirect(planinfo)
     else:
-        print(response.text)
+        # # print(response.text)
         doctor_id=response.json().get("message_data").get("doctor_id")
         role=response.json().get("message_text")
         request.session['role']=role
@@ -67,7 +96,7 @@ def opdlogin(request,token):
         api_url="http://13.233.211.102/doctor/api/get_doctor_related_info/"
         response=requests.post(api_url,json=api_data)
         all_id=response.json()
-        print(all_id)
+        # # print(all_id)
         request.session['doctor_id']=doctor_id
         request.session['location_id']=all_id.get('doctor_location_id')
         request.session['avalibility_id']=all_id.get('last_availability_id')
@@ -89,18 +118,18 @@ def login(request):
             # request.session.clear()
             mobileno = request.POST['username']
             password= request.POST['password']
-            print(mobileno,password)
+            # # print(mobileno,password)
             api_data={"mobile_number":mobileno,"password":password}
             api_url="http://13.233.211.102/doctor/api/login_desktop/"
             response=requests.post(api_url,json=api_data)
-            print(response.text)
+            # # print(response.text)
             if(response.json().get("message_code") ==999):
                 # request.session.clear()
                 # request.session['token']=token
                 messages.error(request, "Invalid username or password")
                 return redirect(login)
             else:
-                print(response.text)
+                # # print(response.text)
                 doctor_id=response.json().get("message_data").get("doctor_id")
                 role=response.json().get("message_text")
                 request.session['role']=role
@@ -109,7 +138,7 @@ def login(request):
                 api_url="http://13.233.211.102/doctor/api/get_doctor_related_info/"
                 response=requests.post(api_url,json=api_data)
                 all_id=response.json()
-                print(all_id)
+                # # print(all_id)
                 request.session['doctor_id']=doctor_id
                 request.session['location_id']=all_id.get('doctor_location_id')
                 request.session['avalibility_id']=all_id.get('last_availability_id')
@@ -132,12 +161,12 @@ def doctorReg(request):
     if(request.method=="GET"):
         # request.session['doctor_id'] =1
         # doctor_id=request.session['doctor_id']
-        # print(request.session['doctor_id'])
+        # # # print(request.session['doctor_id'])
         # request.session.clear()
         # Fetch countries, states, and cities
         country_response = requests.post("http://13.233.211.102/masters/api/get_all_countries/")
         countries = country_response.json().get("message_data", [])
-        # print(countries)
+        # # # print(countries)
 
         if 'doctor_id' in request.session and 'role' in request.session :
             if(request.session['role']=='Doctor'):
@@ -147,38 +176,38 @@ def doctorReg(request):
                 api_url="http://13.233.211.102/doctor/api/get_doctor_by_id/"
                 response=requests.post(api_url,json=api_data)
                 data=response.json().get("message_data",{})
-                print(data)
+                # # print(data)
                 # Convert epoch timestamp to formatted date
                 epoch_timestamp = data[0].get('doctor_dateofbirth', 0)
-                # print(epoch_timestamp)
+                # # print(epoch_timestamp)
                 # formatted_date = datetime.utcfromtimestamp(epoch_timestamp).strftime('%Y-%m-%d')
                 formatted_date=datetime.datetime.fromtimestamp(epoch_timestamp).strftime( "%Y-%m-%d")   
-                # print(formatted_date)
+                # # print(formatted_date)
                 data[0]['doctor_dateofbirth'] = formatted_date
                 state_response = requests.post("http://13.233.211.102/masters/api/get_states_by_country_id/",json={"country_id":data[0]['doctor_countryid']})
                 states = (state_response.json().get("message_data", [])).get('states',[])
-                # print(states)
+                # # print(states)
 
                 city_response = requests.post("http://13.233.211.102/masters/api/get_cities_by_state_id/",json={"state_id":data[0]['doctor_stateid']})
                 cities = (city_response.json().get("message_data", [])).get('cities',[])
-                # print(cities)
+                # # print(cities)
                 return render(request,"Doctor/DoctorRegUpdate.html",{"data":data[0],'doctor_id':doctor_id,"countries": countries,"states": states,"cities": cities})
             else:
                 return redirect(dashboard)
         else:
             state_response = requests.post("http://13.233.211.102/masters/api/get_states_by_country_id/",json={"country_id":101})
             states = (state_response.json().get("message_data", [])).get('states',[])
-            # print(states)
+            # # print(states)
 
             city_response = requests.post("http://13.233.211.102/masters/api/get_cities_by_state_id/",json={"state_id":22})
             cities = (city_response.json().get("message_data", [])).get('cities',[])
-            # print(cities)
+            # # print(cities)
             request.session['doctor_id']=None
             return render(request,"Doctor/DoctorRegUpdate.html",{"doctor_id":None,"countries": countries,"states": states,"cities": cities})
     
     else:
         # form_data=request.POST
-        # print(form_data)
+        # # print(form_data)
         # return HttpResponse("else part of Doctor Reg")
         doctor_id= request.session['doctor_id']
         fname=request.POST['firstName']
@@ -215,7 +244,7 @@ def doctorReg(request):
                 "password":password,
                 # "doctor_login_token":request.session['token']
             }
-        # print(dob)
+        # # print(dob)
         if doctor_id is not None :
             update_data={
                 "doctor_id": doctor_id,
@@ -228,9 +257,9 @@ def doctorReg(request):
             return redirect(settingdashboard)
         
         else:
-            #print('token',request.session['token'])
+            ## print('token',request.session['token'])
             api_data['doctor_login_token']=generate_random_string()
-            print(api_data)
+            # print(api_data)
             request.session['doctor_login_token']=api_data['doctor_login_token']
             # api_url = "http://127.0.0.1:8000/api/insert_doctor/"
             api_url = "http://13.233.211.102/doctor/api/insert_doctor/"
@@ -243,7 +272,7 @@ def doctorReg(request):
             request.session['doctor_id'] = doctor_id
             request.session['doctor']=api_data
             request.session.save()
-            # print(response.status_code)
+            # # print(response.status_code)
 
             if response.status_code == 200:
                 # return HttpResponse(f"Data successfully stored in the Database. API response: {response.text}")
@@ -254,7 +283,7 @@ def doctorReg(request):
 
 def get_states(request):
     country_id = request.GET.get('country_id')
-    print(country_id)
+    # print(country_id)
     state_response = requests.post("http://13.233.211.102/masters/api/get_states_by_country_id/",json={"country_id":country_id})
     states = (state_response.json().get("message_data", [])).get('states',[])
 
@@ -262,7 +291,7 @@ def get_states(request):
 
 def get_cities(request):
     state_id = request.GET.get('state_id')
-    print(state_id)
+    # print(state_id)
     city_response = requests.post("http://13.233.211.102/masters/api/get_cities_by_state_id/",json={"state_id":state_id})
     cities = (city_response.json().get("message_data", [])).get('cities',[])
     return JsonResponse(cities, safe=False)
@@ -273,16 +302,16 @@ def get_cities(request):
 #         # request.session['location_id'] =5
 #         # location_id=request.session['location_id']
 #         # doctor_id=request.session['doctor_id']
-#         # print(location_id)
+#         # # print(location_id)
 #         if 'location_id' in request.session:
 #             location_id=request.session['location_id']
-#             print(location_id)
+#             # print(location_id)
 #             api_data={"doctor_location_id":location_id}
 #             # api_url="http://127.0.0.1:8000/api/get_all_doctor_location/"
 #             api_url="http://13.233.211.102/doctor/api/get_all_doctor_location/"
 #             response=requests.post(api_url,json=api_data)
 #             data=response.json().get("message_data",{})
-#             # print(data)
+#             # # print(data)
 #             return render(request,"Doctor/clinicaddandupdate.html",{"data":data[0],'location_id':location_id})
 #         else:
 #             request.session['location_id']=None
@@ -323,13 +352,13 @@ def get_cities(request):
         
 #         else:
 #             api_data['doctor_id']=request.session['doctor_id']
-#             print(api_data['doctor_id'])
+#             # print(api_data['doctor_id'])
 #             # api_url = "http://127.0.0.1:8000/api/insert_doctor_location/"
 #             api_url = "http://13.233.211.102/doctor/api/insert_doctor_location/"
 
 #             response = requests.post(api_url, json=api_data)
 #             api_response = response.json()
-#             print(api_response)
+#             # print(api_response)
 #             # Extract location id from the response
 #             location_id = api_response.get("message_data", {}).get("doctor_location_id")
 #             request.session['location_id'] =location_id
@@ -346,29 +375,29 @@ def addClinic(request):
         # request.session['location_id'] =5
         # location_id=request.session['location_id']
         # doctor_id=request.session['doctor_id']
-        # print(location_id)
+        # # print(location_id)
         # request.session['location_id']=20
         # del request.session['location_id']
         country_response = requests.post("http://13.233.211.102/masters/api/get_all_countries/")
         countries = country_response.json().get("message_data", [])
-        # print(countries)
+        # # print(countries)
 
         if 'location_id' in request.session:
             location_id=request.session['location_id']
-            print(location_id)
+            # print(location_id)
             api_data={"doctor_location_id":location_id}
             # api_url="http://127.0.0.1:8000/api/get_all_doctor_location/"
             api_url="http://13.233.211.102/doctor/api/get_all_doctor_location/"
             response=requests.post(api_url,json=api_data)
             data=response.json().get("message_data",{})
-            print(data)
+            # print(data)
             link=(data[0]).get('location_image')
-            print(link)
+            # print(link)
             if(link is None):
                 link="/staticfiles/media/location_images/cliniclogo2.jpg"
             # Replace '/staticfiles/' with '/static/'
             updated_link = link.replace('/staticfiles/', '/static/')
-            print("Updated link:", updated_link)
+            # print("Updated link:", updated_link)
             timestamp = int(time())
 
             # Update the value in 'data' dictionary
@@ -376,20 +405,20 @@ def addClinic(request):
 
             state_response = requests.post("http://13.233.211.102/masters/api/get_states_by_country_id/",json={"country_id":data[0]['location_country_id']})
             states = (state_response.json().get("message_data", [])).get('states',[])
-            # print(states)
+            # # print(states)
 
             city_response = requests.post("http://13.233.211.102/masters/api/get_cities_by_state_id/",json={"state_id":data[0]['location_state_id']})
             cities = (city_response.json().get("message_data", [])).get('cities',[])
-            # print(cities)
+            # # print(cities)
             return render(request,"Doctor/clinicaddandupdate.html",{"data":data[0],'location_id':location_id,"timestamp": timestamp,"countries": countries,"states": states,"cities": cities})
         else:
             state_response = requests.post("http://13.233.211.102/masters/api/get_states_by_country_id/",json={"country_id":101})
             states = (state_response.json().get("message_data", [])).get('states',[])
-            # print(states)
+            # # print(states)
 
             city_response = requests.post("http://13.233.211.102/masters/api/get_cities_by_state_id/",json={"state_id":22})
             cities = (city_response.json().get("message_data", [])).get('cities',[])
-            # print(cities)
+            # # print(cities)
             request.session['location_id']=None
             return render(request,"Doctor/clinicaddandupdate.html",{"location_id":None,"countries": countries,"states": states,"cities": cities})
     
@@ -404,9 +433,9 @@ def addClinic(request):
         longitude=request.POST['longitude']
         location_id=request.session['location_id']
         clinic_logo = request.FILES.get('clinicLogo')
-        print(clinic_logo)
-        print(location_id)
-        print(longitude)
+        # print(clinic_logo)
+        # print(location_id)
+        # print(longitude)
         
         api_data={
                 "location_title":clinicname,
@@ -423,15 +452,15 @@ def addClinic(request):
             }
         
         if location_id is not None :
-            print("new Logo: ",clinic_logo)
+            # print("new Logo: ",clinic_logo)
             api_data['doctor_location_id']=location_id
             detail_url="http://13.233.211.102/doctor/api/update_location_details/"
             detail_response=requests.post(detail_url,json=api_data)
-            print(detail_response.text)
+            # print(detail_response.text)
             if(clinic_logo):
                 image_url="http://13.233.211.102/doctor/api/update_location_image/"
                 image_response=requests.post(image_url,data={"doctor_location_id":location_id},files={'location_image': clinic_logo})
-                print(image_response.text)
+                # print(image_response.text)
             messages.success(request, 'Clinic Details updated successfully!')
             return redirect(settingdashboard)
             # return HttpResponse("Updated Successfully..")
@@ -443,7 +472,7 @@ def addClinic(request):
                     unique_id = str(uuid.uuid4())[:8]  # Use a portion of the UUID as a short identifier
                     file_extension = os.path.splitext(clinic_logo.name)[-1]
                     new_filename = f"{unique_id}{file_extension}"
-                    print(new_filename)
+                    # print(new_filename)
 
                     # Create a BytesIO object to hold the file data in memory
                     renamed_file = BytesIO()
@@ -460,16 +489,16 @@ def addClinic(request):
             # else:
             #     return HttpResponse("No file uploaded.")
             api_data['doctor_id']=request.session['doctor_id']
-            print(api_data['doctor_id'])
+            # print(api_data['doctor_id'])
             # api_url = "http://127.0.0.1:8000/api/insert_doctor_location/"
             api_url = "http://13.233.211.102/doctor/api/insert_doctor_location/"
             if(clinic_logo):
                 response = requests.post(api_url, data=api_data, files={'location_image': (new_filename, renamed_file)})
             else:
                 response= requests.post(api_url, json=api_data)
-            print(response.text)
+            # print(response.text)
             api_response = response.json()
-            print(api_response)
+            # print(api_response)
             # Extract location id from the response
             location_id = api_response.get("message_data", {}).get("doctor_location_id")
             request.session['location_id'] =location_id
@@ -501,8 +530,8 @@ def addSlot(request):
                 avalibility_id+=1
                 # details=response.json().get("message_data",{})
                 data[i]=response.json().get("message_data",{})
-            # print(data)
-            # print(avalibility_id)
+            # # print(data)
+            # # print(avalibility_id)
             return render(request, 'Doctor/slotsaddandupdate.html',{"data":data,'avalibility_id':avalibility_id})
         else:
             request.session['avalibility_id']=None
@@ -510,7 +539,7 @@ def addSlot(request):
     
     else:
         avalibility_id=request.session['avalibility_id']
-        print(avalibility_id)
+        # print(avalibility_id)
         if avalibility_id is not None :
             avalibility_id=int(avalibility_id)-20
             try:    
@@ -537,7 +566,7 @@ def addSlot(request):
                         response = requests.post(api_url, json=api_data)
                         response.raise_for_status()  # Raise exception for bad responses
                         api_url=''
-                #print(avalibility_id)
+                ## print(avalibility_id)
                 messages.success(request, 'Availibility details updated successfully!')
                 return redirect(settingdashboard)
 
@@ -573,7 +602,7 @@ def addSlot(request):
                         response.raise_for_status()  # Raise exception for bad responses
                 api_response = response.json()
                 avalibility_id = api_response.get("message_data", {}).get("doctor_location_availability_id")
-                print(avalibility_id)
+                # print(avalibility_id)
                 request.session['avalibility_id'] =avalibility_id
                 request.session.save()
                 return redirect(consultaion_fee)
@@ -647,7 +676,7 @@ def consultaion_fee(request):
         consult_id=request.session['consult_id']
         medic_id=request.session['medic_id']
         map_data={1:[homefv,homesv,daycarefee],2:[clinicfv,clinicsv,Ivfee],3:[phonefv,phonesv,injectionfee]}
-        print(consult_id)
+        # print(consult_id)
         if consult_id is not None :
             consult_id-=2
             medic_id-=2
@@ -670,8 +699,8 @@ def consultaion_fee(request):
                 consult_id+=1
                 medic_id+=1
 
-            print(consult_id)
-            print(medic_id)
+            # print(consult_id)
+            # print(medic_id)
             messages.success(request, 'Consultation fee details updated successfully!')
             return redirect(settingdashboard)
         
@@ -700,7 +729,7 @@ def consultaion_fee(request):
             request.session['consult_id'] = api_response.get("message_data", {}).get("consultation_fee_id")
             request.session['medic_id'] = api_response.get("message_data", {}).get("medical_service_fee_id")
             request.session.save()
-            print(request.session['consult_id'],request.session['medic_id'])
+            # print(request.session['consult_id'],request.session['medic_id'])
             return redirect(pdf_view)
         
 
@@ -710,12 +739,12 @@ def pdf_view(request):
         doctor_token= request.session.get('doctor_login_token')
         doctor = request.session.get('doctor')
         clinic = request.session.get('clinic')
-        print(doctor_token)
+        # print(doctor_token)
     else:
         doctor_token = 0
         doctor=0
         clinic=0
-        print("712",doctor_token)
+        # print("712",doctor_token)
 
     return render(request, 'Doctor/pdf_view.html',{'doctor_token':doctor_token,'doctor':doctor,'clinic':clinic})
    
@@ -724,18 +753,18 @@ def pdf_view(request):
         api_url="http://13.233.211.102/doctor/api/get_all_doctor_location/"
         response=requests.post(api_url,json=api_data)
         data=response.json().get("message_data",{})
-        print("location_details",data)
+        # print("location_details",data)
         doctor_url="http://13.233.211.102/doctor/api/get_doctor_by_id/"
         response=requests.post(doctor_url,json={'doctor_id':request.session['doctor_id']})
         doctor_data=response.json().get("message_data",{})
-        print(doctor_data)
+        # print(doctor_data)
         doctor_name="Dr. "+ (doctor_data[0]).get('doctor_firstname')+" "+(doctor_data[0]).get('doctor_lastname')
-        print(doctor_name)
+        # print(doctor_name)
         doctor_phoneno=(doctor_data[0]).get('doctor_mobileno')
-        print(doctor_phoneno)
+        # print(doctor_phoneno)
         clinic_name=(data[0]).get('location_title')
         location_token=(data[0]).get('location_token')
-        print(clinic_name,location_token)
+        # print(clinic_name,location_token)
         chatscript_url="http://13.233.211.102/appointmentbot/api/insert_chatscripts_bulk_record_withparam/"
         scriptoption_url="http://13.233.211.102/appointmentbot/api/insert_scriptoptions_bulk_record_withparam/"
         chatscript_data={
@@ -748,12 +777,12 @@ def pdf_view(request):
             "dr_name":doctor_name,
             "location_token":location_token 
         }
-        print(chatscript_data)
-        print(scriptoption_data)
+        # print(chatscript_data)
+        # print(scriptoption_data)
         chatscript_res=requests.post(chatscript_url,json=chatscript_data)
         scriptoption_res=requests.post(scriptoption_url,json=scriptoption_data)
-        print(chatscript_res.text)
-        print(scriptoption_res.text)
+        # print(chatscript_res.text)
+        # print(scriptoption_res.text)
         messages.success(request, "Thank you for registering! Please click 'Continue' to proceed.")
         messages.success(request,"Your 30 days Trial Plan is Activated ")
         return redirect(subscriptioninfo)
@@ -766,12 +795,12 @@ def subscriptioninfo(request):
        url="http://13.233.211.102/masters/api/get_all_master_subscriptions/"
        res=requests.get(url)
        subinfo=res.json().get('message_data')
-       print(subinfo)
+       # print(subinfo)
        return render(request,'Doctor/subscriptioninfo.html',{'plans':subinfo})
     
     else:
         master_subscription_id = request.POST['selectedPlan']
-        print(master_subscription_id)
+        # print(master_subscription_id)
         sub_url="http://13.233.211.102/masters/api/insert_doctor_subscription/"
         api_data={
                 "doctor_id": request.session['doctor_id'],
@@ -792,9 +821,9 @@ def subscriptioninfo(request):
                 # "subscription_billing_city": 1
             }
         res=requests.post(sub_url,json=api_data)
-        print(res.text)
-        # print(api_data)
-        print("master_subscription_id",master_subscription_id)
+        # print(res.text)
+        # # print(api_data)
+        # print("master_subscription_id",master_subscription_id)
         request.session.clear()
         messages.success(request, "Your Registeration is completed please Sign In with Your Login Credential")
         return redirect(login)
@@ -806,11 +835,11 @@ def dashboard(request):
         # Ensure role is set in session
         if 'role' not in request.session:
             request.session['role'] = 'Doctor'
-            print("734")
+            # print("734")
         
         # Make the API call to validate subscription
         res = requests.post("http://13.233.211.102/masters/api/validate_subscription/", json={"doctor_id": request.session['doctor_id']})
-        print(res.text)
+        # print(res.text)
         
         days = 0  # Default days to 0 if remaining days are more than 30
         if res.json().get('message_code') == 1000:
@@ -855,7 +884,7 @@ def leaves(request):
         api_url = "http://13.233.211.102/doctor/api/get_doctor_leave_details/"
         response = requests.post(api_url, json=api_data)
         leaves=response.json().get("message_data",{})
-        # print(leaves)
+        # # print(leaves)
         data=[]
         detail={}
         for i in leaves:
@@ -869,7 +898,7 @@ def leaves(request):
                 detail[i['order']]=i
 
         data.append(detail)
-        # print(data)
+        # # print(data)
         global leave_data
         leave_data=data.copy()
         return render(request,"Doctor/leaves.html",{'leaves':data})
@@ -887,14 +916,14 @@ def leavesystem(request):
         todate=request.POST.get("toDate")
         if not todate:
            todate = leavedate
-        # print(todate)
+        # # print(todate)
         dates_between = get_dates_between(leavedate, todate)
-        #print(dates_between)
+        ## print(dates_between)
         for ldate in dates_between:
             selected_date = datetime.datetime.strptime(ldate, '%Y-%m-%d')
             day_of_week = selected_date.strftime('%A')
             day = day_name_to_int(day_of_week)
-            # print(day)
+            # # print(day)
             for order in range(1, 4):
                     field_name_start = f'{order_to_string(order)}Start'
                     field_name_end = f'{order_to_string(order)}End'     
@@ -923,7 +952,7 @@ def updateleave(request,leave_date):
         api_url = "http://13.233.211.102/doctor/api/get_doctor_leave_details/"
         response = requests.post(api_url, json=api_data)
         Leaves=response.json().get("message_data",{})
-        # print(leaves)
+        # # print(leaves)
         data=[]
         detail={}
         for i in Leaves:
@@ -937,12 +966,12 @@ def updateleave(request,leave_date):
                 detail[i['order']]=i
 
         data.append(detail)
-        # print(data)
+        # # print(data)
         global leave_data
         leave_data=data.copy()
         for leave in leave_data:
             if(leave_date == leave[1]['leave_date']):
-                # print(leave)
+                # # print(leave)
                 return render(request,"Doctor/updateleave.html",{'leave':leave})
         else:
             return HttpResponse("no")
@@ -965,7 +994,7 @@ def updateleave(request,leave_date):
                 api_url = "http://13.233.211.102/doctor/api/update_doctor_leave/"
                 response = requests.post(api_url, json=api_data)
                 # data[order]=[start_time,end_time]
-        print(response.text)
+        # print(response.text)
         return redirect(leaves)
 
 def day_name_to_int(day):
@@ -990,15 +1019,15 @@ def fetch_timings(request):
     if request.method == 'POST':
         # Get the selected date from the POST data
         selected_date = request.POST.get('selectedDate', None)
-        print(selected_date)
+        # print(selected_date)
 
         # Convert the selected date string to a datetime object
         selected_date = datetime.datetime.strptime(selected_date, '%Y-%m-%d')
 
         # Get the day from the datetime object
         day_of_week = selected_date.strftime('%A')
-        # print(day_name_to_int(day_of_week))
-        # print(day_of_week)
+        # # print(day_name_to_int(day_of_week))
+        # # print(day_of_week)
 
         # api_url = "http://127.0.0.1:8000/api/get_doctor_location_availability/"
         api_url = "http://13.233.211.102/doctor/api/get_doctor_location_availability/"
@@ -1013,7 +1042,7 @@ def fetch_timings(request):
         required_data={}
         for d in data:
             required_data[d['availability_order']]=[d['availability_starttime'],d['availability_endtime']]
-        # print(required_data)
+        # # print(required_data)
 
         # Convert data to JSON
         json_data = []
@@ -1080,7 +1109,7 @@ def insert_medicine(request):
                 }
         api_url = "http://13.233.211.102/doctor/api/insert_doctor_medicine/"
         response = requests.post(api_url,json=insert_medicine_details)
-        print(response.text)
+        # print(response.text)
 
         if response.status_code == 200:
             messages.success(request, 'Medicine details Added successfully!')
@@ -1098,7 +1127,7 @@ def update_medicine(request,doctor_medicine_id):
         all_medicines=response.json().get('message_data', {})
         for medicine in all_medicines:
             if(doctor_medicine_id==medicine['doctor_medicine_id']):
-                # print(medicine)
+                #print(medicine)
                 return render(request,'Doctor/add_medicine.html',{'medicine':medicine})
                 # return render(request,'Doctor/demo.html',{'medicine':medicine})
         else:
@@ -1121,7 +1150,7 @@ def update_medicine(request,doctor_medicine_id):
                 }
         api_url = f'http://13.233.211.102/doctor/api/update_doctor_medicine/{doctor_medicine_id}/'
         response = requests.post(api_url,json=update_medicine_details)
-        print(response.text)
+        # print(response.text)
 
         if response.status_code == 200:
             messages.success(request, 'Medicine details Updated successfully!')
@@ -1138,8 +1167,8 @@ def get_all_medicines(request):
     global all_medicines
     all_medicines=response.json().get('message_data', {})
     # for i in all_medicines:
-    #     print(i)
-    #     print('----------------------------------------------------------')
+    #     # print(i)
+    #     # print('----------------------------------------------------------')
     # return HttpResponse(all_medicines)
     return render(request,'Doctor/get_all_medicine.html',{'all_medicines':all_medicines})
 
@@ -1173,7 +1202,7 @@ def add_lab_report(request):
         }
         api_url= f"http://13.233.211.102/doctor/api/insert_labinvestigations/"
         response = requests.post(api_url,json=api_data)
-        print(response.text)
+        # print(response.text)
         messages.success(request, 'Lab report Added successfully!')
         return redirect(get_all_lab_report)
 
@@ -1183,10 +1212,10 @@ def get_all_lab_report(request):
     api_url ='http://13.233.211.102/medicalrecord/api/get_labinvestigation_bydoctorid/'
 
     response = requests.post(api_url,json=doctor_id)
-    #print("lab_investigation_report_data:", lab_investigation_report_data)
+    ## print("lab_investigation_report_data:", lab_investigation_report_data)
     global lab_investigation_report
     lab_investigation_report =response.json().get('message_data')
-    # print(lab_investigation_report)
+    # # print(lab_investigation_report)
     return render(request,'Doctor/lab_report.html',{'lab_reports':lab_investigation_report})
 
 
@@ -1196,12 +1225,12 @@ def update_lab_report(request,investigation_id):
         api_url ='http://13.233.211.102/medicalrecord/api/get_labinvestigation_bydoctorid/'
 
         response = requests.post(api_url,json=doctor_id)
-        #print("lab_investigation_report_data:", lab_investigation_report_data)
+        ## print("lab_investigation_report_data:", lab_investigation_report_data)
         global lab_investigation_report
         lab_investigation_report =response.json().get('message_data')
         for report in lab_investigation_report:
             if(investigation_id==report['investigation_id']):
-                # print(medicine)
+                # # print(medicine)
                 return render(request,'Doctor/addandupdate_labreport.html',{'report':report})
         else:
             return HttpResponse("no data found")
@@ -1214,7 +1243,7 @@ def update_lab_report(request,investigation_id):
                 }
         api_url = f"http://13.233.211.102/doctor/api/update_labinvestigations/"
         response = requests.post(api_url,json=api_data)
-        print(response.text)
+        # print(response.text)
         if response.status_code == 200:
             messages.success(request, 'Lab report Updated successfully!')
             return redirect(get_all_lab_report)
@@ -1249,7 +1278,7 @@ def fetch_data(request):
     if request.method == 'POST':
         # Get the selected date from the POST data
         selected_date = request.POST.get('selectedDate', None)
-        print(selected_date)
+        # print(selected_date)
 
         api_url = "http://13.233.211.102/appointment/api/get_doctor_appointments/"
         api_data ={
@@ -1258,26 +1287,26 @@ def fetch_data(request):
         }
 
         response = requests.get(api_url, json=api_data)
-        # print(response.text)
+        # # print(response.text)
         api_response = response.json()
         data = api_response.get("message_data", [])
-        # print(data)
+        # # print(data)
         for appointment in data:
             if(appointment['consultation_id'] is not None):
                 consultation_url="http://13.233.211.102/medicalrecord/api/get_consultation_byconsultationid/"
                 api_para={"consultation_id":appointment['consultation_id']}
                 consult_response=requests.post(consultation_url,json=api_para)
                 consult_data=(consult_response.json().get("message_data"))[0]
-                # print(consult_data['consultation_fees'])
+                # # print(consult_data['consultation_fees'])
                 appointment['consult_fee']= float(consult_data['consultation_fees'])
                  
             
         for detail in data:
             if(detail['createdon'] is not None):
                 formatted_date=datetime.datetime.fromtimestamp(detail['createdon']).strftime( "%d-%m-%Y")
-                print(formatted_date)
+                # print(formatted_date)
                 detail['createdon']=formatted_date
-        # print('updated',data)
+        # # print('updated',data)
         return JsonResponse(data, safe=False) 
     
     return HttpResponse('hi')
@@ -1287,33 +1316,33 @@ def fetch_data(request):
 def initial_assesment(request,appointment_id):
     if(request.method=="GET"):
         request.session['appointment_id']=appointment_id
-        print(request.session['appointment_id'])
+        # print(request.session['appointment_id'])
         api_data = {"appointment_id": appointment_id}
         # api_url = 'http://127.0.0.1:8000/api/get_patient_by_appointment_id/'
         api_url ='http://13.233.211.102/appointment/api/get_patient_by_appointment_id/'
         response = requests.post(api_url, json=api_data)
 
         # request.session['appointment_id'] = api_data
-        # print("api",api_data)
+        # # print("api",api_data)
         if response.status_code == 200:
             data = response.json().get('message_data')
             data1=data.get('appointment details', {})
             request.session['appointment_details']=data1
-            print(data1)
+            # print(data1)
             data1['patient_id']=request.GET.get('patient_id')
-            print('pateint_id',request.GET.get('patient_id'))
+            # print('pateint_id',request.GET.get('patient_id'))
             if(request.GET.get('patient_id') is not None):
                 api_url="http://13.233.211.102/pateint/api/get_patient_byid/"
                 response=requests.post(api_url,json={"patient_id":request.GET.get('patient_id')})
-                print(response.text)
+                # print(response.text)
                 data=response.json().get("message_data",{})
-                print(data)
+                # print(data)
                 # Convert epoch timestamp to formatted date
                 epoch_timestamp = data.get('patient_dateofbirth', 0)
-                print(epoch_timestamp)
+                # print(epoch_timestamp)
                 # formatted_date = datetime.utcfromtimestamp(epoch_timestamp).strftime('%Y-%m-%d')
                 formatted_date=datetime.datetime.fromtimestamp(epoch_timestamp).strftime( "%Y-%m-%d")   
-                # print(formatted_date)
+                # # print(formatted_date)
                 data1['dob'] = formatted_date
                 data1['aadharnumber']=data.get('patient_aadharnumber', 0)
                 data1['health_id']=data.get('patient_universalhealthid', 0)
@@ -1321,26 +1350,26 @@ def initial_assesment(request,appointment_id):
                 pdlink_url="http://13.233.211.102/pateint/api/insert_patient_doctor_link/"
                 pdlink_data={"doctor_id":request.session['doctor_id'],"patient_id":request.GET.get('patient_id')}
                 pdlink_res=requests.post(pdlink_url,json=pdlink_data)
-                print("if selected",pdlink_res.text)
+                # print("if selected",pdlink_res.text)
         
         # vital_url="http://localhost:8000/api/get_patientvitals_by_appointment_id/"
         vital_url="http://13.233.211.102/medicalrecord/api/get_patientvitals_by_appointment_id/"
         vital_response=requests.post(vital_url,json={"appointment_id": appointment_id})
-        # print(vital_response.text)
+        # # print(vital_response.text)
         vital_data=vital_response.json().get('message_data')
         if(vital_response.json().get('message_code')==1000):
-            print("vitals_data: ",vital_data)
+            # print("vitals_data: ",vital_data)
             api_url="http://13.233.211.102/pateint/api/get_patient_byid/"
             response=requests.post(api_url,json={"patient_id":vital_data['patient_id']})
-            print(response.text)
+            # print(response.text)
             data=response.json().get("message_data",{})
-            print(data)
+            # print(data)
             # Convert epoch timestamp to formatted date
             epoch_timestamp = data.get('patient_dateofbirth', 0)
-            print(epoch_timestamp)
+            # print(epoch_timestamp)
             # formatted_date = datetime.utcfromtimestamp(epoch_timestamp).strftime('%Y-%m-%d')
             formatted_date=datetime.datetime.fromtimestamp(epoch_timestamp).strftime( "%Y-%m-%d")   
-            # print(formatted_date)
+            # # print(formatted_date)
             data1['dob'] = formatted_date
             data1['aadharnumber']=data.get('patient_aadharnumber', 0)
             data1['health_id']=data.get('patient_universalhealthid', 0)
@@ -1354,8 +1383,8 @@ def initial_assesment(request,appointment_id):
 
 
     else:
-        print(request.POST['phoneno'])
-        print(request.POST['patient_id'])
+        # print(request.POST['phoneno'])
+        # print(request.POST['patient_id'])
         patient_id=request.POST['patient_id']
         sex=request.POST['sex']
         # age=request.POST['age']
@@ -1363,23 +1392,23 @@ def initial_assesment(request,appointment_id):
         aadharno=request.POST['aadharNumber']
         health_id=request.POST['health_id']
         pname=request.POST['patient_name']
-        print(sex,dob,pname,aadharno,health_id)
+        # print(sex,dob,pname,aadharno,health_id)
         # Convert the DOB string to a date object
         dob = datetime.datetime.strptime(dob, '%Y-%m-%d').date()   
         # Calculate the age
         today = datetime.datetime.today().date()
         age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
-        print(age)
+        # print(age)
         # appointment_update="http://127.0.0.1:8002/appointment/api/update_appointment_by_id/"
         appointment_update="http://13.233.211.102/appointment/api/update_appointment_by_id/"
         appointment_data={"appointment_id":appointment_id,"age":age,"appointment_gender":sex,"appointment_name":pname}
         appointment_res=requests.post(appointment_update,json=appointment_data)
-        print(appointment_res.text)
+        # print(appointment_res.text)
 
         fullname=(pname.split(" "))
-        print(fullname)
+        # print(fullname)
         fullname=[item for item in fullname if item != '']
-        print(fullname)
+        # print(fullname)
         if(len(fullname)<=1):
             fullname.append('none')
         
@@ -1393,7 +1422,7 @@ def initial_assesment(request,appointment_id):
             p_data['patient_universalhealthid']=health_id
              
         patient_res=requests.post(patient_update,json=p_data)
-        print(patient_res.text)
+        # print(patient_res.text)
          
 
         # return HttpResponse("else initial assesement")
@@ -1420,21 +1449,21 @@ def initial_assesment(request,appointment_id):
         # api_url = 'http://127.0.0.1:8000/api/insert_patients_vitals/'
         api_url ='http://13.233.211.102/medicalrecord/api/insert_patients_vitals/'
         response = requests.post(api_url, json=patient_data)
-        print(response.text)
+        # print(response.text)
 
         vitals_id = response.json().get('message_data', {})  # Getting 'message_data' safely
         vitals_id = (vitals_id[0]).get("Patient_Biometricid")
         request.session['vitals_id']=vitals_id
-        print(vitals_id)
-        print("vitals_id",vitals_id)
+        # print(vitals_id)
+        # print("vitals_id",vitals_id)
 
         update_status_url="http://13.233.211.102/appointment/api/update_appointment_status"
         status_response=requests.post(update_status_url,json={"appointment_id":appointment_id,"appointment_status":2})
-        print(status_response.text)
+        # print(status_response.text)
         
         # return render(request, 'initial_assesment.html',{"data":data.get('appointment details', {}),"vitals_id":vitals_id,"data1":data1})
         # return redirect(consultation)
-        print('initial assessment part:',request.session['role'])
+        # print('initial assessment part:',request.session['role'])
         if(request.session['role']=='Doctor'):
             return redirect('consultation', id=appointment_id)
         else:
@@ -1443,7 +1472,7 @@ def initial_assesment(request,appointment_id):
 def update_initial_assesment(request):
     appointment_id=request.POST['appointment_id']
     request.session['appointment_id']=appointment_id
-    print(request.POST['patient_id'])
+    # print(request.POST['patient_id'])
     patient_id=request.POST['patient_id']
     sex=request.POST['sex']
     # age=request.POST['age']
@@ -1451,23 +1480,23 @@ def update_initial_assesment(request):
     aadharno=request.POST['aadharNumber']
     health_id=request.POST['health_id']
     pname=request.POST['patient_name']
-    print(sex,dob,pname,aadharno,health_id)
+    # print(sex,dob,pname,aadharno,health_id)
     # Convert the DOB string to a date object
     dob = datetime.datetime.strptime(dob, '%Y-%m-%d').date()   
     # Calculate the age
     today = datetime.datetime.today().date()
     age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
-    print(age)
+    # print(age)
     # appointment_update="http://127.0.0.1:8002/appointment/api/update_appointment_by_id/"
     appointment_update="http://13.233.211.102/appointment/api/update_appointment_by_id/"
     appointment_data={"appointment_id":appointment_id,"age":age,"appointment_gender":sex,"appointment_name":pname}
     appointment_res=requests.post(appointment_update,json=appointment_data)
-    print(appointment_res.text)
+    # print(appointment_res.text)
 
     fullname=(pname.split(" "))
-    print(fullname)
+    # print(fullname)
     fullname=[item for item in fullname if item != '']
-    print(fullname)
+    # print(fullname)
     if(len(fullname)<=1):
         fullname.append('none')
     
@@ -1481,7 +1510,7 @@ def update_initial_assesment(request):
         p_data['patient_universalhealthid']=health_id
             
     patient_res=requests.post(patient_update,json=p_data)
-    print(patient_res.text)
+    # print(patient_res.text)
     api_data = {
             # "patient_id":request.POST['patient_id'],
             # "patient_id":1,
@@ -1505,10 +1534,10 @@ def update_initial_assesment(request):
     # url="http://localhost:8000/api/update_patientvitals_by_appointment_id/"
     url="http://13.233.211.102/medicalrecord/api/update_patientvitals_by_appointment_id/"
     response=requests.post(url,json=api_data)
-    print(response.text)
+    # print(response.text)
     vdata=response.json().get('message_data')
     request.session['vitals_id']= vdata['patient_biometricid']
-    print('update assesment',request.session['role'])
+    # print('update assesment',request.session['role'])
     if(request.session['role']=='Doctor'):
         return redirect('consultation', id=request.session['appointment_id'])
     else:
@@ -1519,27 +1548,27 @@ def update_initial_assesment(request):
 # ####################################Consultation###########################
 def Consultation(request,id):
     if(request.method == "GET"):
-        print('appointent_id',id)
+        # print('appointent_id',id)
         request.session['appointment_id']=id
         appointment_id= request.session['appointment_id']
         #appointment_id=1
-        print("appointment_id",appointment_id)
+        # print("appointment_id",appointment_id)
         Get_Patient_By_Appointment_Id(requests,appointment_id)
         if(get_patient_by_appointment_id.get('consultation_id')):
             request.session['consultation_id']=get_patient_by_appointment_id.get('consultation_id')
-            print("the consultation id is present",get_patient_by_appointment_id.get('consultation_id'))
+            # print("the consultation id is present",get_patient_by_appointment_id.get('consultation_id'))
             consultation_url="http://13.233.211.102/medicalrecord/api/get_consultation_byconsultationid/"
             api_para={"consultation_id":request.session['consultation_id']}
             consult_response=requests.post(consultation_url,json=api_para)
             consult_data=(consult_response.json().get("message_data"))[0]
-            print(consult_data)
+            # print(consult_data)
             epoch_timestamp = consult_data.get('followup_datetime', 0)
-            # print(epoch_timestamp)
+            # # print(epoch_timestamp)
             # formatted_date = datetime.utcfromtimestamp(epoch_timestamp).strftime('%Y-%m-%d')
             formatted_date=datetime.datetime.fromtimestamp(epoch_timestamp).strftime( "%Y-%m-%d %H:%M:%S")   
-            print(formatted_date)
+            # print(formatted_date)
             consult_data['followup_datetime'] = formatted_date
-            print(consult_data)
+            # print(consult_data)
 
             #################patient findingsymptoms################
             # finding_symptoms_url="http://localhost:8000/api/get_patient_findings_symptoms_by_consultation/"
@@ -1547,7 +1576,7 @@ def Consultation(request,id):
             api_para={"consultation_id":request.session['consultation_id']}
             symptoms_response=requests.post(finding_symptoms_url,json=api_para)
             symptoms_data=(symptoms_response.json().get("message_data"))[0]
-            print(symptoms_data)
+            # print(symptoms_data)
             #################patient Lab Invstigations################
             # patientlab_url="http://localhost:8000/api/get_patient_labinvestigations_by_consultation_id/"
             patientlab_url="http://13.233.211.102/medicalrecord/api/get_patient_labinvestigations_by_consultation_id/"
@@ -1556,10 +1585,10 @@ def Consultation(request,id):
             patientlab_data=(patientlab_response.json().get("message_data"))
             lab_list=[]
             for i in patientlab_data:
-                print(i)
+                # print(i)
                 lab_list.append(i['labinvestigation_category'])
-                print("-----------------------")
-            print(lab_list)
+                # print("-----------------------")
+            # print(lab_list)
             #################patient Medications################
             patientmedic_url="http://13.233.211.102/medicalrecord/api/get_patient_medications_byconsultationid/"
             api_para={"consultation_id":request.session['consultation_id']}
@@ -1567,16 +1596,16 @@ def Consultation(request,id):
             patientmedic_data=(patientmedic_response.json().get("message_data"))
             medic_list=[]
             for i in patientmedic_data:
-                # print(i)
+                # # print(i)
                 medic_list.append(i)
-                # print("-----------------------")
+                # # print("-----------------------")
          
             if medic_list:
                 for i in medic_list:
                     instuct_res=requests.post("http://13.233.211.102/masters/api/get_medicine_instruction",json={"Doctor_Instruction_Id":i['medicine_instruction_id']})
                     i['instruction_text']=(instuct_res.json().get('message_data'))[0].get('instruction_text')
 
-                print(medic_list)
+                # print(medic_list)
             else:
                 print('no data in medic list')
 
@@ -1585,9 +1614,9 @@ def Consultation(request,id):
             prescription_url="http://13.233.211.102/medicalrecord/api/get_prescription_details/"
             api_para={"consultation_id":request.session['consultation_id']}
             prescription_response=requests.post(prescription_url,json=api_para)
-            print(prescription_response.text)
+            # print(prescription_response.text)
             prescription_data=(prescription_response.json().get("message_data"))[0]
-            print(prescription_data)
+            # print(prescription_data)
             default_fees=0
             #return HttpResponse("Update consultation details")
         else:
@@ -1598,14 +1627,14 @@ def Consultation(request,id):
            prescription_data={"prescription_details":0}
            if('consultation_id' in request.session):
               del request.session['consultation_id']
-           print("not present",get_patient_by_appointment_id.get('consultation_id'))
+           # print("not present",get_patient_by_appointment_id.get('consultation_id'))
            consult_id=request.session['consult_id']-1
            api_consultdata={"consultation_fee_id":consult_id}
            consult_url="http://13.233.211.102/doctor/api/get_consultation_fee_details/"
            response=requests.post(consult_url,json=api_consultdata)
            fees=response.json().get("message_data",{})
            default_fees=fees['first_visit_fee']
-           print(default_fees,'fees')
+           # print(default_fees,'fees')
         
         All_medicines(requests,request.session['doctor_id'])
     ############################################# KCO for for fetch the values########################
@@ -1628,24 +1657,24 @@ def Consultation(request,id):
         Get_Patient_Boimterics_Vitals(requests,request.session['appointment_id'])
         patient_res=requests.post('http://13.233.211.102/pateint/api/get_patient_details_by_appointment_id/',json={"appointment_id":request.session['appointment_id']})
         outstanding=(patient_res.json().get("message_data",{})).get('outstanding',0) or 0
-        print(outstanding)
+        # print(outstanding)
 
         ################################All Active Pharmacist##################
         pharma_res= requests.post('http://13.233.211.102/medicalrecord/api/get_doctor_pharmacist_bydoctorid/',json={"doctor_id":request.session['doctor_id'],"Status":0})
-        print(pharma_res.text)
+        # print(pharma_res.text)
         if(pharma_res.json().get('message_code')==1000):
             pharmadata = pharma_res.json().get('message_data')
-            print("1563",pharmadata) 
+            # print("1563",pharmadata) 
         
         else:
             pharmadata=[]
         
         ################################All Active Laboratory##################
         laboratory_res= requests.post('http://13.233.211.102/medicalrecord/api/get_doctor_laboratory_bydoctorid/',json={"doctor_id":request.session['doctor_id'],"Status":0})
-        print(laboratory_res.text)
+        # print(laboratory_res.text)
         if(laboratory_res.json().get('message_code')==1000):
             laboratorydata = laboratory_res.json().get('message_data')
-            print("1642",laboratorydata) 
+            # print("1642",laboratorydata) 
         
         else:
             laboratorydata=[]
@@ -1660,37 +1689,37 @@ def Consultation(request,id):
                     'laboratorydata':laboratorydata,
                 })
     else: 
-                   
+             
 ########################## insert consultaions ########################################
             # Get_Patient_Boimterics_Vitals(requests,request.session['appointment_id'])
-            # print("in consult",get_patient_boimterics_vitals)
+            # # print("in consult",get_patient_boimterics_vitals)
             vital_url="http://13.233.211.102/medicalrecord/api/get_patientvitals_by_appointment_id/"
             vital_response=requests.post(vital_url,json={"appointment_id": request.session['appointment_id']})
-            # print(vital_response.text)
+            # # print(vital_response.text)
             vital_data=vital_response.json().get('message_data')
             patient_id= vital_data.get("patient_id")
             patient_status= vital_data.get("patient_status")
-            print("id and status",patient_id,patient_status)
+            # print("id and status",patient_id,patient_status)
             dt = request.POST["followup_datetime"]
-            print(dt)
+            # print(dt)
              # Parse the input datetime string into a datetime object
             datetime_obj = datetime.datetime.strptime(dt, '%Y-%m-%dT%H:%M')
             # Add 9 months to the month to get December (datetime objects are 1-indexed)
             # datetime_obj = datetime_obj.replace(month=datetime_obj.month + 9)
             # Format the datetime object as the required string format
             formatted_datetime = datetime_obj.strftime('%Y-%m-%d %H:%M:%S')
-            print("required:",formatted_datetime)
+            # print("required:",formatted_datetime)
             followup_datetime_epoch = datetime.datetime.strptime(formatted_datetime, '%Y-%m-%d %H:%M:%S')
             followup_datetime = int(followup_datetime_epoch.timestamp())
-            print(followup_datetime,'fd')
+            # print(followup_datetime,'fd')
             consultation_datetime=int(request.POST["Consultation_DateTime"])
-            print(consultation_datetime)
+            # print(consultation_datetime)
             consultation_datetime = datetime.datetime.fromtimestamp(consultation_datetime).strftime("%Y-%m-%d %H:%M:%S")
             current_datetime = datetime.datetime.now()
 
             # Convert to epoch time (Unix timestamp)
             current_epoch_time = int(current_datetime.timestamp())
-            print(current_epoch_time)
+            # print(current_epoch_time)
 
             if('consultation_id' in request.session):
                 update_consultation = {
@@ -1712,7 +1741,7 @@ def Consultation(request,id):
                 #updateconsult_url="http://localhost:8000/api/update_consultation_details/"
                 updateconsult_url="http://13.233.211.102/medicalrecord/api/update_consultation_details/"
                 updateconsult_response=requests.post(updateconsult_url,json=update_consultation)
-                print(updateconsult_response.text)
+                # print(updateconsult_response.text)
 
                 all_kco=request.POST['kco']
                 alladvice=request.POST['advice']
@@ -1724,8 +1753,8 @@ def Consultation(request,id):
                 kco_str = ', '.join(kco_list)
                 advice_str = ', '.join(advice_list)
 
-                print(kco_str)
-                print(advice_str)
+                # print(kco_str)
+                # print(advice_str)
                 update_symptoms= {
                     "patient_id":patient_id, 
                     "doctor_id": request.session["doctor_id"],
@@ -1740,7 +1769,7 @@ def Consultation(request,id):
                 update_patient_findingsandsymtoms_url = "http://13.233.211.102/medicalrecord/api/update_patient_findings_and_symptoms/"
 
                 updatefindingsandsymtoms_response = requests.post(update_patient_findingsandsymtoms_url,json=update_symptoms)
-                print(updatefindingsandsymtoms_response.text)
+                # print(updatefindingsandsymtoms_response.text)
                 # return HttpResponse("done")
 
 
@@ -1751,37 +1780,37 @@ def Consultation(request,id):
                 dosage = request.POST.get('dosage')
                 language = request.POST.get('Language')
                 instruction = request.POST.get('Instructions')
-                print(language,instruction,mode,medicine,days,dosage) 
+                # print(language,instruction,mode,medicine,days,dosage) 
                 instruction_list= instruction.split(",")
                 mode_list=mode.split(",")
                 medicine_list=medicine.split(",")
                 days_list=days.split(",")
                 dosage_list=dosage.split(",")
                 language_list=language.split(",")
-                print(language_list,instruction_list,mode_list,medicine_list,days_list,dosage_list)
+                # print(language_list,instruction_list,mode_list,medicine_list,days_list,dosage_list)
                 patientmedic_url="http://13.233.211.102/medicalrecord/api/get_patient_medications_byconsultationid/"
                 api_para={"consultation_id":request.session['consultation_id']}
                 patientmedic_response=requests.post(patientmedic_url,json=api_para)
                 patientmedic_data=(patientmedic_response.json().get("message_data"))
                 medic_list=[]
                 for i in patientmedic_data:
-                    print(i)
+                    # print(i)
                     medic_list.append(i)
-                    print("-----------------------")
-                print(medic_list)
+                    # print("-----------------------")
+                # print(medic_list)
                 prescription_url="http://13.233.211.102/medicalrecord/api/get_prescription_details/"
                 api_para={"consultation_id":request.session['consultation_id']}
                 prescription_response=requests.post(prescription_url,json=api_para)
-                print(prescription_response.text)
+                # print(prescription_response.text)
                 prescription_data=(prescription_response.json().get("message_data"))[0]
-                print(prescription_data)
+                # print(prescription_data)
                 # prescription_id=(medic_list[0])['prescription_id']
                 prescription_id=prescription_data['prescriptions_id']
                 previous_name={}
                 for i in medic_list:
                     previous_name[i['medicine_name']]=i['patient_medication_id']
-                print(previous_name)
-                print(medicine_list)
+                # print(previous_name)
+                # print(medicine_list)
                 unique_list=[]
                 u_index=[]
                 sum=-1
@@ -1793,18 +1822,18 @@ def Consultation(request,id):
                         u_index.append(sum)
                         unique_list.append(name)
         
-                print(unique_list)
-                print(u_index,'u_index')
-                print(sum,'sum')
+                # print(unique_list)
+                # print(u_index,'u_index')
+                # print(sum,'sum')
 
                 updated_modelist=[ mode_list[i]  for i in u_index]
-                print("update dmode list",updated_modelist)
+                # print("update dmode list",updated_modelist)
                 updated_dayslist=[ days_list[i]  for i in u_index]
-                print("update days list",updated_dayslist)
+                # print("update days list",updated_dayslist)
                 updated_instructionlist=[ instruction_list[i]  for i in u_index]
-                print("update instruction list",updated_instructionlist)
+                # print("update instruction list",updated_instructionlist)
                 updated_dosagelist=[ dosage_list[i]  for i in u_index]
-                print("update dosage list",updated_dosagelist)
+                # print("update dosage list",updated_dosagelist)
 
                 # med_id_list=[]
                 # for name in unique_list:
@@ -1839,7 +1868,7 @@ def Consultation(request,id):
                                 "Medicine_ExtraField2": 9
                             }
                             response=requests.post(medication_url,json=medication_data)
-                            print(response.text)
+                            # print(response.text)
 
                 common_name=[]
                 for i in medicine_list:
@@ -1847,7 +1876,7 @@ def Consultation(request,id):
                         continue
                     else:
                         common_name.append(i)
-                print(common_name,"common Name")
+                # print(common_name,"common Name")
 
                 delete_medic=[]
                 for key, value in previous_name.items():
@@ -1855,9 +1884,9 @@ def Consultation(request,id):
                         delete_medic.append(key)
                         deletemedic_url=" http://13.233.211.102/medicalrecord/api/delete_patient_medications/"
                         deletemedic_response=requests.post(deletemedic_url,json={"Patient_Medication_Id":value})
-                        print(deletemedic_response.text)
+                        # print(deletemedic_response.text)
                          
-                print(delete_medic)
+                # print(delete_medic)
 
                 labs=request.POST['lab_tests']
                 labsdata_list = [labs.strip() for labs in labs.split('\n') if labs.strip()]
@@ -1873,25 +1902,25 @@ def Consultation(request,id):
                                 "prescription_id":prescription_id
                             }
                             laboratoryapi_res = requests.post('http://13.233.211.102/medicalrecord/api/insert_prescribe_laboratory/',json=laboratoryapi_data)
-                            print(laboratoryapi_res.text)
-                print('from screen',labsdata_list)
+                            # print(laboratoryapi_res.text)
+                # print('from screen',labsdata_list)
                 patientlab_url="http://13.233.211.102/medicalrecord/api/get_patient_labinvestigations_by_consultation_id/"
                 api_para={"consultation_id":request.session['consultation_id']}
                 patientlab_response=requests.post(patientlab_url,json=api_para)
                 patientlab_data=(patientlab_response.json().get("message_data"))
                 lab_list={}
                 for i in patientlab_data:
-                    print(i)
+                    # print(i)
                     lab_list[i['labinvestigation_category']]=i['patient_labinvestigation_id']
-                    print("-----------------------")
-                print('get data',lab_list)
+                    # print("-----------------------")
+                # print('get data',lab_list)
                 unique_lablist=[]
                 for i in labsdata_list:
                     if(i in lab_list):
                         continue
                     else:
                         unique_lablist.append(i)
-                print(unique_lablist)
+                # print(unique_lablist)
                 if(unique_lablist):
                     # lab_url="http://localhost:8000/api/insert_patient_labinvestigations/"
                     lab_url="http://13.233.211.102/medicalrecord/api/insert_patient_labinvestigations/"
@@ -1913,7 +1942,7 @@ def Consultation(request,id):
                     for category in unique_lablist:
                         labs_data['labinvestigation_category']=category
                         lab_response=requests.post(lab_url,json=labs_data)
-                    print(lab_response.text)
+                    # print(lab_response.text)
                 
                 common_labname=[]
                 for i in labsdata_list:
@@ -1921,20 +1950,20 @@ def Consultation(request,id):
                         continue
                     else:
                         common_labname.append(i)
-                print(common_labname,"common lab Name")
+                # print(common_labname,"common lab Name")
                 delete_lab=[]
                 for key, value in lab_list.items():
                     if key not in common_labname:
                         delete_lab.append(key)
                         deletelab_url=" http://13.233.211.102/medicalrecord/api/delete_patient_labinvestigations/"
                         deletelab_response=requests.post(deletelab_url,json={"Patient_LabInvestigation_Id":value})
-                        print(deletelab_response.text)
+                        # print(deletelab_response.text)
                          
-                print(delete_lab)
+                # print(delete_lab)
             
 #####################Update prescription details######################
                 prescritption=request.POST['Prescription']
-                print(prescritption)
+                # print(prescritption)
                 # updateprescription_url="http://localhost:8000/api/update_prescription_details/"
                 updateprescription_url="http://13.233.211.102/medicalrecord/api/update_prescription_details/"
                 prescription_data={
@@ -1946,7 +1975,7 @@ def Consultation(request,id):
                     "prescription_details": prescritption
                 }
                 updateprescritption_response=requests.post(updateprescription_url,json=prescription_data)
-                print(updateprescritption_response.text)
+                # print(updateprescritption_response.text)
 
                 api_data = {
                     "Doctor_Id":request.session["doctor_id"],
@@ -1971,7 +2000,7 @@ def Consultation(request,id):
                 # url="http://localhost:8000/api/update_patientvitals_by_appointment_id/"
                 url="http://13.233.211.102/medicalrecord/api/update_patientvitals_by_appointment_id/"
                 response=requests.post(url,json=api_data)
-                print(response.text)
+                # print(response.text)
 
 
                 #return HttpResponse("done")
@@ -1995,16 +2024,16 @@ def Consultation(request,id):
                 consultation_api_url = 'http://13.233.211.102/medicalrecord/api/insert_consultation'
 
                 consultation_response = requests.post(consultation_api_url, json=insert_consultation)
-                print("consultation_response : ", consultation_response.text)
+                # print("consultation_response : ", consultation_response.text)
                 consultation = consultation_response.json().get('message_data', {})
                 consultation_id=consultation['consultation_id']
-                print("consultation_ID : ", consultation)
+                # print("consultation_ID : ", consultation)
                 #update appointment status to 3 means completed.
                 # update_status_url="http://13.233.211.102/appointment/api/update_appointment_status"
                 # status_response=requests.post(update_status_url,json={"appointment_id":request.session['appointment_id'],"appointment_status":3})
-                # print(status_response.text)
+                # # print(status_response.text)
                 consultation_id = consultation['consultation_id']
-                print(consultation_id )
+                # print(consultation_id )
                 request.session[ 'consultation_id' ] = consultation_id   # Create Session for Consulation ID
 
 
@@ -2033,7 +2062,7 @@ def Consultation(request,id):
                 # url="http://localhost:8000/api/update_patientvitals_by_appointment_id/"
                 url="http://13.233.211.102/medicalrecord/api/update_patientvitals_by_appointment_id/"
                 response=requests.post(url,json=api_data)
-                print(response.text)
+                # print(response.text)
                 
     ###############################  insert finding symptoms(complaints & Diagnosis) ########################################
                 all_kco=request.POST['kco']
@@ -2046,8 +2075,8 @@ def Consultation(request,id):
                 kco_str = ', '.join(kco_list)
                 advice_str = ', '.join(advice_list)
 
-                print(kco_str)
-                print(advice_str)
+                # print(kco_str)
+                # print(advice_str)
                 finding_symptoms= {
                     "patient_id":patient_id, 
                     "doctor_id": request.session["doctor_id"],
@@ -2063,11 +2092,11 @@ def Consultation(request,id):
                 insert_patient_findingsandsymtoms_url = "http://13.233.211.102/medicalrecord/api/insert_patient_findingsandsymtoms/"
 
                 findingsandsymtoms_response = requests.post(insert_patient_findingsandsymtoms_url,json=finding_symptoms)
-                print(findingsandsymtoms_response.text)
+                # print(findingsandsymtoms_response.text)
 
     #################################Prescription###############################
                 prescritption=request.POST['Prescription']
-                print(prescritption)
+                # print(prescritption)
                 prescription_url="http://13.233.211.102/medicalrecord/api/insert_prescriptions/"
                 prescription_data={
                     "doctor_id": request.session["doctor_id"],
@@ -2078,9 +2107,9 @@ def Consultation(request,id):
                     "prescription_details": prescritption
                 }
                 prescritption_response=requests.post(prescription_url,json=prescription_data)
-                print(prescritption_response.text)
+                # print(prescritption_response.text)
                 prescription_id=(prescritption_response.json().get("message_data"))[0]['Prescriptions_Id']
-                print("prescription id:",prescription_id)
+                # print("prescription id:",prescription_id)
             
     #############################Pharmacist details##############################
                 selected_pharmacistid = request.POST.getlist('options[]')  # Fetch selected options as a list 
@@ -2093,7 +2122,7 @@ def Consultation(request,id):
                             "prescription_id":prescription_id
                         }
                         pharmaapi_res = requests.post('http://13.233.211.102/medicalrecord/api/insert_prescribe_pharmacist/',json=pharmaapi_data)
-                        print(pharmaapi_res.text)
+                        # print(pharmaapi_res.text)
                     
                 
     #############################Patient Medications##############################
@@ -2103,7 +2132,7 @@ def Consultation(request,id):
                 dosage = request.POST.get('dosage')
                 language = request.POST.get('Language')
                 instruction = request.POST.get('Instructions')
-                print('language',language,'instruction',instruction,'mode',mode,'medicine',medicine,'days',days,'dosage',dosage) 
+                # print('language',language,'instruction',instruction,'mode',mode,'medicine',medicine,'days',days,'dosage',dosage) 
                 instruction_list= instruction.split(",")
                 mode_list=mode.split(",")
                 medicine_list=medicine.split(",")
@@ -2113,7 +2142,7 @@ def Consultation(request,id):
                 med_id_list=[]
                 All_medicines(requests,request.session['doctor_id'])
                 for name in medicine_list:
-                    print("name",name)
+                    # print("name",name)
                     for medicine in all_medicines:
                         if(name==medicine['medicine_name']):
                             med_id_list.append(medicine['doctor_medicine_id'])
@@ -2142,10 +2171,10 @@ def Consultation(request,id):
                                 "Medicine_ExtraField2": 9
                             }
                             response=requests.post(medication_url,json=medication_data)
-                            print(response.text)
-                # print(language_list,instruction_list,mode_list,medicine_list,days_list,dosage_list,med_id_list)
-                # print(all_medicines)
-                # print(med_id_list)
+                            # print(response.text)
+                # # print(language_list,instruction_list,mode_list,medicine_list,days_list,dosage_list,med_id_list)
+                # # print(all_medicines)
+                # # print(med_id_list)
                 # return HttpResponse("ok")
 
                 else:
@@ -2155,7 +2184,7 @@ def Consultation(request,id):
                 labs=request.POST['lab_tests']
                 labs_list = [labs.strip() for labs in labs.split('\n') if labs.strip()]
                 labinvest_id=[]
-                print(labs_list)
+                # print(labs_list)
                 if(labs_list):
                     # lab_url="http://localhost:8000/api/insert_patient_labinvestigations/"
                     lab_url="http://13.233.211.102/medicalrecord/api/insert_patient_labinvestigations/"
@@ -2177,7 +2206,7 @@ def Consultation(request,id):
                     for category in labs_list:
                         labs_data['labinvestigation_category']=category
                         lab_response=requests.post(lab_url,json=labs_data)
-                    print(lab_response.text)
+                    # print(lab_response.text)
 
                     #############################Pharmacist details##############################
                     selected_laboratorytid = request.POST.getlist('laboratoryoptions[]')  # Fetch selected options as a list 
@@ -2190,7 +2219,7 @@ def Consultation(request,id):
                                 "prescription_id":prescription_id
                             }
                             laboratoryapi_res = requests.post('http://13.233.211.102/medicalrecord/api/insert_prescribe_laboratory/',json=laboratoryapi_data)
-                            print(laboratoryapi_res.text)
+                            # print(laboratoryapi_res.text)
                 else:
                     print("no labs found")
                 
@@ -2203,12 +2232,12 @@ def Get_Patient_By_Appointment_Id(requests,appointment_id):
     # appointment_id = requests.session.get('appointment_id')
     # requests.session['appointment_id'] = id
 
-    # print("session : ",request.session['appointment_id'])
+    # # print("session : ",request.session['appointment_id'])
 
     api_data1 = {"appointment_id": appointment_id}
     url = 'http://13.233.211.102/appointment/api/get_patient_by_appointment_id/'
     response1 = requests.post(url, json=api_data1)
-    # print(response1.text)
+    # # print(response1.text)
 
     # data1 = {}  # Initialize data1 to an empty dictionary
     if response1.status_code == 200:
@@ -2216,17 +2245,17 @@ def Get_Patient_By_Appointment_Id(requests,appointment_id):
         global get_patient_by_appointment_id 
         get_patient_by_appointment_id = data.get('message_data', {})  # Getting 'message_data' safely
         get_patient_by_appointment_id =get_patient_by_appointment_id.get('appointment details', {})
-        print(get_patient_by_appointment_id)
+        # print(get_patient_by_appointment_id)
         doctor_id = get_patient_by_appointment_id['doctor_id']
         # Create a session object
         # session = requests.session()
         # Store the doctor_id in the session
         # session['doctor_id'] = doctor_id
-        # Print the doctor_id stored in the session
-        # print(session['doctor_id'])
-        # Print the doctor_id directly
-        print("doctor_id:", doctor_id)
-        print("appointments",get_patient_by_appointment_id)
+        # # print the doctor_id stored in the session
+        # # print(session['doctor_id'])
+        # # print the doctor_id directly
+        # print("doctor_id:", doctor_id)
+        # print("appointments",get_patient_by_appointment_id)
                 
         # Assuming the session already contains the doctor_id
         # doctor_id = session.get('doctor_id')
@@ -2239,7 +2268,7 @@ def Get_Patient_By_Appointment_Id(requests,appointment_id):
 
 def Get_Patient_Boimterics_Vitals(requests,vitals_id):
     # id   =  request.session["biometrics_id"]
-    print(id)
+    # print(id)
     
     # api_data = {"patient_biometric_id": vitals_id }
     # # api_url = 'http://127.0.0.1:8000/api/get_patientvitals_by_biometric_id/'
@@ -2247,7 +2276,7 @@ def Get_Patient_Boimterics_Vitals(requests,vitals_id):
     # response = requests.post(api_url, api_data)
     vital_url="http://13.233.211.102/medicalrecord/api/get_patientvitals_by_appointment_id/"
     response=requests.post(vital_url,json={"appointment_id": vitals_id})
-    print(response.text)
+    # print(response.text)
        
     if response.status_code == 200:
         global get_patient_boimterics_vitals
@@ -2255,7 +2284,7 @@ def Get_Patient_Boimterics_Vitals(requests,vitals_id):
         data2.append(response.json().get('message_data', {}))
         get_patient_boimterics_vitals = data2  # Getting 'message_data' safely
         # request.session["data2"] = data2 
-        print("get_patient_boimterics_vitals :",get_patient_boimterics_vitals)
+        # print("get_patient_boimterics_vitals :",get_patient_boimterics_vitals)
 #################################################################################################################
 def All_medicines(requests,doctor_id):
 
@@ -2263,13 +2292,13 @@ def All_medicines(requests,doctor_id):
     all_medicine_url = 'http://13.233.211.102/doctor/api/get_all_doctor_medicine_bydoctorid_medicinename/'
 
     all_medicine_response = requests.post(all_medicine_url,json=all_medicine_api_data)
-    # print(all_medicine_response.text)
+    # # print(all_medicine_response.text)
     if all_medicine_response.status_code == 200:
         global all_medicines
         all_medicines = all_medicine_response.json().get('message_data', {})
-        print(all_medicines)
+        #print(all_medicines)
         # doctor_medicine_id = all_medicines[0]['doctor_medicine_id']
-        # print("doctor_medicine_id: ",doctor_medicine_id)
+        # # print("doctor_medicine_id: ",doctor_medicine_id)
         # request.session['doctor_medicine_id'] = medicine_id 
 
 
@@ -2278,10 +2307,10 @@ def ADVICE(requests,did):
     advice_data={"datacodename": "ADVICE","doctor_id":did}
 
     advice_response = requests.post(advice_url,json=advice_data)
-        # print(kco_response.text)
+        # # print(kco_response.text)
     global advice
     advice = advice_response.json().get('message_data')
-    print(advice)
+    # print(advice)
 
 
 def KCO(requests,did):
@@ -2291,53 +2320,53 @@ def KCO(requests,did):
     kco_data={"datacodename": "KCO","doctor_id": did}
 
     kco_response = requests.post(kco_url,json=kco_data)
-    # print(kco_response.text)
+    # # print(kco_response.text)
     global kco
     kco = kco_response.json().get('message_data')
-    print(kco)
+    # print(kco)
 
 def get_instruction(requests,did):
         doctor_id ={ "Doctor_Id":did}
         url_instruction = 'http://13.233.211.102/masters/api/get_medicine_instructionsbydoctorId'
 
         medicine_instruction_response = requests.post(url_instruction, json = doctor_id)
-        print("medicine_instruction_response:",medicine_instruction_response.text)
+        # print("medicine_instruction_response:",medicine_instruction_response.text)
 
         global medicine_instruction
         medicine_instruction = medicine_instruction_response.json().get('message_data', {})
         # language= medicine_instruction[1]['instruction_language']
         # instruction = medicine_instruction[2]['instruction_text']
-        print("Medicine_Instructions: ",medicine_instruction)
+        # print("Medicine_Instructions: ",medicine_instruction)
 
 def get_labinvestigation(requests,doctor_id):
     doctor_id ={"doctor_id":doctor_id}
     lab_investigation_url ='http://13.233.211.102/medicalrecord/api/get_labinvestigation_bydoctorid/'
 
     lab_investigation_report_data = requests.post(lab_investigation_url,json=doctor_id)
-    #print("lab_investigation_report_data:", lab_investigation_report_data)
+    ## print("lab_investigation_report_data:", lab_investigation_report_data)
     global lab_investigation_report
     lab_investigation_report = lab_investigation_report_data.json().get('message_data')
-    print("lab_investigation_report:", lab_investigation_report)
+    # print("lab_investigation_report:", lab_investigation_report)
 
 
 def get_pdf_link(request):
     update_appstatus_url="http://13.233.211.102/appointment/api/update_appointment_status"
     appstatus_response=requests.post(update_appstatus_url,json={"appointment_id":request.session['appointment_id'],"appointment_status":3})
-    print(appstatus_response.text)
+    # print(appstatus_response.text)
 
     update_consultstatus_url="http://13.233.211.102/medicalrecord/api/update_consultation_status/"
     consultstatus_response=requests.post(update_consultstatus_url,json={"consultation_id":request.session['consultation_id'],"consultation_status":2})
-    print(consultstatus_response.text)
+    # print(consultstatus_response.text)
 
     consultation_url="http://13.233.211.102/medicalrecord/api/get_consultation_byconsultationid/"
     api_para={"consultation_id":request.session['consultation_id']}
     consult_response=requests.post(consultation_url,json=api_para)
     consult_data=(consult_response.json().get("message_data"))[0]
-    print(consult_data)
+    # print(consult_data)
 
     url="http://13.233.211.102/pateint/api/get_patient_byid/"
     res=requests.post(url,json={"patient_id":consult_data['patient_id']})
-    print(res.text)
+    # print(res.text)
     patient=res.json().get('message_data')
     prev_oustanding = patient.get('outstanding', 0) or 0
     new_oustanding = prev_oustanding + float(consult_data['consultation_fees'])
@@ -2361,22 +2390,22 @@ def get_pdf_link(request):
             "previous_outstanding":prev_oustanding,
             "new_outstanding":new_oustanding
         }
-    print(patient_charges_data)
+    # print(patient_charges_data)
     patient_charge_response=requests.post(patient_charges_url,json=patient_charges_data)
-    print(patient_charge_response.text)
+    # print(patient_charge_response.text)
     
     patient_apidata = {"patient_id":consult_data['patient_id'],"outstanding":new_oustanding}
     oustanding_res=requests.post("http://13.233.211.102/pateint/api/update_patient_by_id/",json=patient_apidata)
-    print(oustanding_res.text)
+    # print(oustanding_res.text)
 
     pdf_url="http://13.233.211.102/medicalrecord/api/generateprescriptionpdf/"
     url_data= {"consultation_id":request.session['consultation_id']}
     response=requests.post(pdf_url,json=url_data)
-    print(response.text)
+    # print(response.text)
     pdfurl=((response.json().get("message_data"))[0]).get("pdf_url")
-    print(pdfurl)
+    # print(pdfurl)
     pdf_link = pdfurl.replace("http://13.233.211.102", "https://www.drishtis.app")
-    print(pdf_link)
+    # print(pdf_link)
 
     if pdf_link:
         return JsonResponse({'pdf_link': pdf_link})
@@ -2386,21 +2415,21 @@ def get_pdf_link(request):
 def paid(request):
     update_appstatus_url="http://13.233.211.102/appointment/api/update_appointment_status"
     appstatus_response=requests.post(update_appstatus_url,json={"appointment_id":request.session['appointment_id'],"appointment_status":4})
-    print(appstatus_response.text)
+    # print(appstatus_response.text)
 
     update_consultstatus_url="http://13.233.211.102/medicalrecord/api/update_consultation_status/"
     consultstatus_response=requests.post(update_consultstatus_url,json={"consultation_id":request.session['consultation_id'],"consultation_status":3})
-    print(consultstatus_response.text)
+    # print(consultstatus_response.text)
 
     consultation_url="http://13.233.211.102/medicalrecord/api/get_consultation_byconsultationid/"
     api_para={"consultation_id":request.session['consultation_id']}
     consult_response=requests.post(consultation_url,json=api_para)
     consult_data=(consult_response.json().get("message_data"))[0]
-    print(consult_data)
+    # print(consult_data)
 
     url="http://13.233.211.102/pateint/api/get_patient_byid/"
     res=requests.post(url,json={"patient_id":consult_data['patient_id']})
-    print(res.text)
+    # print(res.text)
     patient=res.json().get('message_data')
     prev_oustanding = patient.get('outstanding', 0) or 0
     new_oustanding = abs(float(consult_data['consultation_fees']) - prev_oustanding)
@@ -2416,13 +2445,13 @@ def paid(request):
             "previous_outstanding":prev_oustanding,
             "new_outstanding":new_oustanding
         }
-    print(patient_payment_data)
+    # print(patient_payment_data)
     patient_charge_response=requests.post(patient_payment_url,json=patient_payment_data)
-    print(patient_charge_response.text)
+    # print(patient_charge_response.text)
 
     patient_apidata = {"patient_id":consult_data['patient_id'],"outstanding":new_oustanding}
     oustanding_res=requests.post("http://13.233.211.102/pateint/api/update_patient_by_id/",json=patient_apidata)
-    print(oustanding_res.text)
+    # print(oustanding_res.text)
     
     if appstatus_response.ok and consultstatus_response.ok:
             return JsonResponse({'message': 'Payment successful'})
@@ -2431,7 +2460,7 @@ def paid(request):
 
 
 def for_user(request,id):
-    print(request.session['role'])
+    # print(request.session['role'])
     api_data = {"appointment_id":id}
         # api_url = 'http://127.0.0.1:8000/api/get_patient_by_appointment_id/'
     api_url ='http://13.233.211.102/appointment/api/get_patient_by_appointment_id/'
@@ -2441,20 +2470,20 @@ def for_user(request,id):
         data = response.json().get('message_data')
         data1=data.get('appointment details', {})
         request.session['appointment_details']=data1
-        print(data1)
+        # print(data1)
         patient_res=requests.post('http://13.233.211.102/pateint/api/get_patient_details_by_appointment_id/',json={"appointment_id":id})
         data1['outstanding']=(patient_res.json().get("message_data",{})).get('outstanding',0) or 0
         patientlab_url="http://13.233.211.102/medicalrecord/api/get_patient_labinvestigations_by_consultation_id/"
         api_para={"consultation_id":data1.get('consultation_id')}
         patientlab_response=requests.post(patientlab_url,json=api_para)
         patientlab_data=(patientlab_response.json().get("message_data"))
-        print(patientlab_response.text)
+        # print(patientlab_response.text)
         lab_list=[]
         for i in patientlab_data:
-            print(i)
+            # print(i)
             lab_list.append(i['labinvestigation_category'])
-            print("-----------------------")
-        print(lab_list)
+            # print("-----------------------")
+        # print(lab_list)
         #################patient Medications################
         patientmedic_url="http://13.233.211.102/medicalrecord/api/get_patient_medications_byconsultationid/"
         api_para={"consultation_id":data1.get('consultation_id')}
@@ -2462,17 +2491,17 @@ def for_user(request,id):
         patientmedic_data=(patientmedic_response.json().get("message_data"))
         medic_list=[]
         for i in patientmedic_data:
-            # print(i)
+            # # print(i)
             medic_list.append(i)
-            # print("-----------------------")
-        #print(medic_list)
+            # # print("-----------------------")
+        ## print(medic_list)
 
         if medic_list:
             for i in medic_list:
                 instuct_res=requests.post("http://13.233.211.102/masters/api/get_medicine_instruction",json={"Doctor_Instruction_Id":i['medicine_instruction_id']})
                 i['instruction_text']=(instuct_res.json().get('message_data'))[0].get('instruction_text')
 
-            print(medic_list)
+            # print(medic_list)
         else:
             print('no data in medic list')
 
@@ -2480,7 +2509,7 @@ def for_user(request,id):
         api_para={"consultation_id":data1.get('consultation_id')}
         consult_response=requests.post(consultation_url,json=api_para)
         consult_data=(consult_response.json().get("message_data"))[0]
-        print(consult_data)
+        # print(consult_data)
         request.session['consultation_id']=data1.get('consultation_id')
         request.session['appointment_id']=id
     return render(request,'Doctor/for_user.html',{'data1':data1,'medic_list':medic_list,'lab_list':lab_list,'consult_data':consult_data})
@@ -2492,7 +2521,7 @@ def clinic_pdf(request):
         clinic_pdf_url = "http://13.233.211.102/medicalrecord/api/generateclinicpdf/"
         response = requests.post(clinic_pdf_url, json={"doctor_location_id": request.session['location_id']})
         data = response.json()
-        print(data)
+        # print(data)
         pdf_url = data.get("message_data")[0].get("pdf_url")
         
         if pdf_url:
@@ -2509,20 +2538,20 @@ def prescription_setting(request):
     if(request.method=='GET'):
         detail_url="http://13.233.211.102/doctor/api/get_prescription_settings_by_doctor/"
         detail_response=requests.post(detail_url,json={'doctor_id':request.session['doctor_id']})
-        print(detail_response.text)
+        # print(detail_response.text)
         if(detail_response.json().get('message_code')==1000):
             prescription_settings=(detail_response.json()).get('message_data')
-            print(prescription_settings)
+            # print(prescription_settings)
             link=prescription_settings['header_image']
             if(link is not None):
                 # Replace '/staticfiles/' with '/static/'
                 updated_link = link.replace('/staticfiles/', '/static/')
-                print("Updated link:", updated_link)
+                # print("Updated link:", updated_link)
                 prescription_settings['header_image']=updated_link
 
              
         else:
-            print(detail_response.json().get('message_code'))
+            # print(detail_response.json().get('message_code'))
             prescription_settings=0
         timestamp = int(time())
         return render(request,'Doctor/prescriptionsetting.html',{'prescription_settings':prescription_settings,"timestamp": timestamp})
@@ -2533,12 +2562,12 @@ def prescription_setting(request):
             header_type = request.POST.get('headerType')
             header_image = request.FILES.get('headerImage')
             header_top_margin = request.POST.get('headerHeight')
-            print(paper_size,'\n',logo_alignment,'\n',header_type,'\n',header_image,'\n',header_top_margin)
+            # print(paper_size,'\n',logo_alignment,'\n',header_type,'\n',header_image,'\n',header_top_margin)
 
             if(header_type=='1'):
                 # Extract selected auto header options
                 auto_header_options = request.POST.getlist('autoHeaderOptions')
-                print(auto_header_options)
+                # print(auto_header_options)
                 options=['clinic_name','clinic_address','doctor_name','doctor_degree','doctor_speciality','doctor_availability','clinic_services','clinic_logo','clinic_mobile_number']
                 api_data={
                     "doctor_id": request.session['doctor_id'],
@@ -2552,13 +2581,13 @@ def prescription_setting(request):
                     for option in options:
                         if(checkedoption==option):
                             api_data[option]=1 # 1 means true if the option is checked and default value is 0 means not selected.
-                            print(checkedoption)
+                            # print(checkedoption)
                             break
                    
-                print(api_data)
+                # print(api_data)
                 insert_url="http://13.233.211.102/doctor/api/insert_prescription_settings/"
                 response = requests.post(insert_url, data=api_data)
-                print(response.text)
+                # print(response.text)
 
 
             
@@ -2578,7 +2607,7 @@ def prescription_setting(request):
                         unique_id = str(uuid.uuid4())[:8]  # Use a portion of the UUID as a short identifier
                         file_extension = os.path.splitext(header_image.name)[-1]
                         new_filename = f"{unique_id}{file_extension}"
-                        print(new_filename)
+                        # print(new_filename)
 
                         # Create a BytesIO object to hold the file data in memory
                         renamed_file = BytesIO()
@@ -2595,8 +2624,8 @@ def prescription_setting(request):
                 else:
                     return HttpResponse("No file uploaded.")
                 response = requests.post(insert_url, data=api_data, files={'header_image': (new_filename, renamed_file)})
-                print(response.text)
-                # print(header_image)
+                # print(response.text)
+                # # print(header_image)
             
             else:
                 insert_url="http://13.233.211.102/doctor/api/insert_prescription_settings/"
@@ -2609,8 +2638,8 @@ def prescription_setting(request):
                     'header_top_margin':header_top_margin,    
                 }
                 response = requests.post(insert_url, data=api_data)
-                print(response.text)
-                print(header_top_margin)
+                # print(response.text)
+                # print(header_top_margin)
 
             if response.json().get('message_code') == 1000:
                 messages.success(request, 'Prescription Format Added successfully!')
@@ -2626,12 +2655,12 @@ def update_prescription_setting(request):
     header_type = request.POST.get('headerType')
     header_image = request.FILES.get('headerImage')
     header_top_margin = request.POST.get('headerHeight')
-    print(paper_size,'\n',logo_alignment,'\n',header_type,'\n',header_image,'\n',header_top_margin)
-    print("update prescription settings..")
+    # print(paper_size,'\n',logo_alignment,'\n',header_type,'\n',header_image,'\n',header_top_margin)
+    # print("update prescription settings..")
     if(header_type=='1'):
                 # Extract selected auto header options
                 auto_header_options = request.POST.getlist('autoHeaderOptions')
-                print(auto_header_options)
+                # print(auto_header_options)
                 options=['clinic_name','clinic_address','doctor_name','doctor_degree','doctor_speciality','doctor_availability','clinic_services','clinic_logo','clinic_mobile_number']
                 api_data={
                     "doctor_id": request.session['doctor_id'],
@@ -2644,18 +2673,18 @@ def update_prescription_setting(request):
                     for option in options:
                         if(checkedoption==option):
                             api_data[option]=1 # 1 means true if the option is checked and default value is 0 means not selected.
-                            print(checkedoption)
+                            # print(checkedoption)
                             break 
-                # print(api_data)
+                # # print(api_data)
                 for option in options:
                     if(option not in api_data):
                         api_data[option]=0
                         
-                print(api_data)
+                # print(api_data)
                     
                 update_url="http://13.233.211.102/doctor/api/update_prescription_details/"
                 response = requests.post(update_url, data=api_data)
-                print(response.text)
+                # print(response.text)
             
     elif(header_type=='2'):
         update_url="http://13.233.211.102/doctor/api/update_prescription_details/"
@@ -2668,12 +2697,12 @@ def update_prescription_setting(request):
         }
          
         response = requests.post(update_url, data=api_data)
-        print(response.text)
-        # print(header_image)
+        # print(response.text)
+        # # print(header_image)
         if(header_image):
                 image_url="http://13.233.211.102/doctor/api/update_header_image/"
                 image_response=requests.post(image_url,data={"doctor_id":request.session['doctor_id']},files={'header_image':header_image})
-                print(image_response.text)
+                # print(image_response.text)
         else:
             print("no image uploaded")
             # return HttpResponse("no image uploaded")
@@ -2688,8 +2717,8 @@ def update_prescription_setting(request):
             'header_top_margin':header_top_margin,    
         }
         response = requests.post(update_url, data=api_data)
-        print(response.text)
-        print(header_top_margin)
+        # print(response.text)
+        # print(header_top_margin)
     
     if response.json().get('message_code') == 1000:
             messages.success(request, 'Prescription Format Updated successfully!')
@@ -2706,7 +2735,7 @@ def get_all_users(request):
     api_url = 'http://13.233.211.102/doctor/api/get_all_users_by_location/'
     response = requests.post(api_url,json=api_data)
     all_users=response.json().get('message_data', {})
-    # print(all_users)
+    # # print(all_users)
     return render(request,'Doctor/get_all_users.html',{'all_users':all_users})
   
 
@@ -2724,7 +2753,7 @@ def insert_user(request):
                     "location_id":request.session['location_id']  
                 }
         user_response=requests.post(user_url,json=user_data)
-        print(user_response.text)
+        # print(user_response.text)
         if user_response.status_code == 200:
             messages.success(request, 'User details Added successfully!')
             return redirect(get_all_users)
@@ -2738,10 +2767,10 @@ def update_user(request,user_id):
         api_url = 'http://13.233.211.102/doctor/api/get_all_users_by_location/'
         response = requests.post(api_url,json=api_data)
         all_users=response.json().get('message_data', {})
-        # print(all_users)
+        # # print(all_users)
         for user in all_users:
             if(user_id==user['user_id']):
-                print(user)
+                # print(user)
                 return render(request,'Doctor/insert_user.html',{'user':user})
         else:
             return HttpResponse("no data found")
@@ -2754,7 +2783,7 @@ def update_user(request,user_id):
                     "user_id":user_id
                 }
         user_updateresponse=requests.post(user_updateurl,json=user_updatedata)
-        print(user_updateresponse.text)
+        # print(user_updateresponse.text)
 
         if user_updateresponse.status_code == 200:
             messages.success(request, 'User details Updated successfully!')
@@ -2766,7 +2795,7 @@ def update_user(request,user_id):
 
 #############################Patient History################################
 def patient_history(request,id):
-    print("appointment id",id)
+    # print("appointment id",id)
     api_data = {"appointment_id":id}
         # api_url = 'http://127.0.0.1:8000/api/get_patient_by_appointment_id/'
     api_url ='http://13.233.211.102/appointment/api/get_patient_by_appointment_id/'
@@ -2775,11 +2804,11 @@ def patient_history(request,id):
     if response.status_code == 200:
         data = response.json().get('message_data')
         data1=data.get('appointment details', {})
-        print(data1)
+        # print(data1)
         fullname=(data1['appointment_name']).split(" ")
-        print(fullname)
+        # print(fullname)
         fullname=[item for item in fullname if item != '']
-        print(fullname)
+        # print(fullname)
         if(len(fullname)<=1):
             fullname.append('none')
         # patient_url="http://13.233.211.102/pateint/api/get_patient_details_by_phone/"
@@ -2787,11 +2816,11 @@ def patient_history(request,id):
         patient_url="http://13.233.211.102/pateint/api/get_patients_by_mobile_number/"
         api_data={"mobile_number": data1['appointment_mobileno']}
         patient_response=requests.post(patient_url,api_data)
-        print(patient_response.text)
+        # print(patient_response.text)
         if(patient_response.json().get('message_code')==1000):
             # patient_data=patient_response.json().get("message_data")
             patient_data=patient_response.json().get('patients_data')
-            print(patient_data)
+            # print(patient_data)
             patient_id=0
             for patient in patient_data:
                 if(patient['patient_firstname'].lower() ==fullname[0].lower()  and patient['patient_lastname'].lower() ==fullname[1].lower() ):
@@ -2799,30 +2828,30 @@ def patient_history(request,id):
                     data1['outstanding']= patient.get('outstanding',0) or 0
                     break
              
-            print("if pateint_id",patient_id)
+            # print("if pateint_id",patient_id)
             # consult_url="http://13.233.211.102/medicalrecord/api/get_consultations_by_patient_id/"
             consult_url="http://13.233.211.102/medicalrecord/api/get_consultations_by_patient_and_doctor_id/"
             consult_res=requests.post(consult_url,{"patient_id":patient_id,"doctor_id":request.session['doctor_id']})
             if(consult_res.json().get('message_code')==1000):
 
                 all_data=consult_res.json().get("message_data")
-                # print(all_data)
+                # # print(all_data)
 
                 for data in all_data:
                     formatted_date=datetime.datetime.fromtimestamp(data['consultation_datetime']).strftime( "%d-%m-%Y")
-                    print(formatted_date,'consult date')
+                    # print(formatted_date,'consult date')
                     data['consultation_datetime']=formatted_date
                 
                     patientlab_url="http://13.233.211.102/medicalrecord/api/get_patient_labinvestigations_by_consultation_id/"
                     api_para={"consultation_id":data.get('consultation_id')}
                     patientlab_response=requests.post(patientlab_url,json=api_para)
                     patientlab_data=(patientlab_response.json().get("message_data"))
-                    # print(patientlab_response.text)
+                    # # print(patientlab_response.text)
                     lab_list=[]
                     for i in patientlab_data:
                         lab_list.append(i['labinvestigation_category'])
 
-                    # print(lab_list)
+                    # # print(lab_list)
                     data['labs']=lab_list
                     #################patient Medications################
                     patientmedic_url="http://13.233.211.102/medicalrecord/api/get_patient_medications_byconsultationid/"
@@ -2839,10 +2868,10 @@ def patient_history(request,id):
                     api_para={"consultation_id":data.get('consultation_id')}
                     symptoms_response=requests.post(finding_symptoms_url,json=api_para)
                     symptoms_data=(symptoms_response.json().get("message_data"))[0]
-                    print(symptoms_data) 
+                    # print(symptoms_data) 
                     data['symptoms_data']=symptoms_data
 
-                print(all_data)
+                # print(all_data)
             
             else:
                 all_data=[]
@@ -2851,7 +2880,7 @@ def patient_history(request,id):
         else:
             data1=[]
             all_data=[]
-            print("no patient details")
+            # print("no patient details")
     return render(request,'Doctor/patient_history.html',{'data1':data1,'all_data':all_data})
 
 
@@ -2867,22 +2896,22 @@ def patientselect(request,id):
             data = response.json().get('message_data')
             data2=data.get('appointment details', {})
             request.session['appointment_details']=data2
-            print(data2)
+            # print(data2)
             
         url="http://13.233.211.102/pateint/api/get_patients_by_mobile_number/"
         # res=requests.post(url,json={"mobile_number":9876564532})
         res=requests.post(url,json={"mobile_number": data2['appointment_mobileno']})
         if(res.json().get('message_code')==1000):
             data1=res.json().get('patients_data')
-            print(data1)
+            # print(data1)
         else:
-            print("no patient avaliable for current phone number")
+            # print("no patient avaliable for current phone number")
             appointment_details=request.session['appointment_details']
-            print(appointment_details)
+            # print(appointment_details)
             fullname=(appointment_details['appointment_name']).split(" ")
-            print(fullname)
+            # print(fullname)
             fullname=[item for item in fullname if item != '']
-            print(fullname)
+            # print(fullname)
             if(len(fullname)<=1):
                 fullname.append('None')
             
@@ -2906,16 +2935,16 @@ def patientselect(request,id):
                 "patient_countryid": 1
             }
             patientdata_response=requests.post(patient_url,json=patient_apidata)
-            print(patientdata_response.text)
+            # print(patientdata_response.text)
             patient_id=((patientdata_response.json().get("message_data"))[0]).get("Patient_Id")
-            print("else patient_id",patient_id)
+            # print("else patient_id",patient_id)
             data2['patient_id']=patient_id
             data2['outstanding']=0
             data1=[]
             pdlink_url="http://13.233.211.102/pateint/api/insert_patient_doctor_link/"
             pdlink_data={"doctor_id":request.session['doctor_id'],"patient_id":patient_id}
             pdlink_res=requests.post(pdlink_url,json=pdlink_data)
-            print("first time patient inserted",pdlink_res.text)
+            # print("first time patient inserted",pdlink_res.text)
             return render(request, 'Doctor/initial_assesment.html',{"data1":data2,'pain_scale_range': range(1, 11)})
             
 
@@ -2927,7 +2956,7 @@ def patientselect(request,id):
 
 def add_member(request):
     appointment_id = request.POST.get('appointment_id')
-    print(appointment_id)
+    # print(appointment_id)
     api_data = {"appointment_id":appointment_id}
         # api_url = 'http://127.0.0.1:8000/api/get_patient_by_appointment_id/'
     api_url ='http://13.233.211.102/appointment/api/get_patient_by_appointment_id/'
@@ -2937,13 +2966,13 @@ def add_member(request):
         data = response.json().get('message_data')
         data2=data.get('appointment details', {})
         request.session['appointment_details']=data2
-        print(data2)
+        # print(data2)
         appointment_details=request.session['appointment_details']
-        print(appointment_details)
+        # print(appointment_details)
         fullname=(appointment_details['appointment_name']).split(" ")
-        print(fullname)
+        # print(fullname)
         fullname=[item for item in fullname if item != '']
-        print(fullname)
+        # print(fullname)
         if(len(fullname)<=1):
             fullname.append('None')
         
@@ -2967,15 +2996,15 @@ def add_member(request):
             "patient_countryid": 1
         }
         patientdata_response=requests.post(patient_url,json=patient_apidata)
-        print(patientdata_response.text)
+        # print(patientdata_response.text)
         patient_id=((patientdata_response.json().get("message_data"))[0]).get("Patient_Id")
-        print("else patient_id",patient_id)
+        # print("else patient_id",patient_id)
         data2['patient_id']=patient_id
         data2['outstanding']=0
         pdlink_url="http://13.233.211.102/pateint/api/insert_patient_doctor_link/"
         pdlink_data={"doctor_id":request.session['doctor_id'],"patient_id":patient_id}
         pdlink_res=requests.post(pdlink_url,json=pdlink_data)
-        print("add member",pdlink_res.text)
+        # print("add member",pdlink_res.text)
         return render(request, 'Doctor/initial_assesment.html',{"data1":data2,'pain_scale_range': range(1, 11)})
     # return redirect('patientselect', id=appointment_id)
 
@@ -2985,10 +3014,13 @@ def all_diseases(request):
     api="http://13.233.211.102/pateint/api/get_diseases_by_doctorid/"
     api_data={"doctor_id": request.session['doctor_id']}
     api_res=requests.post(api,json=api_data)
-    print(api_res.text)
+    # print(api_res.text)
     if(api_res.json().get('message_code')==1000):
         all_data=api_res.json().get("message_data")
-        return render(request,'Doctor/all_diseases.html',{"all_data":all_data})
+        for data  in  all_data:
+            if(data['disease_type'] in disease_type_mapping):
+                data['disease_type']=disease_type_mapping[data['disease_type']]
+        return render(request,'Doctor/all_diseases.html',{"all_data":all_data,'disease_type_mapping': disease_type_mapping})
     else:
            messages.error(request, 'Disease details Not found add the details..')
            return render(request,'Doctor/all_diseases.html')
@@ -2996,7 +3028,7 @@ def all_diseases(request):
 
 def insert_disease(request):
     if(request.method=='GET'):
-     return render(request,'Doctor/insert_disease.html')
+     return render(request,'Doctor/insert_disease.html',{'types':disease_type_mapping})
     
     else:
         disease_name=request.POST['disease_name']
@@ -3006,7 +3038,7 @@ def insert_disease(request):
         disease_res=requests.post(disease_api,json=disease_data)
         if(disease_res.json().get('message_code')==1000):
             messages.success(request, 'Disease details Added successfully!')
-            print(disease_res.text)
+            # print(disease_res.text)
             return redirect(all_diseases)
 
         else:
@@ -3014,12 +3046,12 @@ def insert_disease(request):
         
 def update_disease(request,id):
     if(request.method=='GET'):
-        print('disease id',id)
+        # print('disease id',id)
         url_disease = 'http://13.233.211.102/pateint/api/get_diseases_by_diseaseid/'
         res=requests.post(url_disease,json={"disease_id":id})
         disease=res.json().get('message_data')[0]
-        print(disease)
-        return render(request,'Doctor/insert_disease.html',{'disease':disease})
+        # print(disease)
+        return render(request,'Doctor/insert_disease.html',{'disease':disease,'types':disease_type_mapping})
     
     else:
         disease_name=request.POST['disease_name']
@@ -3028,7 +3060,7 @@ def update_disease(request,id):
         disease_api="http://13.233.211.102/pateint/api/update_disease_by_diseaseid/"
         disease_data={"disease_id":id,"disease_name":disease_name,"disease_type":disease_type}
         disease_res=requests.post(disease_api,json=disease_data)
-        print(disease_res.text)
+        # print(disease_res.text)
 
         if disease_res.json().get('message_code') == 1000:
             messages.success(request, 'Disease details Updated successfully!')
@@ -3044,9 +3076,13 @@ def all_allergy(request):
     api="http://13.233.211.102/pateint/api/get_allergies_by_doctorid/"
     api_data={"doctor_id": request.session['doctor_id']}
     api_res=requests.post(api,json=api_data)
-    print(api_res.text)
+    # print(api_res.text)
     if(api_res.json().get('message_code')==1000):
         all_data=api_res.json().get("message_data")
+        for data  in  all_data:
+            if(data['allergy_type'] in allergy_type_mapping):
+                data['allergy_type']=allergy_type_mapping[data['allergy_type']]
+
         return render(request,'Doctor/all_allergy.html',{"all_data":all_data})
     else:
            messages.error(request, 'Allergy details Not found add the details..')
@@ -3054,7 +3090,7 @@ def all_allergy(request):
 
 def insert_allergy(request):
     if(request.method=='GET'):
-     return render(request,'Doctor/insert_allergy.html')
+     return render(request,'Doctor/insert_allergy.html',{'types':allergy_type_mapping})
     
     else:
      
@@ -3065,7 +3101,7 @@ def insert_allergy(request):
         allergy_res=requests.post(allergy_api,json=allergy_data)
         if(allergy_res.json().get('message_code')==1000):
             messages.success(request, 'Allergy details Added successfully!')
-            print(allergy_res.text)
+            # print(allergy_res.text)
             return redirect(all_allergy)
 
         else:
@@ -3073,12 +3109,12 @@ def insert_allergy(request):
         
 def update_allergy(request,id):
     if(request.method=='GET'):
-        print('allergy id',id)
+        # print('allergy id',id)
         url_allergy = 'http://13.233.211.102/pateint/api/get_allergy_by_allergyid/'
         res=requests.post(url_allergy,json={"allergy_id":id})
         allergy=res.json().get('message_data')
-        print(allergy)
-        return render(request,'Doctor/insert_allergy.html',{'allergy':allergy})
+        # print(allergy)
+        return render(request,'Doctor/insert_allergy.html',{'allergy':allergy,'types':allergy_type_mapping})
     
     else:
         allergy_name=request.POST['allergy_name']
@@ -3087,7 +3123,7 @@ def update_allergy(request,id):
         allergy_api="http://13.233.211.102/pateint/api/update_allergy_by_allergyid/"
         allergy_data={"allergy_id":id,"allergy_name":allergy_name,"allergy_type":allergy_type}
         allergy_res=requests.post(allergy_api,json=allergy_data)
-        print(allergy_res.text)
+        # print(allergy_res.text)
 
         if allergy_res.json().get('message_code') == 1000:
             messages.success(request, 'Allergy details Updated successfully!')
@@ -3103,7 +3139,7 @@ def all_kco(request):
     api="http://13.233.211.102/masters/api/get_datacodemaster_by_name_and_doctor/"
     api_data={"datacodename": "KCO","doctor_id": request.session['doctor_id']}
     api_res=requests.post(api,json=api_data)
-    print(api_res.text)
+    # print(api_res.text)
     if(api_res.json().get('message_code')==1000):
         all_data=api_res.json().get("message_data")
         return render(request,'Doctor/all_kco.html',{"all_data":all_data})
@@ -3120,12 +3156,12 @@ def insert_kco(request):
         datacodedescription=request.POST['datacodedescription']
         kco_api="http://13.233.211.102/masters/api/insert_datacodemaster"
         kco_data={"datacodename": "KCO","datacodevalue":datacodevalue,"datacodedescription":datacodedescription,"doctor_id": request.session['doctor_id']}
-        print(kco_data)
+        # print(kco_data)
         kco_res=requests.post(kco_api,json=kco_data)
         if(kco_res.json().get('message_code')==1000):
             messages.success(request, 'KCO details Added successfully!')
-            print(kco_res.text)
-            # print(datacodevalue,datacodedescription,request.session['doctor_id'])
+            # print(kco_res.text)
+            # # print(datacodevalue,datacodedescription,request.session['doctor_id'])
             return redirect(all_kco)
         
 def update_kco(request,id):
@@ -3134,10 +3170,10 @@ def update_kco(request,id):
         api_data={"datacodename": "KCO","doctor_id": request.session['doctor_id']}
         api_res=requests.post(api,json=api_data)
         all_data=api_res.json().get("message_data")
-        # print(all_users)
+        # # print(all_users)
         for kco in all_data:
             if(id==kco['datacodeid']):
-                print(kco)
+                # print(kco)
                 return render(request,'Doctor/insert_kco.html',{'kco':kco})
         else:
             return HttpResponse("no data found")
@@ -3151,7 +3187,7 @@ def update_kco(request,id):
                     "datacodedescription":request.POST['datacodedescription']
                 }
         kco_updateresponse=requests.post(kco_updateurl,json=kco_updatedata)
-        print(kco_updateresponse.text)
+        # print(kco_updateresponse.text)
 
         if kco_updateresponse.json().get('message_code') == 1000:
             messages.success(request, 'KCO details Updated successfully!')
@@ -3167,7 +3203,7 @@ def all_advice(request):
     api="http://13.233.211.102/masters/api/get_datacodemaster_by_name_and_doctor/"
     api_data={"datacodename": "ADVICE","doctor_id": request.session['doctor_id']}
     api_res=requests.post(api,json=api_data)
-    print(api_res.text)
+    # print(api_res.text)
     if(api_res.json().get('message_code')==1000):
         all_data=api_res.json().get("message_data")
         return render(request,'Doctor/all_advice.html',{"all_data":all_data})
@@ -3185,12 +3221,12 @@ def insert_advice(request):
         datacodedescription=request.POST['datacodedescription']
         advice_api="http://13.233.211.102/masters/api/insert_datacodemaster"
         advice_data={"datacodename": "ADVICE","datacodevalue":datacodevalue,"datacodedescription":datacodedescription,"doctor_id": request.session['doctor_id']}
-        print(advice_data)
+        # print(advice_data)
         advice_res=requests.post(advice_api,json=advice_data)
         if(advice_res.json().get('message_code')==1000):
             messages.success(request, 'Advice details Added successfully!')
-            print(advice_res.text)
-            # print(datacodevalue,datacodedescription,request.session['doctor_id'])
+            # print(advice_res.text)
+            # # print(datacodevalue,datacodedescription,request.session['doctor_id'])
             return redirect(all_advice)
         
 
@@ -3200,10 +3236,10 @@ def update_advice(request,id):
         api_data={"datacodename": "ADVICE","doctor_id": request.session['doctor_id']}
         api_res=requests.post(api,json=api_data)
         all_data=api_res.json().get("message_data")
-        # print(all_users)
+        # # print(all_users)
         for advice in all_data:
             if(id==advice['datacodeid']):
-                print(advice)
+                # print(advice)
                 return render(request,'Doctor/insert_advice.html',{'advice':advice})
         else:
             return HttpResponse("no data found")
@@ -3217,7 +3253,7 @@ def update_advice(request,id):
                     "datacodedescription":request.POST['datacodedescription']
                 }
         advice_updateresponse=requests.post(advice_updateurl,json=advice_updatedata)
-        print(advice_updateresponse.text)
+        # print(advice_updateresponse.text)
 
         if advice_updateresponse.json().get('message_code') == 1000:
             messages.success(request, 'Advice details Updated successfully!')
@@ -3231,7 +3267,7 @@ def all_instruction(request):
     url_instruction = 'http://13.233.211.102/masters/api/get_medicine_instructionsbydoctorId'
     all_res=requests.post(url_instruction,json={"Doctor_Id":request.session['doctor_id']})
     all_data=all_res.json().get("message_data")
-    print(all_data)
+    # print(all_data)
     return render(request,'Doctor/all_instruction.html',{'all_data':all_data})
 
 
@@ -3252,18 +3288,18 @@ def insert_instruction(request):
         #     translation = instruction  # No translation needed if the language is English or other
 
         # translated_instruction = translation.text if hasattr(translation, 'text') else translation
-        # print(translated_instruction)
+        # # print(translated_instruction)
         # return HttpResponse("ok")
 
-        # print(instruction,language)
+        # # print(instruction,language)
         instruct_api="http://13.233.211.102/masters/api/insert_medicine_instruction"
         instruct_data={"Doctor_Id":request.session['doctor_id'],"Instruction_Language":language,"Instruction_Text":instruction}
-        #print(instruct_data)
+        ## print(instruct_data)
         instruct_res=requests.post(instruct_api,json=instruct_data)
-        print(instruct_res.text)
+        # print(instruct_res.text)
         if(instruct_res.json().get('message_code')==1000):
             messages.success(request, 'Instruction details Added successfully!')
-            print(instruct_res.text)
+            # print(instruct_res.text)
             return redirect(all_instruction)
         else:
             return redirect(all_instruction)
@@ -3271,22 +3307,22 @@ def insert_instruction(request):
 
 def update_instruction(request,id):
     if(request.method=='GET'):
-        print('instruction id',id)
+        # print('instruction id',id)
         url_instruction = 'http://13.233.211.102/masters/api/get_medicine_instruction'
         res=requests.post(url_instruction,json={"Doctor_Instruction_Id":id})
         instuction=res.json().get('message_data')[0]
-        print(instuction)
+        # print(instuction)
         return render(request,'Doctor/insert_instruction.html',{'instruction':instuction})
     
     else:
         instruction=request.POST['instruction_text']
         language=request.POST['instruction_language']
-        # print(instruction,language)
+        # # print(instruction,language)
         instruct_api="http://13.233.211.102/masters/api/update_medicine_instruction"
         instruct_data={"Doctor_Instruction_Id":id,"Doctor_Id":request.session['doctor_id'],"Instruction_Language":language,"Instruction_Text":instruction}
-        #print(instruct_data)
+        ## print(instruct_data)
         instruct_res=requests.post(instruct_api,json=instruct_data)
-        print(instruct_res.text)
+        # print(instruct_res.text)
 
         if instruct_res.json().get('message_code') == 1000:
             messages.success(request, 'Instruction details Updated successfully!')
@@ -3298,7 +3334,7 @@ def update_instruction(request,id):
 def all_patient(request):
     patient_url="http://13.233.211.102/pateint/api/get_patients_by_doctor_id/"
     patient_res=requests.post(patient_url,json={"doctor_id":request.session['doctor_id']})
-    # print(patient_res.text)
+    # # print(patient_res.text)
     all_data=patient_res.json().get('message_data')
     return render(request,'Doctor/all_patient.html',{'all_data':all_data})
 
@@ -3310,15 +3346,15 @@ def addPatient(request):
 
         state_response = requests.post("http://13.233.211.102/masters/api/get_states_by_country_id/",json={"country_id":101})
         states = (state_response.json().get("message_data", [])).get('states',[])
-        # print(states)
+        # # print(states)
 
         city_response = requests.post("http://13.233.211.102/masters/api/get_cities_by_state_id/",json={"state_id":22})
         cities = (city_response.json().get("message_data", [])).get('cities',[])
-        # print(cities)
+        # # print(cities)
         allergy_api="http://13.233.211.102/pateint/api/get_allergies_by_doctorid/"
         allergy_data={"doctor_id": request.session['doctor_id']}
         allergy_res=requests.post(allergy_api,json=allergy_data)
-        # print(allergy_res.text)
+        # # print(allergy_res.text)
         allergy_data=[]
         disease_data=[]
         if(allergy_res.json().get('message_code')==1000):
@@ -3327,17 +3363,17 @@ def addPatient(request):
         disease_api="http://13.233.211.102/pateint/api/get_diseases_by_doctorid/"
         disease_data={"doctor_id": request.session['doctor_id']}
         disease_res=requests.post(disease_api,json=disease_data)
-        # print(disease_res.text)
+        # # print(disease_res.text)
         if(disease_res.json().get('message_code')==1000):
             disease_data=disease_res.json().get("message_data")
         return render(request,'Doctor/addandupdatepatient.html',{'disease_data':disease_data,'allergy_data':allergy_data,"countries": countries,"states": states,"cities": cities})
     
     else:
         form_data=request.POST
-        print(form_data)
+        # print(form_data)
         non_empty_fields = [key for key, value in form_data.items() if value]
-        # Print the non-empty fields
-        print("Non-empty fields:", non_empty_fields)
+        # # print the non-empty fields
+        # print("Non-empty fields:", non_empty_fields)
       
         patient_apidata = {}
         if 'patient_mobileno' in non_empty_fields:
@@ -3388,23 +3424,23 @@ def addPatient(request):
 
 
         res=requests.post("http://13.233.211.102/pateint/api/insert_patient/",json=patient_apidata)
-        print(res.text)
+        # print(res.text)
         patient_id=((res.json().get("message_data"))[0]).get("Patient_Id")
 
         pdlink_url="http://13.233.211.102/pateint/api/insert_patient_doctor_link/"
         pdlink_data={"doctor_id":request.session['doctor_id'],"patient_id":patient_id}
         pdlink_res=requests.post(pdlink_url,json=pdlink_data)
-        print("patient doctor link",pdlink_res.text)
+        # print("patient doctor link",pdlink_res.text)
 
         if 'remark' in non_empty_fields:
             pdlink_res= requests.post("http://13.233.211.102/pateint/api/update_patient_doctor_link_by_doctorid_patientid/",json={"doctor_id":request.session['doctor_id'],"patient_id":patient_id,"remark":form_data['remark']})
-            print(pdlink_res.text)
-            # print(form_data['remark'])
+            # print(pdlink_res.text)
+            # # print(form_data['remark'])
         
         diseases = request.POST.getlist('diseases[]')
         # allergies = request.POST.getlist('allergies[]')
-        # print(diseases)
-        # print(allergies)
+        # # print(diseases)
+        # # print(allergies)
     
         for disease_json in diseases:
             disease_data = json.loads(disease_json)
@@ -3418,12 +3454,12 @@ def addPatient(request):
                 print(disease_id,disease_description)
             
             dis_res=requests.post("http://13.233.211.102/pateint/api/insert_patient_diseases/",json=disease_apidata)
-            print(dis_res.text)
-            print("---------------------------")
+            # print(dis_res.text)
+            # print("---------------------------")
         
         # Extract allergy data from form
         allergies = request.POST.getlist('allergies[]')
-        # print(allergies)
+        # # print(allergies)
         for allergy_json in allergies:
             allergy_data = json.loads(allergy_json)
             allergy_id = allergy_data.get('allergy_id')
@@ -3436,8 +3472,8 @@ def addPatient(request):
                 print(allergy_id,allergy_description)
             
             allergy_res=requests.post("http://13.233.211.102/pateint/api/insert_patient_allergies/",json=allergy_apidata)
-            print(allergy_res.text)
-            print("------------------------------")
+            # print(allergy_res.text)
+            # print("------------------------------")
 
         book_appointment = request.POST.get('bookAppointment')
         if(book_appointment):
@@ -3448,17 +3484,17 @@ def addPatient(request):
 
             # Combine the names, handling the case where middle_name may be empty
             full_name = ' '.join(part for part in [first_name, middle_name, last_name] if part)
-            print(full_name)
+            # print(full_name)
             dob = datetime.datetime.strptime(request.POST['dob'], '%Y-%m-%d').date()   
             # Calculate the age
             today = datetime.datetime.today().date()
             age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
-            print(age)
+            # print(age)
             # Get the current date and time
             current_datetime = datetime.datetime.now()
             # Format the date and time as "YYYY-MM-DD HH:MM:SS"
             date_time_str = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
-            print(date_time_str)
+            # print(date_time_str)
             if(int(request.POST['patient_gender'])==0):
                 gender='Male'
             else:
@@ -3475,13 +3511,13 @@ def addPatient(request):
                     }
             api_url="http://13.233.211.102/appointment/api/insert_appointment_data/"
             appointment_response=requests.post(api_url,json=appointment_data)
-            print(appointment_response.text)
+            # print(appointment_response.text)
 
          
         if res.json().get('message_code') == 1000:
             if(book_appointment):
                 appointment_id=(appointment_response.json().get('message_data')).get('appointment_id')
-                print(appointment_id)
+                # print(appointment_id)
                 api_data = {"appointment_id":appointment_id}
                 api_url ='http://13.233.211.102/appointment/api/get_patient_by_appointment_id/'
                 response = requests.post(api_url, json=api_data)
@@ -3494,7 +3530,7 @@ def addPatient(request):
                     data2['aadharnumber']=form_data.get('patient_aadharnumber', 0)
                     data2['health_id']=form_data.get('patient_universalhealthid', 0)
                     data2['outstanding']=0
-                    print(data2)
+                    # print(data2)
                     return render(request, 'Doctor/initial_assesment.html',{"data1":data2,'pain_scale_range': range(1, 11)})
         
             else:
@@ -3509,27 +3545,27 @@ def addPatient(request):
 
 def update_patient(request,id):
     if(request.method=='GET'):
-        print('patient id',id)
+        # print('patient id',id)
         url="http://13.233.211.102/pateint/api/get_patient_byid/"
         res=requests.post(url,json={"patient_id":id})
-        print(res.text)
+        # print(res.text)
         patient=res.json().get('message_data')
         epoch_timestamp = patient.get('patient_dateofbirth', 0)
-        print(epoch_timestamp)
+        # print(epoch_timestamp)
         # formatted_date = datetime.utcfromtimestamp(epoch_timestamp).strftime('%Y-%m-%d')
         formatted_date=datetime.datetime.fromtimestamp(epoch_timestamp).strftime( "%Y-%m-%d")   
-        print(formatted_date)
+        # print(formatted_date)
         patient['dob'] = formatted_date
 
         res1=requests.post("http://13.233.211.102/pateint/api/get_patient_doctor_links_by_doctorid_patientid/",json={"doctor_id":request.session['doctor_id'],"patient_id":id})
         if(res1.json().get('message_code')==1000):
-            # print(res1.text)
+            # # print(res1.text)
             patient['remark']=(res1.json().get('message_data')[0])['remark']
 
         allergy_api="http://13.233.211.102/pateint/api/get_allergies_by_doctorid/"
         allergy_data={"doctor_id": request.session['doctor_id']}
         allergy_res=requests.post(allergy_api,json=allergy_data)
-        # print(allergy_res.text)
+        # # print(allergy_res.text)
         allergy_data=[]
         disease_data=[]
         allergy_list=[]
@@ -3540,61 +3576,61 @@ def update_patient(request,id):
         disease_api="http://13.233.211.102/pateint/api/get_diseases_by_doctorid/"
         disease_data={"doctor_id": request.session['doctor_id']}
         disease_res=requests.post(disease_api,json=disease_data)
-        # print(disease_res.text)
+        # # print(disease_res.text)
         if(disease_res.json().get('message_code')==1000):
             disease_data=disease_res.json().get("message_data")
         
         get_allergy_res=requests.post("http://13.233.211.102/pateint/api/get_patient_allergies_by_patientid/",json={"patient_id":id})
-        # print(get_allergy_res.text)
+        # # print(get_allergy_res.text)
         if(get_allergy_res.json().get('message_code')==1000):
             allergy_list=get_allergy_res.json().get("message_data")
         
         get_disease_res=requests.post("http://13.233.211.102/pateint/api/get_patient_diseases_by_patientid/",json={"patient_id":id})
-        # print(get_disease_res.text)
+        # # print(get_disease_res.text)
         if(get_disease_res.json().get('message_code')==1000):
             disease_list=get_disease_res.json().get("message_data")
 
         country_response = requests.post("http://13.233.211.102/masters/api/get_all_countries/")
         countries = country_response.json().get("message_data", [])
         
-        print(patient)
+        # print(patient)
         if(patient['patient_stateid']):
             state_id=patient['patient_stateid']
         else:
             state_id=22
         state_response = requests.post("http://13.233.211.102/masters/api/get_states_by_country_id/",json={"country_id":patient['patient_countryid']})
         states = (state_response.json().get("message_data", [])).get('states',[])
-        # print(states)
+        # # print(states)
 
         city_response = requests.post("http://13.233.211.102/masters/api/get_cities_by_state_id/",json={"state_id":state_id})
         cities = (city_response.json().get("message_data", [])).get('cities',[])
-        # print(cities)
+        # # print(cities)
 
         return render(request,'Doctor/addandupdatepatient.html',{'patient':patient,'disease_data':disease_data,'allergy_data':allergy_data,'allergy_list':allergy_list,'disease_list':disease_list,"countries": countries,"states": states,"cities": cities})
     
     else:
         diseases = request.POST.getlist('diseases[]')
         # allergies = request.POST.getlist('allergies[]')
-        # print(diseases)
-        # print(allergies)
+        # # print(diseases)
+        # # print(allergies)
     
         removed_allergies_json = request.POST.get('removed_allergies')
         removed_diseases_json = request.POST.get('removed_diseases')
         # Parse JSON data
         removed_allergies = json.loads('[' + removed_allergies_json[:-1] + ']') if removed_allergies_json else []
         removed_diseases = json.loads('[' + removed_diseases_json[:-1] + ']') if removed_diseases_json else []
-        print(removed_allergies)
-        print(removed_diseases)
+        # print(removed_allergies)
+        # print(removed_diseases)
 
         for pa_id in removed_allergies:
-            # print(pa_id)
+            # # print(pa_id)
             pa_res=requests.post("http://13.233.211.102/pateint/api/delete_patient_allergy/",json={"patient_allergy_id":pa_id})
-            print(pa_res.text)
+            # print(pa_res.text)
 
         for pd_id in removed_diseases:
             pa_res=requests.post("http://13.233.211.102/pateint/api/delete_patient_disease/",json={"patient_disease_id":pd_id})
-            print(pa_res.text)
-            # print(pd_id)
+            # print(pa_res.text)
+            # # print(pd_id)
     
         for disease_json in diseases:
             disease_data = json.loads(disease_json)
@@ -3608,12 +3644,12 @@ def update_patient(request,id):
                 print(disease_id,disease_description)
             
             dis_res=requests.post("http://13.233.211.102/pateint/api/insert_patient_diseases/",json=disease_apidata)
-            print(dis_res.text)
-            print("---------------------------")
+            # print(dis_res.text)
+            # print("---------------------------")
         
         # Extract allergy data from form
         allergies = request.POST.getlist('allergies[]')
-        # print(allergies)
+        # # print(allergies)
         for allergy_json in allergies:
             allergy_data = json.loads(allergy_json)
             allergy_id = allergy_data.get('allergy_id')
@@ -3626,15 +3662,15 @@ def update_patient(request,id):
                 print(allergy_id,allergy_description)
             
             allergy_res=requests.post("http://13.233.211.102/pateint/api/insert_patient_allergies/",json=allergy_apidata)
-            print(allergy_res.text)
-            print("------------------------------")
+            # print(allergy_res.text)
+            # print("------------------------------")
         
-        print("else patient id",id)
+        # print("else patient id",id)
         form_data=request.POST
-        print(form_data)
+        # print(form_data)
         non_empty_fields = [key for key, value in form_data.items() if value]
-        # Print the non-empty fields
-        print("Non-empty fields:", non_empty_fields)
+        # # print the non-empty fields
+        # print("Non-empty fields:", non_empty_fields)
         patient_apidata = {"patient_id":id}
         if 'patient_firstname' in non_empty_fields:
             patient_apidata["patient_firstname"] = form_data['patient_firstname']
@@ -3668,12 +3704,12 @@ def update_patient(request,id):
 
         if 'remark' in non_empty_fields:
             pdlink_res= requests.post("http://13.233.211.102/pateint/api/update_patient_doctor_link_by_doctorid_patientid/",json={"doctor_id":request.session['doctor_id'],"patient_id":id,"remark":form_data['remark']})
-            print(pdlink_res.text)
-            # print(form_data['remark'])
+            # print(pdlink_res.text)
+            # # print(form_data['remark'])
         
         
         res=requests.post("http://13.233.211.102/pateint/api/update_patient_by_id/",json=patient_apidata)
-        print(res.text)
+        # print(res.text)
         if res.json().get('message_code') == 1000:
             messages.success(request, 'Patient details Updated successfully!')
             return redirect(all_patient)
@@ -3685,10 +3721,10 @@ def approvePharmacy(request):
     if(request.method=='GET'):
         pharmacy_token=request.GET.get("pharmacy_token")
         if(pharmacy_token):
-            print(pharmacy_token)
+            # print(pharmacy_token)
             if('doctor_id' in request.session):
                 api_res= requests.post('http://13.233.211.102/medicalrecord/api/get_pharmacist_details_bytoken/',json={'pharmacist_token':pharmacy_token})
-                print(api_res.text)
+                # print(api_res.text)
                 if(api_res.json().get('message_code')==1000):
                     pharmacy = api_res.json().get('message_data')
                     return render(request,'Doctor/approvePharmacy.html',{'pharmacy':pharmacy})
@@ -3698,16 +3734,16 @@ def approvePharmacy(request):
                 return redirect(login)
         
         else:
-            print(pharmacy_token)
+            # print(pharmacy_token)
             return HttpResponse('No Pharmacy token')
     
     else:
         pharmacist_id = request.POST['pharmacist_id']
         api_res = requests.post('http://13.233.211.102/medicalrecord/api/insert_doctor_pharmacist_link/',json={'doctor_id':request.session['doctor_id'],'location_id':request.session['location_id'],'pharmacist_id':pharmacist_id})
-        print(api_res.text)
+        # print(api_res.text)
         if(api_res.json().get('message_code')==1000):
            messages.success(request, 'Pharmacist Approved successfully!')
-           print('Approved')
+           # print('Approved')
         
         elif(api_res.json().get('message_code')==1001):
             messages.success(request, 'Pharmacist Already Approved!')
@@ -3722,10 +3758,10 @@ def approvePharmacy(request):
 
 def get_all_pharmacist(request):
     api_res = requests.post('http://13.233.211.102/medicalrecord/api/get_doctor_pharmacist_bydoctorid/',json={'doctor_id':request.session['doctor_id']})
-    print(api_res.text)
+    # print(api_res.text)
     if(api_res.json().get('message_code')==1000):
         pharmacists = api_res.json().get('message_data')
-        print(pharmacists)
+        # print(pharmacists)
     else:
         pharmacists=[]
         messages.error(request,'No Pharmacist is Approved..')
@@ -3745,10 +3781,10 @@ def toggle_pharmacist_status(request):
             data = json.loads(request.body)
             doctorpharmacist_id = data.get('doctorpharmacist_id')
             new_status = data.get('status')
-            print(doctorpharmacist_id,new_status)
+            # print(doctorpharmacist_id,new_status)
 
             api_res = requests.post('http://13.233.211.102/medicalrecord/api/update_doctor_pharmacist_status/',json={'doctorpharmacist_id':doctorpharmacist_id,'status':new_status})
-            print(api_res.text)
+            # print(api_res.text)
             response_data= api_res.json()
 
         except Exception as e:
@@ -3763,7 +3799,7 @@ def Add_pharmacist(request):
     
     else:
         form_data=request.POST
-        print(form_data)
+        # print(form_data)
         api_data = {
             "shop_name": form_data.get('shop_name'),
             "shop_address": form_data.get('shop_address'),
@@ -3774,16 +3810,16 @@ def Add_pharmacist(request):
             "pharmacist_password": form_data.get('password'),
             "pharmacist_type": form_data.get('pharmacist_type'), # 1 means external and 2 means internal
         }
-        print(api_data)
+        # print(api_data)
         api_res = requests.post('http://13.233.211.102/medicalrecord/api/insert_pharmacist/',json=api_data)
-        print(api_res.text)
+        # print(api_res.text)
         if(api_res.json().get('message_code')==1000):
             pharmacist_id = api_res.json().get('message_data').get('pharmacist_id')
             approve_res = requests.post('http://13.233.211.102/medicalrecord/api/insert_doctor_pharmacist_link/',json={'doctor_id':request.session['doctor_id'],'location_id':request.session['location_id'],'pharmacist_id':pharmacist_id})
-            print(approve_res.text)
+            # print(approve_res.text)
             if(approve_res.json().get('message_code')==1000):
                 messages.success(request, 'Pharmacist Added and Approved successfully!')
-                print('Approved')
+                # print('Approved')
 
             else:
                 messages.error(request, 'failed to approve try to do By Scanning QR Code')
@@ -3800,10 +3836,10 @@ def approveLaboratory(request):
     if(request.method=='GET'):
         laboratory_token=request.GET.get("laboratory_token")
         if(laboratory_token):
-            print(laboratory_token)
+            # print(laboratory_token)
             if('doctor_id' in request.session):
                 api_res= requests.post('http://13.233.211.102/medicalrecord/api/get_laboratory_details_bytoken/',json={'laboratory_token':laboratory_token})
-                print(api_res.text)
+                # print(api_res.text)
                 if(api_res.json().get('message_code')==1000):
                     laboratory = api_res.json().get('message_data')
                     return render(request,'Doctor/approveLaboratory.html',{'laboratory':laboratory})
@@ -3813,16 +3849,16 @@ def approveLaboratory(request):
                 return redirect(login)
         
         else:
-            print(laboratory_token)
+            # print(laboratory_token)
             return HttpResponse('No Laboratory token')
     
     else:
         laboratory_id = request.POST['laboratory_id']
         api_res = requests.post('http://13.233.211.102/medicalrecord/api/insert_doctor_laboratory_link/',json={'doctor_id':request.session['doctor_id'],'location_id':request.session['location_id'],'laboratory_id':laboratory_id})
-        print(api_res.text)
+        # print(api_res.text)
         if(api_res.json().get('message_code')==1000):
            messages.success(request, 'Laboratory Approved successfully!')
-           print('Approved')
+           # print('Approved')
         
         elif(api_res.json().get('message_code')==1001):
             messages.success(request, 'Laboratory Already Approved!')
@@ -3837,10 +3873,10 @@ def approveLaboratory(request):
 
 def get_all_laboratory(request):
     api_res = requests.post('http://13.233.211.102/medicalrecord/api/get_doctor_laboratory_bydoctorid/',json={'doctor_id':request.session['doctor_id']})
-    print(api_res.text)
+    # print(api_res.text)
     if(api_res.json().get('message_code')==1000):
         labs = api_res.json().get('message_data')
-        print(labs)
+        # print(labs)
     else:
         labs=[]
         messages.error(request,'No Laboratory is Approved..')
@@ -3855,7 +3891,7 @@ def Add_laboratory(request):
     
     else:
         form_data=request.POST
-        print(form_data)
+        # print(form_data)
         api_data = {
             "laboratory_name": form_data.get('laboratory_name'),
             "laboratory_address": form_data.get('laboratory_address'),
@@ -3866,16 +3902,16 @@ def Add_laboratory(request):
             "laboratory_password": form_data.get('password'),
             "laboratory_type": form_data.get('laboratory_type'), # 1 means external and 2 means internal
         }
-        print(api_data)
+        # print(api_data)
         api_res = requests.post('http://13.233.211.102/medicalrecord/api/insert_laboratory/',json=api_data)
-        print(api_res.text)
+        # print(api_res.text)
         if(api_res.json().get('message_code')==1000):
             laboratory_id = api_res.json().get('message_data').get('laboratory_id')
             approve_res = requests.post('http://13.233.211.102/medicalrecord/api/insert_doctor_laboratory_link/',json={'doctor_id':request.session['doctor_id'],'location_id':request.session['location_id'],'laboratory_id':laboratory_id})
-            print(approve_res.text)
+            # print(approve_res.text)
             if(approve_res.json().get('message_code')==1000):
                 messages.success(request, 'Laboratory Added and Approved successfully!')
-                print('Approved')
+                # print('Approved')
 
             else:
                 messages.error(request, 'failed to approve try to do By Scanning QR Code')
@@ -3897,10 +3933,10 @@ def toggle_laboratory_status(request):
             data = json.loads(request.body)
             doctorlaboratory_id = data.get('doctorlaboratory_id')
             new_status = data.get('status')
-            print(doctorlaboratory_id,new_status)
+            # print(doctorlaboratory_id,new_status)
 
             api_res = requests.post('http://13.233.211.102/medicalrecord/api/update_doctor_laboratory_status/',json={'doctorlaboratory_id':doctorlaboratory_id,'status':new_status})
-            print(api_res.text)
+            # print(api_res.text)
             response_data= api_res.json()
 
         except Exception as e:
@@ -3912,7 +3948,7 @@ def toggle_laboratory_status(request):
 def showDeals(request):
     if('doctor_id' in request.session):
         res = requests.post('http://13.233.211.102/masters/api/get_active_deals_by_visible_to/',json={"visible_to":"1","user_id":request.session.get('doctor_id')}) #here '1' pass as a string means Doctor
-        print(res.text)
+        # print(res.text)
         if(res.json().get('message_code')==1000):
             alldeals = res.json().get('message_data')
         
@@ -3931,14 +3967,14 @@ def handle_deal_action(request):
         DealAction_id = request.POST.get('DealAction_id')
         action_type = request.POST.get('action_type')
         user_id = request.session.get('doctor_id')  # Assuming 'doctor_id' is stored in the session
-        print(deal_id,DealAction_id,action_type,user_id)
+        # print(deal_id,DealAction_id,action_type,user_id)
         
         # Make request to external API
         response = requests.post(
             'http://13.233.211.102/masters/api/update_deal_action_type_by_DealactionId/',
             json={"deal_id":deal_id,"dealaction_id":DealAction_id,"dealactiontype":action_type}
         )
-        print(response.text)
+        # print(response.text)
 
         # Check response status
         if response.status_code == 200 and response.json().get('message_code') == 1000:

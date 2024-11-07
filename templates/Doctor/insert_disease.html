@@ -87,9 +87,9 @@
                 <div class="form-floating">
                     <select class="form-select" id="typeSelect" name="disease_type" aria-label="Floating label select example" required>
                         <option value="" disabled selected hidden>Select</option>
-                        <option value="1"{% if disease.disease_type == 1 %}selected{% endif %}>Skin</option>
-                        <option value="2" {% if disease.disease_type == 2 %}selected{% endif %}>Food</option>
-                        <option value="3" {% if disease.disease_type == 3 %}selected{% endif %}>Air</option>
+                        {% for key, value in types.items %}
+                            <option value="{{ key }}"{% if disease.disease_type == key %} selected{% endif %}>{{ value }}</option>
+                        {% endfor %}
                     </select>
                     <label for="disease_type">Disease Type</label>
                 </div>

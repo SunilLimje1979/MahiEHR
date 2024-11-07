@@ -18,7 +18,7 @@
             padding: 0;
         }
 
-        .navbar {
+        {% comment %} .navbar {
             background-color: #A52028;
             color: white;
             padding: 15px;
@@ -26,7 +26,32 @@
             font-size: 24px;
             margin-bottom: 20px;
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.7);
+        } {% endcomment %}
+        .navbar {
+            background-color: #A52028;
+            color: white;
+            padding: 15px ;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 24px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.7);
         }
+        
+        .navbar span {
+            color: white;
+            font-size: 25px;
+        }
+        
+        .logout-icon i{
+            color: white;
+            font-size: 24px;
+            text-decoration: none;
+        }
+        .logout-icon:hover {
+            color: #f8a488; /* Hover color for icon */
+        }
+        
 
         .container {
             padding: 5px;
@@ -122,13 +147,30 @@
 
 <body>
 
-    <div class="navbar">
+    {% comment %} <div class="navbar">
         {%if subscription_status == 'active'%}
           <span style="color: white; font-size: 25px">Dashboard</span>
         {%else%}
             <span style="color: white; font-size: 25px">Dashboard <span style="color: 	rgba(248, 81, 15, 0.954);">(Expired)</span></span>
         {%endif%}
+    </div> {% endcomment %}
+    <div class="navbar d-flex justify-content-between align-items-center">
+        <div>
+            {% if subscription_status == 'active' %}
+                <span>Dashboard</span>
+            {% else %}
+                <span>Dashboard 
+                    <span style="color: rgba(248, 81, 15, 0.954);">(Expired)</span>
+                </span>
+            {% endif %}
+        </div>
+        
+        <!-- Logout icon on the right side -->
+        <a href="{% url 'logout' %}" class="logout-icon" aria-label="Logout">
+            <i class="fas fa-sign-out-alt" style="color:white;"></i>
+        </a>
     </div>
+    
 
     {% if messages %}
         <div id="messages-container" class="messages">

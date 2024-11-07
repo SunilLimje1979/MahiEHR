@@ -461,6 +461,16 @@
                                   Syp
                               {% elif i.medicine_form == '3' %}
                                   Pwd
+                              {% elif i.medicine_form == '4' %}
+                                  Capsule
+                              {% elif i.medicine_form == '5' %}
+                                  Injection
+                              {% elif i.medicine_form == '6' %}
+                                  Suspension
+                              {% elif i.medicine_form == '7' %}
+                                  Drop
+                              {% elif i.medicine_form == '8' %}
+                                  other
                               {% else %}
                                   Unknown Mode
                               {% endif %}
@@ -1236,6 +1246,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 return 'Syp';
             case '3':
                 return 'Pwd';
+            case '4':
+                return 'Capsule';
+            case '5':
+                return 'Injection';
+            case '6':
+                return 'Suspension';
+            case '7':
+                return 'Drop';
+            case '8':
+                return 'other';
             default:
                 return 'Unknown';
         }
@@ -1251,6 +1271,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 return 2;
             case 'Pwd':
                 return 3;
+            case 'Capsule':
+                return 4;
+            case 'Injection':
+                return 5;
+            case 'Suspension':
+                return 6;
+            case 'Drop':
+                return 7;
+            case 'other':
+                return 8;
             default:
                 return 0;
         }

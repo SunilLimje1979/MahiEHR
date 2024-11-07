@@ -58,19 +58,29 @@
                 <a class="navbar-brand" href="/MahiEHR/get_all_medicines/">
                     <i class="fas fa-arrow-left"></i>
                         {% if medicine %}
-                          Update Medicine
+                            {% if medicine.doctor_id%}
+                                Update Medicine
+                            {%else%}
+                                Master Data
+                            {%endif%}
                        {% else %}
                           Insert Medicine
                        {% endif %}
                 </a>
-                <button type="submit" value="Submit" class="btn btn-light mx-3" id="saveButton">
-                    <i class="fas fa-save"></i>
-                        {% if medicine %}
-                           Update
-                        {% else %}
-                           Save
-                        {% endif %}
-                </button>
+                {% if medicine %}
+                    {% if medicine.doctor_id%}
+                        <button type="submit" value="Submit" class="btn btn-light mx-3" id="saveButton">
+                            <i class="fas fa-save"></i>
+                                Update
+                        </button>
+                    {%endif%}
+                {%else%}
+                    <button type="submit" value="Submit" class="btn btn-light mx-3" id="saveButton">
+                        <i class="fas fa-save"></i>
+                            Save
+                    </button>
+                {%endif%}
+
             </div>
         </nav>
         <!-- Form content -->
@@ -96,6 +106,11 @@
                         <option value="1" {% if medicine.medicine_form == 1 %}selected{% endif %}>Tab</option>
                         <option value="2" {% if medicine.medicine_form == 2 %}selected{% endif %}> Syp</option>
                         <option value="3"{% if medicine.medicine_form == 3 %}selected{% endif %}> Pwd</option>
+                        <option value="4"{% if medicine.medicine_form == 4 %}selected{% endif %}> Capsule</option>
+                        <option value="5"{% if medicine.medicine_form == 5 %}selected{% endif %}> Injection</option>
+                        <option value="6"{% if medicine.medicine_form == 6 %}selected{% endif %}> Suspension</option>
+                        <option value="7"{% if medicine.medicine_form == 7 %}selected{% endif %}> Drop</option>
+                        <option value="8"{% if medicine.medicine_form == 8 %}selected{% endif %}> other</option>
                     </select>
                     <label for="medicine_form">Medicine form</label>
                 </div>
@@ -201,16 +216,23 @@
       </div>
 
         <!-- Save Button (Bottom) -->
-        <div class="text-center mt-3">
-            <button type="submit" class="btn btn-primary btn-save" style="background-color: #A52028; border-color:#A52028;" ><span
-                    class="fas fa-save" style="color: #FFFFFF;"></span>
-                    {% if medicine %}
-                      Update
-                    {% else %}
-                      Save
-                    {% endif %}
-            </button>
-        </div>
+        {% if medicine %}
+            <div class="text-center mt-3">
+                {%if medicine.doctor_id%}
+                <button type="submit" class="btn btn-primary btn-save" style="background-color: #A52028; border-color:#A52028;" ><span
+                        class="fas fa-save" style="color: #FFFFFF;"></span>
+                        Update
+                </button>
+                {%endif%}
+            </div>
+        {%else%}
+            <div class="text-center mt-3">
+                <button type="submit" class="btn btn-primary btn-save" style="background-color: #A52028; border-color:#A52028;" ><span
+                        class="fas fa-save" style="color: #FFFFFF;"></span>
+                        Save
+                </button>
+            </div>
+        {%endif%}
     </form>
     {%if request.session.subscription_status == 'inactive' %}
         {% include "Doctor/popup.html" %}

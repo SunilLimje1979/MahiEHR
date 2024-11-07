@@ -168,12 +168,14 @@
                         <div class="medicine-label">{{ data.instruction_text }}</div>
                         <div class="medicine-info" style="margin-left: 15px;">{{ data.instruction_language }}</div>
                     </div>
+                    {% if data.doctor_id%}
                     <div class="actions-container">
                         <a href="{% url 'update_instruction' data.doctor_instruction_id %}">
                             <i class="fa-solid fa-pen-to-square" style="font-size: 20px; color:rgb(13, 173, 236);"></i>
                         </a>
                         
                     </div>
+                    {%endif%}
                 </div>
             </div>
         </div>

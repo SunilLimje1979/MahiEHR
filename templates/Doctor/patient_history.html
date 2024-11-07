@@ -133,15 +133,25 @@
                         {% for medicine in consultation.medicines %}
                             <div class="medicine-item" style="margin: 0;">
                                 <p>
-                                    {% if medicine.medicine_form == '1' %}
+                                {% if medicine.medicine_form == '1' %}
                                     Tab
-                                 {% elif medicine.medicine_form == '2' %}
+                                {% elif medicine.medicine_form == '2' %}
                                      Syp
-                                 {% elif medicine.medicine_form == '3' %}
+                                {% elif medicine.medicine_form == '3' %}
                                      Pwd
-                                 {% else %}
+                                {% elif medicine.medicine_form == '4' %}
+                                     Capsule
+                                {% elif medicine.medicine_form == '5' %}
+                                     Injection
+                                {% elif medicine.medicine_form == '6' %}
+                                     Suspension
+                                {% elif medicine.medicine_form == '7' %}
+                                     Drop
+                                {% elif medicine.medicine_form == '8' %}
+                                     other
+                                {% else %}
                                      Unknown Mode
-                                 {% endif %}&nbsp;
+                                {% endif %}&nbsp;
                                   {{ medicine.medicine_name }}&nbsp;&nbsp;
                                   {{ medicine.medicine_doses }}&nbsp;&nbsp;
                                   <!-- {% if medicine.medicine_form == '1' %}

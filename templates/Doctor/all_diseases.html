@@ -18,12 +18,12 @@
         body {
             background-color: #f8f9fa;
         }
-
+    
         .navbar-orange {
             background-color: #A52028;
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
         }
-
+    
         .form-container {
             margin-top: 80px;
             padding: 10px;
@@ -31,45 +31,48 @@
             border-radius: 10px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
         }
-
+    
         .navbar-brand {
             color: #FFFFFF;
         }
-
+    
         .btn-add {
             margin-top: 10px;
             background-color: #A52028;
             color: #fff;
         }
-
+    
         .medicine-card {
             background-color: white;
-            padding: 8px; /* Increased padding for more space inside the card */
-            margin-bottom: 10px; /* Increased margin for better spacing between cards */
-            border-radius: 8px; /* Slightly more rounded corners */
-            border: 1px solid #ff7f50; /* Added a colored border */
-            
-            /* Enhanced shadow effect */
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); 
-            
+            padding: 8px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid #ff7f50;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            position: relative;
+            flex-direction: column;
         }
-
+    
         .medicine-label {
             font-size: 16px;
             color: #0a0b0b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-
+    
+        .medicine-info-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2px;
+        }
+    
         .medicine-info {
-            font-size: 16px;
+            font-size: 14px;
             color: #0c0c0d;
-            margin-top: 1px;
         }
-
+    
         .messages {
             position: fixed;
             top: 10%;
@@ -77,7 +80,7 @@
             z-index: 1000;
             max-width: 300px;
         }
-
+    
         .message {
             padding: 10px;
             margin-bottom: 10px;
@@ -85,40 +88,34 @@
             border-radius: 5px;
             transition: opacity 0.5s ease-out;
         }
-
+    
         .message.success {
             background-color: #4caf50;
         }
-
+    
         .message.error {
             background-color: #f44336;
         }
-
+    
         .actions-container {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
         }
-
+    
         .actions-container a {
             text-decoration: none;
-            margin-right: 10px;
         }
-
+    
         .actions-container i {
             font-size: 20px;
-            cursor: pointer;
-        }
-
-        .actions-container .spacer {
-            margin-right: 10px;
+            color: rgb(13, 173, 236);
         }
     </style>
+    
+    
 </head>
 
 <body>
-
     <div class="container form-container">
         <!-- Navigation Bar -->
         <nav class="navbar navbar-expand-lg navbar-light navbar-orange fixed-top">
@@ -131,86 +128,105 @@
                 </a>
             </div>
         </nav>
-
+    
         {% if messages %}
         <div id="messages-container" class="messages">
-          {% for message in messages %}
-            <div class="message{% if message.tags %} {{ message.tags }}{% endif %}">{{ message }}</div>
-          {% endfor %}
+            {% for message in messages %}
+                <div class="message{% if message.tags %} {{ message.tags }}{% endif %}">{{ message }}</div>
+            {% endfor %}
         </div>
-    
+        
         <script>
-          // Add a script to hide messages after a delay
-          document.addEventListener('DOMContentLoaded', function() {
-            var messagesContainer = document.getElementById('messages-container');
-            if (messagesContainer) {
-              setTimeout(function() {
-                messagesContainer.style.opacity = '0';
-                setTimeout(function() {
-                  messagesContainer.style.display = 'none';
-                }, 500);  // Adjust the second timeout based on transition duration in CSS
-              }, 1000);  // Adjust the delay time (in milliseconds) as needed
-            }
-          });
+            // Add a script to hide messages after a delay
+            document.addEventListener('DOMContentLoaded', function() {
+                var messagesContainer = document.getElementById('messages-container');
+                if (messagesContainer) {
+                    setTimeout(function() {
+                        messagesContainer.style.opacity = '0';
+                        setTimeout(function() {
+                            messagesContainer.style.display = 'none';
+                        }, 500);
+                    }, 1000);
+                }
+            });
         </script>
         {% endif %}
-
+    
         <!-- Search Bar -->
         <div class="mb-4">
-            <input type="text" id="searchInput" class="form-control" placeholder="Search by Disease name">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search by Disease name or Type">
         </div>
         
         {% for data in all_data %}
-        <div class="medicine-card">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="d-flex">
-                        <div class="medicine-label">{{ data.disease_name}}</div>
-                        <div class="medicine-info" style="margin-left: 15px;">
-                            {% if data.disease_type == 1 %}
-                               Skin
-                            {% elif data.disease_type == 2 %}
-                               Food
-                            {% elif data.disease_type == 3 %}
-                               Air
-                            {% else %}
-                                Unknown Type
-                            {% endif %}
-                        </div>
+        {% comment %} <div class="medicine-card row mx-1">
+            <div class="col-8">
+                <div class="d-flex flex-column">
+                    <div class="medicine-label">{{ data.disease_name }}</div>
+                    <div class="medicine-info mt-1">
+                        {{ data.disease_type }}
                     </div>
+                </div>
+            </div>
+            <div class="col-4 text-end">
+                {%if data.doctor_id%}
                     <div class="actions-container">
                         <a href="{% url 'update_disease' data.disease_id %}">
                             <i class="fa-solid fa-pen-to-square" style="font-size: 20px; color:rgb(13, 173, 236);"></i>
                         </a>
-                        
                     </div>
+                {%endif%}
+            </div>
+        </div> {% endcomment %}
+        <div class="medicine-card">
+            <div class="medicine-label">{{ data.disease_name }}</div>
+            <div class="medicine-info-container">
+                <div class="medicine-info">{{ data.disease_type }}</div>
+                <div class="actions-container">
+                    {% if data.doctor_id%}
+                        <a href="{% url 'update_disease' data.disease_id %}">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+                    {%else%}
+                        <span>Master Data</span>
+                    {%endif%}
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
-
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
         crossorigin="anonymous"></script>
     
-    <!-- JavaScript code -->
-    <script>
-
+    {% comment %} <script>
         document.getElementById('searchInput').addEventListener('input', function () {
             const searchValue = this.value.toLowerCase();
             const medicineCards = document.querySelectorAll('.medicine-card');
-
+    
             medicineCards.forEach(function (card) {
                 const instructionText = card.querySelector('.medicine-label').textContent.toLowerCase();
-                if (instructionText.includes(searchValue)) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
+                card.style.display = instructionText.includes(searchValue) ? 'block' : 'none';
+            });
+        });
+    </script> {% endcomment %}
+    <script>
+        document.getElementById('searchInput').addEventListener('input', function () {
+            const searchValue = this.value.toLowerCase();
+            const medicineCards = document.querySelectorAll('.medicine-card');
+        
+            medicineCards.forEach(function (card) {
+                const diseaseName = card.querySelector('.medicine-label').textContent.toLowerCase();
+                const diseaseType = card.querySelector('.medicine-info').textContent.toLowerCase();
+                
+                // Check if either the disease name or type includes the search value
+                const matchesSearch = diseaseName.includes(searchValue) || diseaseType.includes(searchValue);
+                card.style.display = matchesSearch ? 'block' : 'none';
             });
         });
     </script>
+    
+    
 </body>
 
 </html>
