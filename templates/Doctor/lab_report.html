@@ -1,4 +1,4 @@
-{% load static %}
+{% comment %} {% load static %}
 {% load pwa %}
 <!DOCTYPE html>
 <html lang="en">
@@ -160,6 +160,7 @@
                 {{ i.investigation_name }} - {{ i.investigation_category }}
             </div>
             <div class="actions-container">
+                {% if i.doctor_id%}
                 <a href="{% url 'update_lab_report' i.investigation_id %}">
                     <i class="fas fa-pen-to-square" style="color: rgb(13, 173, 236);"></i>
                 </a>
@@ -167,6 +168,9 @@
                 <div onclick="confirmDelete('{{ i.investigation_id }}')">
                     <i class="fa-solid fa-trash" style="color:rgb(50, 49, 49);"></i>
                 </div>
+                {%else%}
+                <span>Master Data</span>
+                {%endif%}
             </div>
         </div>
         {% endfor %}
@@ -204,4 +208,249 @@
     </script>
 </body>
 
-</html>
+</html> 
+ 
+ {% endcomment %}
+ {% load static %}
+ {% load pwa %}
+ <!DOCTYPE html>
+ <html lang="en">
+ 
+ <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>All Labs</title>
+     <link rel="manifest" href="{% static 'assets/manifest.json' %}"> 
+     <link rel="shortcut icon" href="{% static 'assets/img/mahi.png' %}">
+     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+         integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+         crossorigin="anonymous">
+     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css" />
+     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,500;0,600;0,700;1,400&amp;display=swap" />
+     <style>
+        body {
+            background-color: #f8f9fa;
+        }
+    
+        .navbar-orange {
+            background-color: #A52028;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+        }
+    
+        .form-container {
+            margin-top: 80px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+    
+        .navbar-brand {
+            color: #FFFFFF;
+        }
+    
+        .btn-add {
+            margin-top: 10px;
+            background-color: #A52028;
+            color: #fff;
+        }
+    
+        .medicine-card {
+            background-color: white;
+            padding: 8px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid #ff7f50;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+    
+        .medicine-label {
+            font-size: 16px;
+            color: #0a0b0b;
+            {% comment %} white-space: nowrap; {% endcomment %}
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    
+        .medicine-info-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2px;
+        }
+    
+        .medicine-info {
+            font-size: 14px;
+            color: #0c0c0d;
+        }
+    
+        .messages {
+            position: fixed;
+            top: 10%;
+            right: 10%;
+            z-index: 1000;
+            max-width: 300px;
+        }
+    
+        .message {
+            padding: 10px;
+            margin-bottom: 10px;
+            color: #fff;
+            border-radius: 5px;
+            transition: opacity 0.5s ease-out;
+        }
+    
+        .message.success {
+            background-color: #4caf50;
+        }
+    
+        .message.error {
+            background-color: #f44336;
+        }
+    
+        .actions-container {
+            display: flex;
+            align-items: center;
+        }
+    
+        .actions-container a {
+            text-decoration: none;
+        }
+    
+        .actions-container i {
+            font-size: 20px;
+            color: rgb(13, 173, 236);
+        }
+
+        .actions-container .spacer {
+            margin-right: 10px; /* Adjust the spacing as needed */
+        }
+    </style>
+
+ </head>
+ 
+ <body>
+ 
+     <!-- All Lab Reports -->
+     <div class="container form-container">
+         <!-- Navigation Bar -->
+         <nav class="navbar navbar-expand-lg navbar-light navbar-orange fixed-top">
+             <div class="container-fluid pl-3">
+                 <a class="navbar-brand" href="/MahiEHR/dashboard/">
+                     <i class="fas fa-arrow-left"></i> All Labs
+                 </a>
+                 <a href="{% url 'add_lab_report' %}" class="btn btn-light mx-3 btn-add">
+                     <i class="fas fa-plus"></i> Add
+                 </a>
+             </div>
+         </nav>
+ 
+         {% if messages %}
+         <div id="messages-container" class="messages">
+             {% for message in messages %}
+             <div class="message{% if message.tags %} {{ message.tags }}{% endif %}">{{ message }}</div>
+             {% endfor %}
+         </div>
+ 
+         <script>
+             // Add a script to hide messages after a delay
+             document.addEventListener('DOMContentLoaded', function () {
+                 var messagesContainer = document.getElementById('messages-container');
+                 if (messagesContainer) {
+                     setTimeout(function () {
+                         messagesContainer.style.opacity = '0';
+                         setTimeout(function () {
+                             messagesContainer.style.display = 'none';
+                         }, 500); // Adjust the second timeout based on transition duration in CSS
+                     }, 1000); // Adjust the delay time (in milliseconds) as needed
+                 }
+             });
+         </script>
+         {% endif %}
+ 
+         <!-- Search Bar -->
+         <div class="mb-4">
+             <input type="text" id="searchInput" class="form-control" placeholder="Search by Investigation Name or Category">
+         </div>
+ 
+         <!-- Lab Report Cards -->
+         {% comment %} {% for i in lab_reports %}
+         <div class="medicine-card">
+             <div class="medicine-label">
+                 {{ i.investigation_name }} - {{ i.investigation_category }}
+             </div>
+             <div class="actions-container">
+                 {% if i.doctor_id%}
+                 <a href="{% url 'update_lab_report' i.investigation_id %}">
+                     <i class="fas fa-pen-to-square" style="color: rgb(13, 173, 236);"></i>
+                 </a>
+                 <div class="spacer"></div>
+                 <div onclick="confirmDelete('{{ i.investigation_id }}')">
+                     <i class="fa-solid fa-trash" style="color:rgb(50, 49, 49);"></i>
+                 </div>
+                 {%else%}
+                 <span>Master Data</span>
+                 {%endif%}
+             </div>
+         </div>
+         {% endfor %} {% endcomment %}
+         {% for i in lab_reports  %}
+        <div class="medicine-card">
+            <div class="medicine-label">{{  i.investigation_name  }}</div>
+            <div class="medicine-info-container">
+                <div class="medicine-info">{{  i.investigation_category   }}</div>
+                <div class="actions-container">
+                    {% if i.doctor_id%}
+                        <a href="{% url 'update_lab_report' i.investigation_id %}">
+                            <i class="fas fa-pen-to-square" style="color: rgb(13, 173, 236);"></i>
+                        </a>
+                        <div class="spacer"></div>
+                        <div onclick="confirmDelete('{{ i.investigation_id }}')">
+                            <i class="fa-solid fa-trash" style="color:rgb(50, 49, 49);"></i>
+                        </div>
+                    {%else%}
+                        <span>Master Data</span>
+                    {%endif%}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+     </div>
+ 
+     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+         integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+         crossorigin="anonymous"></script>
+ 
+     <!-- JavaScript code -->
+     <script>
+         function confirmDelete(itemId) {
+             // Display a confirmation dialog
+             var confirmed = window.confirm('Are you sure you want to delete this Lab Report?');
+ 
+             // If the user confirms, redirect to the delete view
+             if (confirmed) {
+                 window.location.href = "/MahiEHR/delete_lab_report/" + itemId + "/";
+             }
+         }
+ 
+         document.getElementById('searchInput').addEventListener('input', function () {
+             const searchValue = this.value.toLowerCase();
+             const labReports = document.querySelectorAll('.medicine-card');
+ 
+             labReports.forEach(function (report) {
+                 const investigationName = report.querySelector('.medicine-label').textContent.toLowerCase();
+                 const investigationCategory = report.querySelector('.medicine-info').textContent.toLowerCase();
+                 if (investigationName.includes(searchValue)|| investigationCategory.includes(searchValue)) {
+                     report.style.display = 'flex';
+                 } else {
+                     report.style.display = 'none';
+                 }
+             });
+         });
+     </script>
+ </body>
+ 
+ </html>
+ 
