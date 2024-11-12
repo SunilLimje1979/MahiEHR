@@ -370,7 +370,7 @@
                       <div class="d-flex justify-content-between mb-2">
                           <label for="" class="fw-bold times-new-roman" style="margin-right:2%;font-size: 20px;">KCO</label>
                           <select class="form-control search form-select" id="kco" required  onchange="UpdateKCOTextArea()">
-                              <option value="Kco" disabled selected hidden>None</option>
+                              <option value="Kco" disabled selected hidden>KCO</option>
                               <option value="clear">Clear</option>
                              
                               {% for i in kco %}
@@ -1400,6 +1400,17 @@ document.getElementById('dropdownSearch').addEventListener('input', function () 
         $(document).ready(function() {
           $('#instructionsSelect').select2();
       });
+
+        // Initialize Select2
+        $(document).ready(function() {
+          $('#advice').select2();
+        });
+
+        // Initialize Select2
+        $(document).ready(function() {
+          $('#kco').select2();
+        });
+
 </script>
 
 
