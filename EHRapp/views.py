@@ -3987,7 +3987,7 @@ def handle_deal_action(request):
 def create_death_certificate(request):
     if('doctor_id' in request.session):
         if(request.method=='GET'):
-            return render(request,'doctor/create_death_certificate.html')
+            return render(request,'Doctor/create_death_certificate.html')
         
         else:
             #print(request.POST)
@@ -4058,7 +4058,7 @@ def create_death_certificate(request):
             # }
             if(res.json().get('message_code')==1000):
                 data['death_certificate_id'] = (res.json().get('message_data')).get('death_certificate_id')
-                return render(request,'doctor/create_death_certificate.html',{'data':data})
+                return render(request,'Doctor/create_death_certificate.html',{'data':data})
             else:
                 return HttpResponse("Error Occured...")
             
