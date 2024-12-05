@@ -300,7 +300,14 @@
                 },
                 success: function (response) {
                     if (response.pdf_url) {
-                        window.open(response.pdf_url, '_blank');
+                        const link = document.createElement("a");
+                        link.href = response.pdf_url;
+                        link.target="_blank";
+                        link.download = "DeathCertificate_document.pdf"; // Specify the filename here
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        // window.open(response.pdf_url, '_blank');
                     } else {
                         alert('Failed to generate PDF.');
                     }
