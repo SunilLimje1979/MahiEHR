@@ -80,5 +80,9 @@ urlpatterns = [
     path('Add_laboratory/',Add_laboratory,name='Add_laboratory'),
     path('showDeals/',showDeals,name='showDeals'),
     path('handle_deal_action/',handle_deal_action, name='handle_deal_action'),
+    path('create_death_certificate/',create_death_certificate,name='create_death_certificate'),
+    path('fetch_patient_list/',fetch_patient_list,name='fetch_patient_list'),
+    path('fetch_selected_patient_details/',fetch_selected_patient_details,name='fetch_selected_patient_details'),
+    path('generate_deathCertificate_pdf/',generate_deathCertificate_pdf,name='generate_deathCertificate_pdf'),
 
 ]

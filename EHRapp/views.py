@@ -3984,9 +3984,148 @@ def handle_deal_action(request):
     
     return JsonResponse({"success": False, "message": "Invalid request method."})
 
-
+def create_death_certificate(request):
+    if('doctor_id' in request.session):
+        if(request.method=='GET'):
+            return render(request,'doctor/create_death_certificate.html')
         
+        else:
+            #print(request.POST)
+            data = {
+                "patient_name": request.POST.get('patient_name', ''),
+                "patient_age": request.POST.get('patient_age', ''),
+                "patient_gender": request.POST.get('patient_gender', ''),
+                "issue_date": request.POST.get('issue_date', ''),
+                "death_date": request.POST.get('death_date', ''),
+                "Doctor_name": request.POST.get('Doctor_name', ''),
+                "clinic_name": request.POST.get('clinic_name', ''),  # Uncomment if needed
+                "immediate_cause": request.POST.get('immediate_cause', ''),
+                "antendent_cause": request.POST.get('antendent_cause', ''),
+                "condition_cause": request.POST.get('condition_cause', ''),
+                "other": request.POST.get('other', ''),
+                "onset_to_death_interval": request.POST.get('onset_to_death_interval', ''),
+                "manner_of_death": "Natural",  # Static value
+                "relative_name": request.POST.get('relative_name', ''),
+                "relation_with_patient": request.POST.get('relation_with_patient', ''),
+                "address": request.POST.get('address', ''),
+                "pregnancy_related_death": request.POST.get('pregnancy_related_death', ''),
+                "delivery_status": request.POST.get('delivery_status', ''),
+                "doctor_id": request.session.get('doctor_id', ''),  # Default to blank if not in session
+                "location_id": request.session.get('location_id', ''),  # Default to blank if not in session
+                "treatment_Starton": request.POST.get('treatment_Starton', ''),
+                "treatment_Endon": request.POST.get('treatment_Endon', ''),
+            }
+            #print(data)
+            if(request.POST.get('death_certificate_id')):
+                print(request.POST.get('death_certificate_id'))
+                print("update data")
+                data['death_certificate_id']=request.POST.get('death_certificate_id')
+                res = requests.post('http://13.233.211.102/masters/api/update_death_certificate_details/',json=data)
+                #print(res.text)
+            else:
+                print(request.POST.get('death_certificate_id'),"add")
+                res = requests.post('http://13.233.211.102/masters/api/insert_death_certificate_details/',json=data)
+                #print(res.text)
+            # res={
+            #     "message_code": 1000,
+            #     "message_text": "Death certificate inserted successfully.",
+            #     "message_data": {
+            #         "death_certificate_id": 1,
+            #         "patient_name": "John Doe",
+            #         "patient_age": 65,
+            #         "patient_gender": 1,
+            #         "issue_date": "2024-12-05T10:00:00",
+            #         "death_date": "2024-12-05T15:30:00",
+            #         "Doctor_name": "Dr. Smith",
+            #         "clinic_name": "Healthcare Clinic",
+            #         "immediate_cause": "Cardiac arrest",
+            #         "antendent_cause": "Chronic heart disease",
+            #         "condition_cause": "Hypertension",
+            #         "other": "None",
+            #         "onset_to_death_interval": "3 hours",
+            #         "relative_name": "Jane Doe",
+            #         "relation_with_patient": "Daughter",
+            #         "address": "123 Elm Street, Cityville",
+            #         "pregnancy_related_death": 0,
+            #         "delivery_status": 0,
+            #         "doctor_id": 101,
+            #         "location_id": 201,
+            #         "treatment_Starton": "2024-12-01",
+            #         "treatment_Endon": "2024-12-04",
+            #         "CreatedOn": "2024-12-05T16:00:00",
+            #         "LastModifiedOn": "2024-12-05T16:00:00"
+            #     }
+            # }
+            if(res.json().get('message_code')==1000):
+                data['death_certificate_id'] = (res.json().get('message_data')).get('death_certificate_id')
+                return render(request,'doctor/create_death_certificate.html',{'data':data})
+            else:
+                return HttpResponse("Error Occured...")
+            
 
+    else:
+        return redirect(login)
+    
+# View to fetch the list of patients
+def fetch_patient_list(request):
+    # Assuming you have a Patient model with fields id and name
+    patient_url="http://13.233.211.102/pateint/api/get_patients_by_doctor_id/"
+    patient_res=requests.post(patient_url,json={"doctor_id":request.session['doctor_id']})
+    # # print(patient_res.text)
+    all_data=patient_res.json().get('message_data')
+    return JsonResponse(all_data, safe=False)
+
+#View to fetch details of a specific patient
+@csrf_exempt
+def fetch_selected_patient_details(request):
+    if request.method == 'POST':
+        patient_id = request.POST.get('patient_id')
+        print(patient_id)
+        url="http://13.233.211.102/pateint/api/get_patient_byid/"
+        res=requests.post(url,json={"patient_id":patient_id})
+        # print(res.text)
+        patient=res.json().get('message_data')
+        epoch_timestamp = patient.get('patient_dateofbirth', 0)
+        # print(epoch_timestamp)
+        # formatted_date = datetime.utcfromtimestamp(epoch_timestamp).strftime('%Y-%m-%d')
+        formatted_date=datetime.datetime.fromtimestamp(epoch_timestamp).strftime( "%Y-%m-%d")
+        dob = datetime.datetime.strptime(formatted_date, '%Y-%m-%d').date()   
+        # Calculate the age
+        today = datetime.datetime.today().date()
+        age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+        print(age)
+        patient_data = {
+            'patient_name': patient.get("patient_firstname") + " "+patient.get('patient_lastname'),
+            'patient_age': age,
+            'patient_gender': patient.get('patient_gender'),
+            'address': patient.get('patient_address'),
+        }
+        print(patient_data)
+        return JsonResponse(patient_data)
+    
+
+    
+
+def generate_deathCertificate_pdf(request):
+    if request.method == 'POST':
+        # Fetch death_certificate_id from the request
+        death_certificate_id = request.POST.get('death_certificate_id')
+        if not death_certificate_id:
+            return JsonResponse({'error': 'Death certificate ID is required.'}, status=400)
+
+        # Simulate the generated PDF URL
+        res = requests.post('http://13.233.211.102/masters/api/generate_death_certificate_pdf/',json={'death_certificate_id':death_certificate_id})
+        print(res.text)
+        if(res.json().get('message_code')==1000):
+            pdf_url = f"http://13.233.211.102/masters/static/death_certificates/{death_certificate_id}.pdf"
+        else:
+            pdf_url = ""
+
+        print(pdf_url)
+        # Return the PDF URL
+        return JsonResponse({'pdf_url': pdf_url}, status=200)
+
+    return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
 
 
