@@ -4117,7 +4117,7 @@ def generate_deathCertificate_pdf(request):
         res = requests.post('http://13.233.211.102/masters/api/generate_death_certificate_pdf/',json={'death_certificate_id':death_certificate_id})
         print(res.text)
         if(res.json().get('message_code')==1000):
-            pdf_url = f"http://13.233.211.102/masters/static/death_certificates/{death_certificate_id}.pdf"
+            pdf_url = f"https://www.drishtis.app/masters/static/death_certificates/{death_certificate_id}.pdf"
         else:
             pdf_url = ""
 
