@@ -64,6 +64,19 @@
         }
     }
 
+    /* Scrollable container for the patient list */
+    /* #patient_list_container {
+        background-color: #f8f9fa;
+        padding: 5px;
+    } */
+
+
+    /* List item hover effect */
+    .patient-item:hover {
+        background-color: #e9ecef97; /* Slightly darker gray */
+        cursor: pointer;
+    }
+
     </style>
 </head>
 <body>
@@ -200,9 +213,14 @@
                     <!-- <label for="patient_select" class="form-label">Search and Select Patient</label> -->
                     <!-- Search input for filtering the dropdown -->
                     <input type="text" id="search_patient_input" class="form-control mb-2" placeholder="Search patient from dropdown">
-                    <select id="patient_select" class="form-select" size="5" aria-label="Select Patient">
+                    <!-- <select id="patient_select" class="form-select" size="5" aria-label="Select Patient">
                         <option selected>Select a patient</option>
-                    </select>
+                    </select> -->
+                    <div id="patient_list_container" class="border rounded" style="max-height: 200px; overflow-y: auto;">
+                        <ul id="patient_list" class="list-group">
+                            <!-- Dynamically populated list items -->
+                        </ul>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -226,7 +244,7 @@
             });
         });
     </script>
-    <script>
+    <!-- <script>
         $(document).ready(function () {
             // Show modal to select patient when button is clicked
             $('#system-patient-btn').click(function () { 
@@ -292,6 +310,66 @@
                 }
             });
         });
+    </script> -->
+    <script>
+        $(document).ready(function () {
+            // Fetch and populate the list when the button is clicked
+            $('#system-patient-btn').click(function () {
+                $.ajax({
+                    url: '/MahiEHR/fetch_patient_list/',  // Your API endpoint to fetch patient list
+                    method: 'GET',
+                    success: function (data) {
+                        let patientList = $('#patient_list');
+                        patientList.empty(); // Clear existing list items
+                        data.forEach(function (patient) {
+                            patientList.append(`
+                                <li class="list-group-item patient-item" data-id="${patient.patient_id}">
+                                    ${patient.patient_firstname} ${patient.patient_lastname}
+                                </li>
+                            `);
+                        });
+        
+                        // Show the modal
+                        $('#selectPatientModal').modal('show');
+                    },
+                    error: function () {
+                        alert('Failed to load patient list');
+                    }
+                });
+            });
+        
+            // Implement search functionality
+            $('#search_patient_input').on('input', function () {
+                const searchTerm = $(this).val().toLowerCase();
+                $('#patient_list .patient-item').each(function () {
+                    const text = $(this).text().toLowerCase();
+                    $(this).toggle(text.includes(searchTerm)); // Show/hide matching items
+                });
+            });
+        
+            // Handle patient selection
+            $(document).on('click', '.patient-item', function () {
+                const selectedPatientId = $(this).data('id');
+                // Fetch selected patient details
+                $.ajax({
+                    url: '/MahiEHR/fetch_selected_patient_details/',  // Your API endpoint
+                    method: 'POST',
+                    data: { patient_id: selectedPatientId },
+                    success: function (patientData) {
+                        $('#patient_name').val(patientData.patient_name);
+                        $('#patient_age').val(patientData.patient_age);
+                        $('#patient_gender').val(patientData.patient_gender).change();
+                        $('#address').val(patientData.address);
+        
+                        // Close the modal
+                        $('#selectPatientModal').modal('hide');
+                    },
+                    error: function () {
+                        alert('Failed to fetch patient details');
+                    }
+                });
+            });
+        });        
     </script>
 
     <script>
