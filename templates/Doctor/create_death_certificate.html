@@ -132,7 +132,7 @@
                 </div>
                 <div class="col-md-6">
                     <label for="Doctor_name" class="form-label">Doctor Name</label>
-                    <input type="text" id="Doctor_name" name="Doctor_name" value="{{data.Doctor_name}}" class="form-control" required>
+                    <input type="text" id="Doctor_name" name="Doctor_name" {%if data %}value="{{data.Doctor_name}}"{%else%} value="{{doctor_name}}"{%endif%} class="form-control" required>
                 </div>
             </div>
             <div class="mb-3">
@@ -141,11 +141,11 @@
             </div>
             <div class="mb-3">
                 <label for="antendent_cause" class="form-label">Antecedent Cause</label>
-                <textarea id="antendent_cause" name="antendent_cause" class="form-control" rows="3">{{ data.antendent_cause}}</textarea>
+                <textarea id="antendent_cause" name="antendent_cause" class="form-control" rows="3" required>{{ data.antendent_cause}}</textarea>
             </div>
             <div class="mb-3">
                 <label for="condition_cause" class="form-label">Condition Cause</label>
-                <textarea id="condition_cause" name="condition_cause" class="form-control" rows="3">{{ data.condition_cause}}</textarea>
+                <textarea id="condition_cause" name="condition_cause" class="form-control" rows="3" required>{{ data.condition_cause}}</textarea>
             </div>
             <div class="mb-3">
                 <label for="other" class="form-label">Other</label>
@@ -154,31 +154,31 @@
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label for="onset_to_death_interval" class="form-label">Onset to Death Interval</label>
-                    <input type="text" id="onset_to_death_interval" name="onset_to_death_interval" value="{{data.onset_to_death_interval}}" class="form-control">
+                    <input type="text" id="onset_to_death_interval" name="onset_to_death_interval" value="{{data.onset_to_death_interval}}" class="form-control" required>
                 </div>
                 <div class="col-md-6">
                     <label for="relative_name" class="form-label">Relative Name</label>
-                    <input type="text" id="relative_name" name="relative_name" value="{{data.relative_name}}" class="form-control">
+                    <input type="text" id="relative_name" name="relative_name" value="{{data.relative_name}}" class="form-control" required>
                 </div>
             </div>
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label for="relation_with_patient" class="form-label">Relation with Patient</label>
-                    <input type="text" id="relation_with_patient" name="relation_with_patient" value="{{data.relation_with_patient}}" class="form-control">
+                    <input type="text" id="relation_with_patient" name="relation_with_patient" value="{{data.relation_with_patient}}" class="form-control" required>
                 </div>
                 <div class="col-md-6">
                     <label for="address" class="form-label">Address</label>
-                    <textarea id="address" name="address" class="form-control" rows="2">{{data.address}}</textarea>
+                    <textarea id="address" name="address" class="form-control" rows="2" required>{{data.address}}</textarea>
                 </div>
             </div>
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label for="treatment_Starton" class="form-label">Treatment Start On</label>
-                    <input type="date" id="treatment_Starton" name="treatment_Starton" value="{{data.treatment_Starton}}" class="form-control">
+                    <input type="date" id="treatment_Starton" name="treatment_Starton" value="{{data.treatment_Starton}}" class="form-control" required>
                 </div>
                 <div class="col-md-6">
                     <label for="treatment_Endon" class="form-label">Treatment End On</label>
-                    <input type="date" id="treatment_Endon" name="treatment_Endon" value="{{data.treatment_Endon}}" class="form-control">
+                    <input type="date" id="treatment_Endon" name="treatment_Endon" value="{{data.treatment_Endon}}" class="form-control" required>
                 </div>
             </div>
             <div class="mb-3" style="display: flex;">
@@ -197,8 +197,10 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <label for="patient_select" class="form-label">Search and Select Patient</label>
-                    <select id="patient_select" class="form-select" aria-label="Select Patient">
+                    <!-- <label for="patient_select" class="form-label">Search and Select Patient</label> -->
+                    <!-- Search input for filtering the dropdown -->
+                    <input type="text" id="search_patient_input" class="form-control mb-2" placeholder="Search patient from dropdown">
+                    <select id="patient_select" class="form-select" size="5" aria-label="Select Patient">
                         <option selected>Select a patient</option>
                     </select>
                 </div>
@@ -246,6 +248,18 @@
                     },
                     error: function () {
                         alert('Failed to load patient list');
+                    }
+                });
+            });
+            // Implement simple search functionality
+            $('#search_patient_input').on('input', function () {
+                const searchTerm = $(this).val().toLowerCase();
+                $('#patient_select option').each(function () {
+                    const text = $(this).text().toLowerCase();
+                    if (text.includes(searchTerm)) {
+                        $(this).show(); // Show matching options
+                    } else {
+                        $(this).hide(); // Hide non-matching options
                     }
                 });
             });

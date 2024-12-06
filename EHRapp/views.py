@@ -3987,7 +3987,11 @@ def handle_deal_action(request):
 def create_death_certificate(request):
     if('doctor_id' in request.session):
         if(request.method=='GET'):
-            return render(request,'Doctor/create_death_certificate.html')
+            api_url="http://13.233.211.102/doctor/api/get_doctor_by_id/"
+            response=requests.post(api_url,json={"doctor_id":request.session.get('doctor_id', '')})
+            data=response.json().get("message_data",{})[0]
+            doctor_name = data.get('doctor_firstname')+" "+data.get('doctor_lastname')
+            return render(request,'Doctor/create_death_certificate.html',{'doctor_name':doctor_name})
         
         else:
             #print(request.POST)
@@ -4023,9 +4027,9 @@ def create_death_certificate(request):
                 res = requests.post('http://13.233.211.102/masters/api/update_death_certificate_details/',json=data)
                 #print(res.text)
             else:
-                print(request.POST.get('death_certificate_id'),"add")
+                #print(request.POST.get('death_certificate_id'),"add")
                 res = requests.post('http://13.233.211.102/masters/api/insert_death_certificate_details/',json=data)
-                #print(res.text)
+                print(res.text)
             # res={
             #     "message_code": 1000,
             #     "message_text": "Death certificate inserted successfully.",
