@@ -4131,6 +4131,122 @@ def generate_deathCertificate_pdf(request):
 
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
+from django.utils.safestring import mark_safe
+def medical_certificate(request):
+    if('doctor_id' in request.session):
+        if(request.method=='GET'):
+            api_url="http://13.233.211.102/doctor/api/get_doctor_by_id/"
+            response=requests.post(api_url,json={"doctor_id":request.session.get('doctor_id', '')})
+            data=response.json().get("message_data",{})[0]
+            doctor_name = data.get('doctor_firstname')+" "+data.get('doctor_lastname')
+
+            master_res = requests.get('http://13.233.211.102/masters/api/get_all_certificate_masters/')
+            #print(master_res.text)
+            master_data = master_res.json().get('message_data')
+            #print(master_data)
+            # Serialize master_data as JSON
+            serialized_master_data = json.dumps(master_data)
+            #print("4149",serialized_master_data)
+            return render(request,'Doctor/medical_certificate.html',{'doctor_name':doctor_name,'master_data':mark_safe(serialized_master_data)})
+        
+        else:
+            print(request.POST)
+            certificate_body = request.POST.get('certificate_body')
+            print(certificate_body)
+            data = {
+                "patient_name": request.POST.get('patient_name', ''),
+                "patient_age": request.POST.get('patient_age', ''),
+                "patient_gender": request.POST.get('patient_gender', ''),
+                "issue_date": request.POST.get('issue_date', ''),
+                "Doctor_name": request.POST.get('Doctor_name', ''),
+                #"clinic_name": request.POST.get('clinic_name', ''),  # Uncomment if needed
+                "address": request.POST.get('address', ''),
+                "doctor_id": request.session.get('doctor_id', ''),  # Default to blank if not in session
+                "location_id": request.session.get('location_id', ''),  # Default to blank if not in session
+                "IssueCertificate_Type":request.POST.get('certificate_type', ''),
+                "IssueCertificate_body":certificate_body
+            }
+            if(request.POST.get('leave_Starton')):
+                data["leave_Starton"]= request.POST.get('leave_Starton', '')
+            if(request.POST.get('leave_Endon')):
+                data["leave_Endon"]=request.POST.get('leave_Endon', '')
+            #print(data)
+            if(request.POST.get('CertificateIssue_id')):
+                print(request.POST.get('CertificateIssue_id'))
+                print("update data")
+                data['CertificateIssue_id']=request.POST.get('CertificateIssue_id')
+                res = requests.post('http://13.233.211.102/masters/api/update_certificate_issue/',json=data)
+                #print(res.text)
+            else:
+                print(request.POST.get('CertificateIssue_id'),"add")
+                res = requests.post('http://13.233.211.102/masters/api/insert_certificate_issue/',json=data)
+                #print(res.text)
+                # return HttpResponse("ok 4146")
+            #res={"message_code":1000,"message_text":"Certificate issued successfully.","message_data":{"CertificateIssue_id":1,"patient_name":"Rahul mali","patient_age":23,"patient_gender":0,"issue_date":"2024-12-10T16:43:00Z","Doctor_name":"Raju Host","clinic_name":0,"IssueCertificate_Type":1,"IssueCertificate_body":"<h4>I, <i><strong>Dr. Raju Host</strong></i> do hereby certify that I have carefully examined Sh./Smt./Km. <i><strong>Rahul mali </strong></i>whose signature is given above, and find that he/she recovered from his/her illness and is now fit to resume duties in Govt. Service. I also certify that before arriving at this decision I have examined the original medical certificate (s) and statement (s) of the case (or certified copies thereof) on which leave was granted or extended and have taken these into consideration in arriving at my decision.</h4>","leave_Starton":"2024-12-03","leave_Endon":"2024-12-11","CreatedOn":"2024-12-10T11:14:38.927798Z","LastModifiedBy":0,"LastModifiedOn":"2024-12-10T11:14:38.927798Z","IsDeleted":0,"DeletedOn":"2024-12-10T11:14:38.927798Z","DeletedBy":0,"doctor_id":26,"location_id":28}}
+            if(res.json().get('message_code')==1000):
+                data['CertificateIssue_id'] = (res.json().get('message_data')).get('CertificateIssue_id')
+                master_res = requests.get('http://13.233.211.102/masters/api/get_all_certificate_masters/')
+                #print(master_res.text)
+                master_data = master_res.json().get('message_data')
+                #print(master_data)
+                # Serialize master_data as JSON
+                serialized_master_data = json.dumps(master_data)
+                if(request.POST.get('suffering_from')):
+                    data['suffering_from']=request.POST.get('suffering_from')
+                    data['department']=request.POST.get('department')
+                return render(request,'Doctor/medical_certificate.html',{'data':data,'master_data':mark_safe(serialized_master_data)})
+            else:
+                return HttpResponse("Error Occured...")
+            
+
+    else:
+        return redirect(login)
+    
+
+@csrf_exempt
+def update_certificate_body(request):
+    if request.method == 'POST':
+        # Get the posted data
+        data = json.loads(request.body)
+        
+        doctor_name = data.get('doctor_name', 'Dr. [Name]')
+        patient_name = data.get('patient_name', '[Patient Name]')
+        leave_Starton = data.get('leave_Starton', '[leave_Starton]')
+        leave_Endon = data.get('leave_Endon', '[leave_Endon]')
+        suffering_from = data.get('suffering_from', '[suffering_from]')
+        department = data.get('department', '[department]')
+        certificate_body = data.get('certificate_body', '')
+        
+        # Replace the placeholders with the actual values
+        certificate_body = certificate_body.replace('{{doctor_name}}', doctor_name)
+        certificate_body = certificate_body.replace('{{patient_name}}', patient_name)
+        certificate_body = certificate_body.replace('{{leave_starton}}', leave_Starton)
+        certificate_body = certificate_body.replace('{{leave_endon}}', leave_Endon)
+        certificate_body = certificate_body.replace('{{suffering}}', suffering_from)
+        certificate_body = certificate_body.replace('{{department}}', department)
+
+        # Return the updated certificate body as a JSON response
+        return JsonResponse({'updated_certificate_body': certificate_body})
+
+
+def generate_MedicalCertificate_pdf(request):
+    if request.method == 'POST':
+        # Fetch death_certificate_id from the request
+        CertificateIssue_id = request.POST.get('CertificateIssue_id')
+        if not CertificateIssue_id:
+            return JsonResponse({'error': 'certificate ID is required.'}, status=400)
+
+        # Simulate the generated PDF URL
+        res = requests.post('http://13.233.211.102/masters/api/generate_certificate_issue_pdf/',json={'CertificateIssue_id':CertificateIssue_id})
+        print(res.text)
+        if(res.json().get('message_code')==1000):
+            pdf_url = f"https://www.drishtis.app/masters/static/MedicalCertificates/certificate_{CertificateIssue_id}.pdf"
+        else:
+            pdf_url = ""
+
+        print(pdf_url)
+        # Return the PDF URL
+        return JsonResponse({'pdf_url': pdf_url}, status=200)
 
 
     
