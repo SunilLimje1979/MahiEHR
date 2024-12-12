@@ -4213,6 +4213,13 @@ def update_certificate_body(request):
         patient_name = data.get('patient_name', '[Patient Name]')
         leave_Starton = data.get('leave_Starton', '[leave_Starton]')
         leave_Endon = data.get('leave_Endon', '[leave_Endon]')
+        # Format dates if they are present
+        if leave_Starton and leave_Starton != '[leave_Starton]':
+            leave_Starton = datetime.datetime.strptime(leave_Starton, '%Y-%m-%d').strftime('%d-%m-%Y')
+
+        if leave_Endon and leave_Endon != '[leave_Endon]':
+            leave_Endon = datetime.datetime.strptime(leave_Endon, '%Y-%m-%d').strftime('%d-%m-%Y')
+
         suffering_from = data.get('suffering_from', '[suffering_from]')
         department = data.get('department', '[department]')
         certificate_body = data.get('certificate_body', '')
