@@ -132,7 +132,7 @@
             <label for="headerImage">{% if prescription_settings %}Update Header Image {%else%}Upload Header Image {%endif%}</label>
             <input type="file" class="form-control" id="headerImage" name="headerImage" accept="image/jpeg, image/png">
             {% if prescription_settings.header_image %}
-                <img src="https://www.drishtis.app/doctor{{ prescription_settings.header_image }}?t={{ timestamp }}" alt="Header Image" style="max-width: 100%; height: auto; margin-top: 10px;">
+                <img src="https://mahi-durg.app/doctor{{ prescription_settings.header_image }}?t={{ timestamp }}" alt="Header Image" style="max-width: 100%; height: auto; margin-top: 10px;">
             {% endif %}
         </div>
 
