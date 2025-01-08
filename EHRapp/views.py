@@ -1574,7 +1574,13 @@ def Consultation(request,id):
             # print(formatted_date)
             consult_data['followup_datetime'] = formatted_date
             # print(consult_data)
-
+            ###########Daycare medication###########
+            daycaremedication_url="https://mahi-durg.app/medicalrecord/api/get_daycare_medication_details/"
+            api_para={"consultation_id":request.session['consultation_id']}
+            daycaremedic_response=session.post(daycaremedication_url,json=api_para)
+            if(daycaremedic_response.json().get('message_code')==1000):
+                url = f"{reverse('add_daycare')}?appointment_id={request.session['appointment_id']}"
+                return redirect(url)
             #################patient findingsymptoms################
             # finding_symptoms_url="http://localhost:8000/api/get_patient_findings_symptoms_by_consultation/"
             finding_symptoms_url="https://mahi-durg.app/medicalrecord/api/get_patient_findings_symptoms_by_consultation/"
@@ -4261,6 +4267,1343 @@ def generate_MedicalCertificate_pdf(request):
         return JsonResponse({'pdf_url': pdf_url}, status=200)
 
 
+###################Daycare
+from django.urls import reverse
+
+def add_daycare(request):
+    if(request.method=='GET'):
+        appointment_id=request.GET.get("appointment_id")
+        print("appointment id",appointment_id)
+        Get_Patient_By_Appointment_Id(session,appointment_id)
+        if(get_patient_by_appointment_id.get('consultation_id')):
+            request.session['consultation_id']=get_patient_by_appointment_id.get('consultation_id')
+            # print("the consultation id is present",get_patient_by_appointment_id.get('consultation_id'))
+            consultation_url="https://mahi-durg.app/medicalrecord/api/get_consultation_byconsultationid/"
+            api_para={"consultation_id":request.session['consultation_id']}
+            consult_response=session.post(consultation_url,json=api_para)
+            consult_data=(consult_response.json().get("message_data"))[0]
+            # print(consult_data)
+            epoch_timestamp = consult_data.get('followup_datetime', 0)
+            # # print(epoch_timestamp)
+            # formatted_date = datetime.utcfromtimestamp(epoch_timestamp).strftime('%Y-%m-%d')
+            formatted_date=datetime.datetime.fromtimestamp(epoch_timestamp).strftime( "%Y-%m-%d %H:%M:%S")   
+            # print(formatted_date)
+            consult_data['followup_datetime'] = formatted_date
+            # print(consult_data)
+
+            #################patient findingsymptoms################
+            # finding_symptoms_url="http://localhost:8000/api/get_patient_findings_symptoms_by_consultation/"
+            finding_symptoms_url="https://mahi-durg.app/medicalrecord/api/get_patient_findings_symptoms_by_consultation/"
+            api_para={"consultation_id":request.session['consultation_id']}
+            symptoms_response=session.post(finding_symptoms_url,json=api_para)
+            symptoms_data=(symptoms_response.json().get("message_data"))[0]
+            # print(symptoms_data)
+            #################patient Lab Invstigations################
+            # patientlab_url="http://localhost:8000/api/get_patient_labinvestigations_by_consultation_id/"
+            patientlab_url="https://mahi-durg.app/medicalrecord/api/get_patient_labinvestigations_by_consultation_id/"
+            api_para={"consultation_id":request.session['consultation_id']}
+            patientlab_response=session.post(patientlab_url,json=api_para)
+            patientlab_data=(patientlab_response.json().get("message_data"))
+            lab_list=[]
+            for i in patientlab_data:
+                # print(i)
+                lab_list.append(i['labinvestigation_category'])
+                # print("-----------------------")
+            # print(lab_list)
+            #################Daycare medication Medications################
+            patientmedic_url="https://mahi-durg.app/medicalrecord/api/get_daycare_medication_details/"
+            api_para={"consultation_id":request.session['consultation_id']}
+            patientmedic_response=session.post(patientmedic_url,json=api_para)
+            patientmedic_data=(patientmedic_response.json().get("message_data"))
+            medic_list=[]
+            for i in patientmedic_data:
+                # # print(i)
+                medic_list.append(i)
+                # # print("-----------------------")
+         
+            if medic_list:
+                for i in medic_list:
+                    instuct_res=session.post("https://mahi-durg.app/masters/api/get_medicine_instruction",json={"Doctor_Instruction_Id":i['medicine_instruction_id']})
+                    i['instruction_text']=(instuct_res.json().get('message_data'))[0].get('instruction_text')
+
+                print(medic_list)
+            else:
+                print('no data in medic list')
+
+            #################patient prescription################
+            # prescription_url="http://localhost:8000/api/get_prescription_details/"
+            prescription_url="https://mahi-durg.app/medicalrecord/api/get_prescription_details/"
+            api_para={"consultation_id":request.session['consultation_id']}
+            prescription_response=session.post(prescription_url,json=api_para)
+            # print(prescription_response.text)
+            prescription_data=(prescription_response.json().get("message_data"))[0]
+            # print(prescription_data)
+            default_fees=0
+            #return HttpResponse("Update consultation details")
+        else:
+           symptoms_data=0
+           consult_data=0
+           lab_list=[]
+           medic_list=[]
+           prescription_data={"prescription_details":0}
+           if('consultation_id' in request.session):
+              del request.session['consultation_id']
+           # print("not present",get_patient_by_appointment_id.get('consultation_id'))
+           medic_id=request.session['medic_id']-2
+           api_medicdata={"medical_service_fee_id":medic_id}
+           # medic_url="http://127.0.0.1:8000/api/get_medical_service_fee_details/"
+           medic_url="https://mahi-durg.app/doctor/api/get_medical_service_fee_details/"
+           response=session.post(medic_url,json=api_medicdata)
+           fees=response.json().get("message_data",{})
+           default_fees=fees['charges']
+           print(default_fees,'fees')
+        
+        All_medicines(session,request.session['doctor_id'])
+    ############################################# KCO for for fetch the values########################
+        KCO(session,request.session['doctor_id'])
+            
+        
+    ############################################# ADVICE for for fetch the values########################
+        ADVICE(session,request.session['doctor_id'])
+                        
+    #################################################################################################################    
+        get_labinvestigation(session,request.session['doctor_id'])   # function call get_labinvestigation
+    #######################################################################################################        
+        get_instruction(session,request.session['doctor_id'])  # function call get_labinvestigatio
+
+    ################################################################################################################       
+        
+            # Get_Patient_By_Appointment_Id(session,appointment_id)
+    #######################################################################################################################
+            
+        Get_Patient_Boimterics_Vitals(session,request.session['appointment_id'])
+        patient_res=session.post('https://mahi-durg.app/pateint/api/get_patient_details_by_appointment_id/',json={"appointment_id":request.session['appointment_id']})
+        outstanding=(patient_res.json().get("message_data",{})).get('outstanding',0) or 0
+        # print(outstanding)
+
+        ################################All Active Pharmacist##################
+        # pharma_res= session.post('https://mahi-durg.app/medicalrecord/api/get_doctor_pharmacist_bydoctorid/',json={"doctor_id":request.session['doctor_id'],"Status":0})
+        # # print(pharma_res.text)
+        # if(pharma_res.json().get('message_code')==1000):
+        #     pharmadata = pharma_res.json().get('message_data')
+        #     # print("1563",pharmadata) 
+        
+        # else:
+        #     pharmadata=[]
+        
+        ################################All Active Laboratory##################
+        laboratory_res= session.post('https://mahi-durg.app/medicalrecord/api/get_doctor_laboratory_bydoctorid/',json={"doctor_id":request.session['doctor_id'],"Status":0})
+        # print(laboratory_res.text)
+        if(laboratory_res.json().get('message_code')==1000):
+            laboratorydata = laboratory_res.json().get('message_data')
+            # print("1642",laboratorydata) 
+        
+        else:
+            laboratorydata=[]
+
+
+        return render(request, 'Doctor/Daycare.html', {"get_patient_by_appointment_id":get_patient_by_appointment_id,
+                    "get_patient_boimterics_vitals":get_patient_boimterics_vitals,"all_medicines":all_medicines,
+                    "kco":kco,"advice":advice,"lab_investigation_report":lab_investigation_report,
+                    "medicine_instruction":medicine_instruction,'consult_data':consult_data,'symptoms_data':symptoms_data,
+                    'lab_list':lab_list,'medic_list':medic_list,'prescription':prescription_data['prescription_details'],
+                    'default_fees':default_fees,'pain_scale_range': range(1, 11),'outstanding':outstanding,
+                    'laboratorydata':laboratorydata,
+                })
+        # return HttpResponse("add daycare"+appointment_id)
+
+    else:
+            print(request.POST)
+           # return HttpResponse("4416")
+        ########################## insert consultaions ########################################
+            # Get_Patient_Boimterics_Vitals(session,request.session['appointment_id'])
+            # # print("in consult",get_patient_boimterics_vitals)
+            vital_url="https://mahi-durg.app/medicalrecord/api/get_patientvitals_by_appointment_id/"
+            vital_response=session.post(vital_url,json={"appointment_id": request.session['appointment_id']})
+            # # print(vital_response.text)
+            vital_data=vital_response.json().get('message_data')
+            patient_id= vital_data.get("patient_id")
+            patient_status= vital_data.get("patient_status")
+            # print("id and status",patient_id,patient_status)
+            # dt = request.POST["followup_datetime"]
+            # # print(dt)
+            #  # Parse the input datetime string into a datetime object
+            # datetime_obj = datetime.datetime.strptime(dt, '%Y-%m-%dT%H:%M')
+            # # Add 9 months to the month to get December (datetime objects are 1-indexed)
+            # # datetime_obj = datetime_obj.replace(month=datetime_obj.month + 9)
+            # # Format the datetime object as the required string format
+            # formatted_datetime = datetime_obj.strftime('%Y-%m-%d %H:%M:%S')
+            # # print("required:",formatted_datetime)
+            # followup_datetime_epoch = datetime.datetime.strptime(formatted_datetime, '%Y-%m-%d %H:%M:%S')
+            # followup_datetime = int(followup_datetime_epoch.timestamp())
+            # # print(followup_datetime,'fd')
+            consultation_datetime=int(request.POST["Consultation_DateTime"])
+            # print(consultation_datetime)
+            consultation_datetime = datetime.datetime.fromtimestamp(consultation_datetime).strftime("%Y-%m-%d %H:%M:%S")
+            current_datetime = datetime.datetime.now()
+
+            # Convert to epoch time (Unix timestamp)
+            current_epoch_time = int(current_datetime.timestamp())
+            # # print(current_epoch_time)
+
+            if('consultation_id' in request.session):
+                update_consultation = {
+                    'consultation_id':request.session['consultation_id'],
+                    "patient_id": patient_id,
+                    "doctor_id":request.session["doctor_id"] ,
+                    "patient_status":patient_status,
+                    #"consultation_datetime":consultation_datetime,#appointment_datetime
+                    "instructions":request.POST["Prescription"],
+                    "consultation_fees":request.POST["Fess"],
+                    "referred_to_doctor":request.POST["referred_to_doctor"],
+                    "referred_by_doctor":request.POST["referred_by_doctor"],
+                    # "followup_datetime":followup_datetime,
+                    "appointment_id":request.session['appointment_id'],
+                    "further_assited": 1,
+                    "consultation_datetime":current_epoch_time, 
+                    "consultation_mode": 1,
+                }
+                #updateconsult_url="http://localhost:8000/api/update_consultation_details/"
+                updateconsult_url="https://mahi-durg.app/medicalrecord/api/update_consultation_details/"
+                updateconsult_response=session.post(updateconsult_url,json=update_consultation)
+                # print(updateconsult_response.text)
+
+                all_kco=request.POST['kco']
+                alladvice=request.POST['advice']
+                # Splitting the strings by newline characters and removing empty strings
+                kco_list = [kco.strip() for kco in all_kco.split('\n') if kco.strip()]
+                advice_list = [advice.strip() for advice in alladvice.split('\n') if advice.strip()]
+
+                # Joining the lists into single strings separated by commas
+                kco_str = ', '.join(kco_list)
+                advice_str = ', '.join(advice_list)
+
+                # print(kco_str)
+                # print(advice_str)
+                update_symptoms= {
+                    "patient_id":patient_id, 
+                    "doctor_id": request.session["doctor_id"],
+                    "patient_status": patient_status,
+                    "findgings_datetime": current_epoch_time, 
+                    "consultation_id":request.session['consultation_id'],
+                    "findings": request.POST["Diagnosis"],
+                    "symtoms": request.POST['complaint_details'],
+                    "kco":kco_str,
+                    "advice":advice_str
+                    }
+                update_patient_findingsandsymtoms_url = "https://mahi-durg.app/medicalrecord/api/update_patient_findings_and_symptoms/"
+
+                updatefindingsandsymtoms_response = session.post(update_patient_findingsandsymtoms_url,json=update_symptoms)
+                # print(updatefindingsandsymtoms_response.text)
+                # return HttpResponse("done")
+
+
+               
+                mode = request.POST.get('Mode')
+                medicine = request.POST.get('Medicine')
+                days = request.POST.get('days')
+                dosage = request.POST.get('dosage')
+                language = request.POST.get('Language')
+                instruction = request.POST.get('Instructions')
+                print(language,instruction,mode,medicine,days,dosage) 
+                instruction_list= instruction.split(",")
+                mode_list=mode.split(",")
+                medicine_list=medicine.split(",")
+                days_list=days.split(",")
+                dosage_list=dosage.split(",")
+                language_list=language.split(",")
+                print(language_list,instruction_list,mode_list,medicine_list,days_list,dosage_list)
+                patientmedic_url="https://mahi-durg.app/medicalrecord/api/get_daycare_medication_details/"
+                api_para={"consultation_id":request.session['consultation_id']}
+                patientmedic_response=session.post(patientmedic_url,json=api_para)
+                patientmedic_data=(patientmedic_response.json().get("message_data"))
+                medic_list=[]
+                for i in patientmedic_data:
+                    # print(i)
+                    medic_list.append(i)
+                    # print("-----------------------")
+                print(medic_list)
+                prescription_url="https://mahi-durg.app/medicalrecord/api/get_prescription_details/"
+                api_para={"consultation_id":request.session['consultation_id']}
+                prescription_response=session.post(prescription_url,json=api_para)
+                # print(prescription_response.text)
+                prescription_data=(prescription_response.json().get("message_data"))[0]
+                # print(prescription_data)
+                # prescription_id=(medic_list[0])['prescription_id']
+                prescription_id=prescription_data['prescriptions_id']
+                previous_name={}
+                for i in medic_list:
+                    previous_name[i['medicine_name']]=i['DaycareMedication_id']
+                # print(previous_name)
+                # print(medicine_list)
+                unique_list=[]
+                u_index=[]
+                sum=-1
+                for name in medicine_list:
+                    sum+=1
+                    if(name in previous_name):
+                        continue
+                    else:
+                        u_index.append(sum)
+                        unique_list.append(name)
+        
+                # print(unique_list)
+                # print(u_index,'u_index')
+                # print(sum,'sum')
+
+                updated_modelist=[ mode_list[i]  for i in u_index]
+                # print("update dmode list",updated_modelist)
+                updated_dayslist=[ days_list[i]  for i in u_index]
+                # print("update days list",updated_dayslist)
+                updated_instructionlist=[ instruction_list[i]  for i in u_index]
+                # print("update instruction list",updated_instructionlist)
+                updated_dosagelist=[ dosage_list[i]  for i in u_index]
+                # print("update dosage list",updated_dosagelist)
+                updated_pricelist=[ language_list[i]  for i in u_index]
+
+                # med_id_list=[]
+                # for name in unique_list:
+                #     for medicine in all_medicines:
+                #         if(name==medicine['medicine_name']):
+                #             med_id_list.append(medicine['doctor_medicine_id'])
+                if(unique_list and unique_list[0]):
+                    med_id_list=[]
+                    for name in unique_list:
+                      for medicine in all_medicines:
+                          if(name==medicine['medicine_name']):
+                             med_id_list.append(medicine['doctor_medicine_id'])
+                    # medication_url="http://127.0.0.1:8000/api/insert_patient_medications/"
+                    daycaremedication_url="https://mahi-durg.app/medicalrecord/api/insert_daycare_medication/"
+                    for i in range(len(unique_list)):
+                            medication_data={
+                                "doctor_id": request.session["doctor_id"],
+                                "patient_id": patient_id,
+                                "patient_status": patient_status,
+                                "consultation_id":request.session['consultation_id'],
+                                "prescription_id":prescription_id,
+                                "medication_datetime": "2024-02-01 12:30:00",
+                                "medicine_id": med_id_list[i],
+                                "medicine_form": updated_modelist[i],
+                                "medicine_name": unique_list[i],
+                                "medicine_duration":updated_dayslist[i],
+                                "medicine_doses": updated_dosagelist[i],
+                                "medicine_instruction_id": updated_instructionlist[i],
+                                "medicine_Category": 1,
+                                "medicine_price": int(updated_pricelist[i]),
+                                "medicine_qty": int(updated_dayslist[i]),
+                                "total_amount": (int(updated_pricelist[i]))*(int(updated_dayslist[i]))
+
+                            }
+                            response=session.post(daycaremedication_url,json=medication_data)
+                            print(response.text)
+
+                common_name=[]
+                for i in medicine_list:
+                    if(i in unique_list):
+                        continue
+                    else:
+                        common_name.append(i)
+                # print(common_name,"common Name")
+
+                delete_medic=[]
+                for key, value in previous_name.items():
+                    if key not in common_name:
+                        delete_medic.append(key)
+                        deletemedic_url=" https://mahi-durg.app/medicalrecord/api/delete_daycare_medication/"
+                        deletemedic_response=session.post(deletemedic_url,json={"DaycareMedication_id":value})
+                        print(deletemedic_response.text)
+
+                daycaremedic_url="https://mahi-durg.app/medicalrecord/api/get_daycare_medication_details/"
+                daycaremedic_para={"consultation_id":request.session['consultation_id']}
+                daycaremedic_response=session.post(daycaremedic_url,json=daycaremedic_para)
+                daycaremedic_data=(daycaremedic_response.json().get("message_data"))  
+                if(len(patientmedic_data)!=len(daycaremedic_data) or  request.POST["Fess"]!=request.POST['old_daycarefees']):
+                    billheader_res=session.post('https://mahi-durg.app/medicalrecord/api/get_bill_header_details/',json={"consultation_id":request.session['consultation_id']})
+                    if(billheader_res.json().get('message_code')==1000):
+                        bill_headerData = billheader_res.json().get('message_data')
+                        old_pateint_outstanding=request.POST.get('patient_outstanding')
+                        updated_daycare_fee = request.POST["Fess"]  # new added in textbox
+                        old_daycare_fee = request.POST['old_daycarefees']
+                        print(old_pateint_outstanding,updated_daycare_fee,old_daycare_fee)
+                        total_amount = float(updated_daycare_fee)
+                        for item in daycaremedic_data:
+                            total_amount += item['total_amount']
+                        
+                        print(total_amount)
+                        new_patient_outstanding = float(old_pateint_outstanding) - (bill_headerData[0]['total_bill_amount'] - bill_headerData[0]['Total_bill_paid'])
+                        print(new_patient_outstanding)
+                        new_patient_outstanding+= (float(total_amount) - bill_headerData[0]['Total_bill_paid'])
+                        print(new_patient_outstanding)
+                        new_payable_amount = float(total_amount) -  bill_headerData[0]['Total_bill_paid']
+                        print(new_payable_amount)
+                        #update billheader detail
+                        updatebillheader_res = session.post("https://mahi-durg.app/medicalrecord/api/update_bill_header/",json={"consultation_id":request.session['consultation_id'],"total_bill_amount":float(total_amount),"Total_bill_payable":float(new_payable_amount)})
+                        print(updatebillheader_res.text)
+
+                        #update patient outstanding
+                        updatepatient_res = session.post("https://mahi-durg.app/pateint/api/update_patient_by_id/",json={"patient_id":patient_id,"outstanding":new_patient_outstanding})
+                        print(updatepatient_res.text)
+
+                        #update patient charges
+                        updatepatientCharges_res = session.post("https://mahi-durg.app/medicalrecord/api/update_patient_charges/",json={"patient_id":patient_id,"doctor_id":request.session['doctor_id'],"charges_amount":total_amount,"new_outstanding":new_patient_outstanding})
+                        print(updatepatientCharges_res.text)
+
+
+                    
+
+                    print("4653update the bill amounts")
+                else:
+                    print("4655 no need to update bill details")    
+                # print(delete_medic)
+
+                labs=request.POST['lab_tests']
+                labsdata_list = [labs.strip() for labs in labs.split('\n') if labs.strip()]
+                if(labsdata_list):
+                    #############################laboratory details##############################
+                    selected_laboratorytid = request.POST.getlist('laboratoryoptions[]')  # Fetch selected options as a list 
+                    if(selected_laboratorytid):
+                        for laboratoryid in selected_laboratorytid:
+                            laboratoryapi_data={
+                                "doctor_id": request.session["doctor_id"],
+                                "patient_id": patient_id,
+                                "laboratory_id": int(laboratoryid),
+                                "prescription_id":prescription_id
+                            }
+                            laboratoryapi_res = session.post('https://mahi-durg.app/medicalrecord/api/insert_prescribe_laboratory/',json=laboratoryapi_data)
+                            # print(laboratoryapi_res.text)
+                # print('from screen',labsdata_list)
+                patientlab_url="https://mahi-durg.app/medicalrecord/api/get_patient_labinvestigations_by_consultation_id/"
+                api_para={"consultation_id":request.session['consultation_id']}
+                patientlab_response=session.post(patientlab_url,json=api_para)
+                patientlab_data=(patientlab_response.json().get("message_data"))
+                lab_list={}
+                for i in patientlab_data:
+                    # print(i)
+                    lab_list[i['labinvestigation_category']]=i['patient_labinvestigation_id']
+                    # print("-----------------------")
+                # print('get data',lab_list)
+                unique_lablist=[]
+                for i in labsdata_list:
+                    if(i in lab_list):
+                        continue
+                    else:
+                        unique_lablist.append(i)
+                # print(unique_lablist)
+                if(unique_lablist):
+                    # lab_url="http://localhost:8000/api/insert_patient_labinvestigations/"
+                    lab_url="https://mahi-durg.app/medicalrecord/api/insert_patient_labinvestigations/"
+                    labs_data={
+                    "doctor_id": request.session["doctor_id"],
+                    "patient_id": patient_id,
+                    "patient_status": patient_status,
+                    "consultation_id": request.session['consultation_id'],
+                    "prescription_id": prescription_id,
+                    "labinvestigation_datetime": "2022-02-11 14:30:00",
+                    # "labinvestigation_category": 2,
+                    "patient_labtestid": 1,#investigation_id
+                    "patient_labtestreport": "Sample Report",
+                    "patient_labtestsample": 3,
+                    "patient_labtestreport_check": 0,#1
+                    "lattest_extrafield1": 42,
+                    "isdeleted":0
+                    }
+                    for category in unique_lablist:
+                        labs_data['labinvestigation_category']=category
+                        lab_response=session.post(lab_url,json=labs_data)
+                    # print(lab_response.text)
+                
+                common_labname=[]
+                for i in labsdata_list:
+                    if(i in unique_lablist):
+                        continue
+                    else:
+                        common_labname.append(i)
+                # print(common_labname,"common lab Name")
+                delete_lab=[]
+                for key, value in lab_list.items():
+                    if key not in common_labname:
+                        delete_lab.append(key)
+                        deletelab_url=" https://mahi-durg.app/medicalrecord/api/delete_patient_labinvestigations/"
+                        deletelab_response=session.post(deletelab_url,json={"Patient_LabInvestigation_Id":value})
+                        # print(deletelab_response.text)
+                         
+                # print(delete_lab)
+            
+#####################Update prescription details######################
+                prescritption=request.POST['Prescription']
+                # print(prescritption)
+                # updateprescription_url="http://localhost:8000/api/update_prescription_details/"
+                updateprescription_url="https://mahi-durg.app/medicalrecord/api/update_prescription_details/"
+                prescription_data={
+                    "doctor_id": request.session["doctor_id"],
+                    "patient_id": patient_id,
+                    "patient_status": patient_status,
+                    "consultation_id":request.session['consultation_id'],
+                    "prescription_datetime": current_epoch_time,
+                    "prescription_details": prescritption
+                }
+                updateprescritption_response=session.post(updateprescription_url,json=prescription_data)
+                # print(updateprescritption_response.text)
+
+                api_data = {
+                    "Doctor_Id":request.session["doctor_id"],
+                    "Patient_Id":patient_id,
+                    "Patient_Status":patient_status,
+                    "Consultation_DateTime":request.POST["Consultation_DateTime"],
+                    "patient_heartratepluse": request.POST['heart_rate'],
+                    "patient_bpsystolic": request.POST['bp_s'],
+                    "patient_bpdistolic": request.POST['bp_d'],
+                    "patient_painscale": request.POST['pain_scale'],
+                    "patient_respiratoryrate": request.POST['respiratory_rate'],
+                    "patient_temparature": request.POST['temp'],
+                    "patient_chest": request.POST['chest'],
+                    "patient_ecg": request.POST['ecg'],
+                    "weight":request.POST['weight'],
+                    "height":request.POST['height'],
+                    "bmi":request.POST['bmi'],
+                    "further_assited":"0",
+                    'appointment_id':request.session['appointment_id'],
+                    "consultation_id":request.session['consultation_id']  
+                }
+                # url="http://localhost:8000/api/update_patientvitals_by_appointment_id/"
+                url="https://mahi-durg.app/medicalrecord/api/update_patientvitals_by_appointment_id/"
+                response=session.post(url,json=api_data)
+                # print(response.text)
+
+                url = f"{reverse('add_daycare')}?appointment_id={request.session['appointment_id']}"
+                return redirect(url)
+                #return HttpResponse("done")
+                #return redirect('consultation', id=request.session['appointment_id'])
+            
+            else:
+
+                insert_consultation = {
+                    "Patient_Id": patient_id,
+                    "Doctor_Id":request.session["doctor_id"] ,
+                    "Patient_Status":patient_status,
+                    "Consultation_DateTime":consultation_datetime,#appointment_datetime
+                    "instructions":request.POST["Prescription"],
+                    "consultation_fees":request.POST["Fess"],
+                    "referred_to_doctor":request.POST["referred_to_doctor"],
+                    "referred_by_doctor":request.POST["referred_by_doctor"],
+                    "Followup_DateTime":"2024-06-10 14:30:00",
+                    "appointment_id":request.session['appointment_id'],
+                    'consultation_status':1
+                }
+                consultation_api_url = 'https://mahi-durg.app/medicalrecord/api/insert_consultation'
+
+                consultation_response = session.post(consultation_api_url, json=insert_consultation)
+                print("consultation_response : ", consultation_response.text)
+                consultation = consultation_response.json().get('message_data', {})
+                consultation_id=consultation['consultation_id']
+                # print("consultation_ID : ", consultation)
+                #update appointment status to 3 means completed.
+                # update_status_url="https://mahi-durg.app/appointment/api/update_appointment_status"
+                # status_response=session.post(update_status_url,json={"appointment_id":request.session['appointment_id'],"appointment_status":3})
+                # # print(status_response.text)
+                consultation_id = consultation['consultation_id']
+                # print(consultation_id )
+                request.session[ 'consultation_id' ] = consultation_id   # Create Session for Consulation ID
+
+
+    # ################################ insert_patient__vitals ###############################################
+
+                api_data = {
+                    "Doctor_Id":request.session["doctor_id"],
+                    "Patient_Id":patient_id,
+                    "Patient_Status":patient_status,
+                    "Consultation_DateTime":request.POST["Consultation_DateTime"],
+                    "patient_heartratepluse": request.POST['heart_rate'],
+                    "patient_bpsystolic": request.POST['bp_s'],
+                    "patient_bpdistolic": request.POST['bp_d'],
+                    "patient_painscale": request.POST['pain_scale'],
+                    "patient_respiratoryrate": request.POST['respiratory_rate'],
+                    "patient_temparature": request.POST['temp'],
+                    "patient_chest": request.POST['chest'],
+                    "patient_ecg": request.POST['ecg'],
+                    "weight":request.POST['weight'],
+                    "height":request.POST['height'],
+                    "bmi":request.POST['bmi'],
+                    "further_assited":"0",
+                    'appointment_id':request.session['appointment_id'],
+                    "consultation_id":consultation_id   
+            }
+                # url="http://localhost:8000/api/update_patientvitals_by_appointment_id/"
+                url="https://mahi-durg.app/medicalrecord/api/update_patientvitals_by_appointment_id/"
+                response=session.post(url,json=api_data)
+                # print(response.text)
+                
+    ###############################  insert finding symptoms(complaints & Diagnosis) ########################################
+                all_kco=request.POST['kco']
+                alladvice=request.POST['advice']
+                # Splitting the strings by newline characters and removing empty strings
+                kco_list = [kco.strip() for kco in all_kco.split('\n') if kco.strip()]
+                advice_list = [advice.strip() for advice in alladvice.split('\n') if advice.strip()]
+
+                # Joining the lists into single strings separated by commas
+                kco_str = ', '.join(kco_list)
+                advice_str = ', '.join(advice_list)
+
+                # print(kco_str)
+                # print(advice_str)
+                finding_symptoms= {
+                    "patient_id":patient_id, 
+                    "doctor_id": request.session["doctor_id"],
+                    "patient_status": patient_status,
+                    "findgings_datetime": "2023-12-15 15:10:28", 
+                    "consultation_id":consultation_id,
+                    "findings": request.POST["Diagnosis"],
+                    "symtoms": request.POST['complaint_details'],
+                    "kco":kco_str,
+                    "advice":advice_str
+
+                    }
+                insert_patient_findingsandsymtoms_url = "https://mahi-durg.app/medicalrecord/api/insert_patient_findingsandsymtoms/"
+
+                findingsandsymtoms_response = session.post(insert_patient_findingsandsymtoms_url,json=finding_symptoms)
+                # print(findingsandsymtoms_response.text)
+
+    #################################Prescription###############################
+                prescritption=request.POST['Prescription']
+                # print(prescritption)
+                prescription_url="https://mahi-durg.app/medicalrecord/api/insert_prescriptions/"
+                prescription_data={
+                    "doctor_id": request.session["doctor_id"],
+                    "patient_id": patient_id,
+                    "patient_status": patient_status,
+                    "consultation_id":consultation_id,
+                    "prescription_datetime": "2024-02-01 12:30:00",
+                    "prescription_details": prescritption
+                }
+                prescritption_response=session.post(prescription_url,json=prescription_data)
+                # print(prescritption_response.text)
+                prescription_id=(prescritption_response.json().get("message_data"))[0]['Prescriptions_Id']
+                # print("prescription id:",prescription_id)
+            
+    #############################Pharmacist details##############################
+                # selected_pharmacistid = request.POST.getlist('options[]')  # Fetch selected options as a list 
+                # if(selected_pharmacistid):
+                #     for pharmacistid in selected_pharmacistid:
+                #         pharmaapi_data={
+                #             "doctor_id": request.session["doctor_id"],
+                #             "patient_id": patient_id,
+                #             "pharmacist_id": int(pharmacistid),
+                #             "prescription_id":prescription_id
+                #         }
+                #         pharmaapi_res = session.post('https://mahi-durg.app/medicalrecord/api/insert_prescribe_pharmacist/',json=pharmaapi_data)
+                #         # print(pharmaapi_res.text)
+                    
+                
+    #############################Patient Medications##############################
+                mode = request.POST.get('Mode')
+                medicine = request.POST.get('Medicine')
+                days = request.POST.get('days') #qty
+                dosage = request.POST.get('dosage')
+                language = request.POST.get('Language') #price
+                instruction = request.POST.get('Instructions')
+                print('language',language,'instruction',instruction,'mode',mode,'medicine',medicine,'days',days,'dosage',dosage) 
+                instruction_list= instruction.split(",")
+                mode_list=mode.split(",")
+                medicine_list=medicine.split(",")
+                qty_list=days.split(",")
+                dosage_list=dosage.split(",")
+                price_list=language.split(",")
+                med_id_list=[]
+                All_medicines(session,request.session['doctor_id'])
+                for name in medicine_list:
+                    # print("name",name)
+                    for medicine in all_medicines:
+                        if(name==medicine['medicine_name']):
+                            med_id_list.append(medicine['doctor_medicine_id'])
+            
+                
+                if medicine_list[0]:
+                    # medication_url="http://127.0.0.1:8000/api/insert_patient_medications/"
+                    medication_url="https://mahi-durg.app/medicalrecord/api/insert_daycare_medication/"
+                    for i in range(len(medicine_list)):
+                            medication_data={
+                                "doctor_id": request.session["doctor_id"],
+                                "location_id":request.session['location_id'],
+                                "patient_id": patient_id,
+                                "patient_status": patient_status,
+                                "consultation_id":consultation_id,
+                                "prescription_id":prescription_id,
+                                "medication_datetime": "2024-02-01 12:30:00",
+                                "medicine_id": med_id_list[i],
+                                "medicine_form": mode_list[i],
+                                "medicine_name": medicine_list[i],
+                                "medicine_doses": dosage_list[i],
+                                "medicine_instruction_id": instruction_list[i],
+                                "medicine_Category": 1,
+                                "medicine_price": int(price_list[i]),
+                                "medicine_qty": int(qty_list[i]),
+                                "total_amount": (int(price_list[i]))*(int(qty_list[i]))
+
+                            }
+                            response=session.post(medication_url,json=medication_data)
+                            print(response.text)
+                # # print(language_list,instruction_list,mode_list,medicine_list,days_list,dosage_list,med_id_list)
+                # # print(all_medicines)
+                # # print(med_id_list)
+                # return HttpResponse("ok")
+
+                else:
+                    print("no data")
+                
+    ##############################Patient Lab Investigations###########################
+                labs=request.POST['lab_tests']
+                labs_list = [labs.strip() for labs in labs.split('\n') if labs.strip()]
+                labinvest_id=[]
+                # print(labs_list)
+                if(labs_list):
+                    # lab_url="http://localhost:8000/api/insert_patient_labinvestigations/"
+                    lab_url="https://mahi-durg.app/medicalrecord/api/insert_patient_labinvestigations/"
+                    labs_data={
+                    "doctor_id": request.session["doctor_id"],
+                    "patient_id": patient_id,
+                    "patient_status": patient_status,
+                    "consultation_id": consultation_id,
+                    "prescription_id": prescription_id,
+                    "labinvestigation_datetime": "2022-02-11 14:30:00",
+                    # "labinvestigation_category": 2,
+                    "patient_labtestid": 1,#investigation_id
+                    "patient_labtestreport": "Sample Report",
+                    "patient_labtestsample": 3,
+                    "patient_labtestreport_check": 0,
+                    "lattest_extrafield1": 42,
+                    "isdeleted":0
+                }
+                    for category in labs_list:
+                        labs_data['labinvestigation_category']=category
+                        lab_response=session.post(lab_url,json=labs_data)
+                    # print(lab_response.text)
+
+                    #############################Pharmacist details##############################
+                    selected_laboratorytid = request.POST.getlist('laboratoryoptions[]')  # Fetch selected options as a list 
+                    if(selected_laboratorytid):
+                        for laboratoryid in selected_laboratorytid:
+                            laboratoryapi_data={
+                                "doctor_id": request.session["doctor_id"],
+                                "patient_id": patient_id,
+                                "laboratory_id": int(laboratoryid),
+                                "prescription_id":prescription_id
+                            }
+                            laboratoryapi_res = session.post('https://mahi-durg.app/medicalrecord/api/insert_prescribe_laboratory/',json=laboratoryapi_data)
+                            # print(laboratoryapi_res.text)
+                else:
+                    print("no labs found")
+                
+                # return redirect(get_all_doctor_appointments)
+                url = f"{reverse('add_daycare')}?appointment_id={request.session['appointment_id']}"
+                return redirect(url)
+
+
+from django.http import JsonResponse, HttpResponse
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet,ParagraphStyle
+from io import BytesIO
+ 
+
+# def daycarebillcharges(request):
+#     try:
+#         # Fetch consultation data
+#         consultation_url = "https://mahi-durg.app/medicalrecord/api/get_consultation_byconsultationid/"
+#         api_para = {"consultation_id": request.session['consultation_id']}
+#         consult_response = session.post(consultation_url, json=api_para)
+#         consult_data = (consult_response.json().get("message_data"))[0]
+
+#         # Fetch patient data
+#         url = "https://mahi-durg.app/pateint/api/get_patient_byid/"
+#         res = session.post(url, json={"patient_id": consult_data['patient_id']})
+#         patient = res.json().get('message_data')
+
+#         # Fetch daycare medication data
+#         daycaremedic_url = "https://mahi-durg.app/medicalrecord/api/get_daycare_medication_details/"
+#         patientmedic_response = session.post(daycaremedic_url, json=api_para)
+#         patientmedic_data = patientmedic_response.json().get("message_data")
+
+#         #fetch doctor and clinic details
+#         doctor_url="https://mahi-durg.app/doctor/api/get_doctor_by_id/"
+#         doctor_res=session.post(doctor_url,json={"doctor_id":request.session['doctor_id']})
+#         doctor=doctor_res.json().get("message_data",{})
+#         print(doctor)
+
+#         clinic_url="https://mahi-durg.app/doctor/api/get_all_doctor_location/"
+#         clinic_res=session.post(clinic_url,json={"doctor_location_id":request.session['location_id']})
+#         clinic=clinic_res.json().get("message_data",{})
+#         print(clinic)
+
+#         # Create the PDF in memory
+#         buffer = BytesIO()
+#         pdf = SimpleDocTemplate(
+#             buffer,
+#             pagesize=letter,
+#             topMargin=30,  # Reduced top margin
+#             leftMargin=30,
+#             rightMargin=30,
+#         )
+#         elements = []
+#         styles = getSampleStyleSheet()
+
+#         # Add today's date on top left
+#         today_date = datetime.datetime.now().strftime("%d-%m-%Y")
+#         date_style = ParagraphStyle(
+#             name='DateStyle',
+#             parent=styles['Normal'],
+#             alignment=0,  # Left align
+#             fontSize=10
+#         )
+#         elements.append(Paragraph(f"Date: {today_date}", date_style))
+
+#         # Add Bill Title at the top
+#         title_style = ParagraphStyle(
+#             name='TitleStyle',
+#             parent=styles['Title'],
+#             alignment=1,  # Center align
+#             fontSize=16,
+#             spaceAfter=10
+#         )
+#         elements.append(Paragraph("Daycare Bill", title_style))
+#         elements.append(Spacer(1, 5))  # Reduced space below the title
+
+#         # Add Patient Details
+#         patient_details = [
+#             f"Patient Name: {patient.get('patient_firstname', 'N/A')} {patient.get('patient_lastname', '')}",
+#             f"Gender: {'Male' if patient.get('patient_gender') == 0 else 'Female'}",
+#             f"Mobile Number: {patient.get('patient_mobileno', 'N/A')}",
+#         ]
+#         for detail in patient_details:
+#             elements.append(Paragraph(detail, styles['Normal']))
+#         elements.append(Spacer(1, 10))  # Reduced space below patient details
+
+#         # Add Consultation Fee
+#         consultation_fee = consult_data.get("consultation_fees", 0)  # Assuming 'consultation_fee' is present in consult_data
+#         total_amount = float(consultation_fee)
+#         elements.append(Paragraph(f"DayeCare Amount: Rs {consultation_fee}", styles['Normal']))
+#         elements.append(Spacer(1, 10))  # Reduced space below daycare amount
+
+#         # Add Table for Medication Details
+#         table_data = [["Medicine Name", "Quantity", "Price (Rs)", "Total Amount (Rs)"]]
+#         for item in patientmedic_data:
+#             table_data.append([
+#                 item['medicine_name'],
+#                 item['medicine_qty'],
+#                 f"{item['medicine_price']}",
+#                 f"{item['total_amount']}"
+#             ])
+#             total_amount += item['total_amount']
+
+#         table = Table(table_data, colWidths=[200, 80, 100, 100])
+#         table.setStyle(TableStyle([
+#             ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+#             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+#             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+#             ('GRID', (0, 0), (-1, -1), 1, colors.black),
+#             ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+#         ]))
+#         elements.append(table)
+#         elements.append(Spacer(1, 10))  # Reduced space below the table
+
+#         # Add Grand Total
+#         elements.append(Paragraph(f"Grand Total: Rs {total_amount}", styles['Heading2']))
+
+#         # Build PDF
+#         pdf.build(elements)
+#         buffer.seek(0)
+
+#         # Create a response object to send the PDF
+#         response = HttpResponse(buffer, content_type='application/pdf')
+#         response['Content-Disposition'] = 'attachment; filename="daycare_bill.pdf"'
+#         return response
+
+#     except Exception as e:
+#         return JsonResponse({"message_code": 999, "message_text": f"Error: {str(e)}"})
+def daycarebillcharges(request):
+    try:
+        # Fetch consultation data
+        consultation_url = "https://mahi-durg.app/medicalrecord/api/get_consultation_byconsultationid/"
+        api_para = {"consultation_id": request.session['consultation_id']}
+        consult_response = session.post(consultation_url, json=api_para)
+        consult_data = (consult_response.json().get("message_data"))[0]
+
+        # Fetch patient data
+        patient_url = "https://mahi-durg.app/pateint/api/get_patient_byid/"
+        patient_res = session.post(patient_url, json={"patient_id": consult_data['patient_id']})
+        patient = patient_res.json().get('message_data')
+
+        # Fetch daycare medication data
+        daycaremedic_url = "https://mahi-durg.app/medicalrecord/api/get_daycare_medication_details/"
+        patientmedic_response = session.post(daycaremedic_url, json=api_para)
+        patientmedic_data = patientmedic_response.json().get("message_data")
+
+        # Fetch doctor and clinic details
+        doctor_url = "https://mahi-durg.app/doctor/api/get_doctor_by_id/"
+        doctor_res = session.post(doctor_url, json={"doctor_id": request.session['doctor_id']})
+        doctor = doctor_res.json().get("message_data", {})
+
+        clinic_url = "https://mahi-durg.app/doctor/api/get_all_doctor_location/"
+        clinic_res = session.post(clinic_url, json={"doctor_location_id": request.session['location_id']})
+        clinic = clinic_res.json().get("message_data", {})
+
+        # Create the PDF in memory
+        buffer = BytesIO()
+        pdf = SimpleDocTemplate(
+            buffer,
+            pagesize=letter,
+            topMargin=10,  # Reduced top margin
+            leftMargin=30,
+            rightMargin=30,
+        )
+        elements = []
+        styles = getSampleStyleSheet()
+
+        # Add today's date on top left
+        today_date = datetime.datetime.now().strftime("%d-%m-%Y")
+        date_style = ParagraphStyle(
+            name='DateStyle',
+            parent=styles['Normal'],
+            alignment=0,  # Left align
+            fontSize=10
+        )
+        elements.append(Paragraph(f"Date: {today_date}", date_style))
+
+        # Add Bill Title at the top
+        title_style = ParagraphStyle(
+            name='TitleStyle',
+            parent=styles['Title'],
+            alignment=1,  # Center align
+            fontSize=16,
+            spaceAfter=10
+        )
+        elements.append(Paragraph("Daycare Bill", title_style))
+        elements.append(Spacer(1, 5))  # Reduced space below the title
+
+        # Add Doctor and Clinic Details
+        doctor_clinic_details = [
+            f"Doctor Name: {doctor[0].get('doctor_firstname', 'N/A')} {doctor[0].get('doctor_lastname', '')}",
+            f"Clinic Name: {clinic[0].get('location_title', 'N/A') if clinic else 'N/A'}",
+            f"Clinic Address: {clinic[0].get('location_address', 'N/A') if clinic else 'N/A'}",
+            f"Phone Number: {doctor[0].get('doctor_mobileno', 'N/A')}",
+        ]
+        for detail in doctor_clinic_details:
+            elements.append(Paragraph(detail, styles['Normal']))
+
+        # Add horizontal line
+        # elements.append(Spacer(1, 3))
+        elements.append(Table(
+            [[""]],
+            colWidths=[570],
+            style=TableStyle([('LINEBELOW', (0, 0), (-1, 0), 1, colors.black)])
+        ))
+        elements.append(Spacer(1, 8))
+
+        # Add Patient Details
+        patient_details = [
+            f"Patient Name: {patient.get('patient_firstname', 'N/A')} {patient.get('patient_lastname', '')}",
+            f"Gender: {'Male' if patient.get('patient_gender') == 0 else 'Female'}",
+            f"Mobile Number: {patient.get('patient_mobileno', 'N/A')}",
+        ]
+        for detail in patient_details:
+            elements.append(Paragraph(detail, styles['Normal']))
+        elements.append(Spacer(1, 10))  # Reduced space below patient details
+
+        # Add Consultation Fee
+        consultation_fee = consult_data.get("consultation_fees", 0)  # Assuming 'consultation_fee' is present in consult_data
+        total_amount = float(consultation_fee)
+        elements.append(Paragraph(f"DayeCare Amount: Rs {consultation_fee}", styles['Normal']))
+        elements.append(Spacer(1, 10))  # Reduced space below daycare amount
+
+        # Add Table for Medication Details
+        table_data = [["Medicine Name", "Quantity", "Price (Rs)", "Total Amount (Rs)"]]
+        for item in patientmedic_data:
+            table_data.append([
+                item['medicine_name'],
+                item['medicine_qty'],
+                f"{item['medicine_price']}",
+                f"{item['total_amount']}"
+            ])
+            total_amount += item['total_amount']
+
+        table = Table(table_data, colWidths=[200, 80, 100, 100])
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ]))
+        elements.append(table)
+        elements.append(Spacer(1, 10))  # Reduced space below the table
+
+        # Add Grand Total
+        elements.append(Paragraph(f"Grand Total: Rs {total_amount}", styles['Heading2']))
+
+        # Build PDF
+        pdf.build(elements)
+        buffer.seek(0)
+
+        # Create a response object to send the PDF
+        response = HttpResponse(buffer, content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="daycare_bill.pdf"'
+        return response
+
+    except Exception as e:
+        return JsonResponse({"message_code": 999, "message_text": f"Error: {str(e)}"})
+
+def daycare_finalize(request):
+    data = json.loads(request.body)
+    advfee = data.get('advfee', 0)
+    print("5257",advfee)
+    # if 1000:  # Assuming `success` is a variable indicating success status
+    #     return JsonResponse({'success': True, 'message': 'Bill Genrerated Successfully..'})
+    # else:
+    #     return JsonResponse({'success': False, 'error': 'Failed to Generate Bill'}, status=500)
+
+    update_appstatus_url="https://mahi-durg.app/appointment/api/update_appointment_status"
+    appstatus_response=session.post(update_appstatus_url,json={"appointment_id":request.session['appointment_id'],"appointment_status":3})
+    # print(appstatus_response.text)
+
+    update_consultstatus_url="https://mahi-durg.app/medicalrecord/api/update_consultation_status/"
+    consultstatus_response=session.post(update_consultstatus_url,json={"consultation_id":request.session['consultation_id'],"consultation_status":2})
+    # print(consultstatus_response.text)
+
+    consultation_url="https://mahi-durg.app/medicalrecord/api/get_consultation_byconsultationid/"
+    api_para={"consultation_id":request.session['consultation_id']}
+    consult_response=session.post(consultation_url,json=api_para)
+    consult_data=(consult_response.json().get("message_data"))[0]
+    # print(consult_data)
+
+    # Fetch daycare medication data
+    daycaremedic_url = "https://mahi-durg.app/medicalrecord/api/get_daycare_medication_details/"
+    daycaremedic_response = session.post(daycaremedic_url, json={"consultation_id":request.session['consultation_id']})
+    patientdaycaremedic_data = daycaremedic_response.json().get("message_data")
+    print(patientdaycaremedic_data)
+    daycare_fee = consult_data.get("consultation_fees", 0)  # Assuming 'consultation_fee' is present in consult_data
+    total_amount = float(daycare_fee)
+
+
+    for item in patientdaycaremedic_data:
+        total_amount += item['total_amount']
+
+    print(total_amount)
+    precription_id = (patientdaycaremedic_data[0])['prescription_id'] or None
+
+    url="https://mahi-durg.app/pateint/api/get_patient_byid/"
+    res=session.post(url,json={"patient_id":consult_data['patient_id']})
+    # print(res.text)
+    patient=res.json().get('message_data')
+    prev_oustanding = patient.get('outstanding', 0) or 0
+    new_oustanding = prev_oustanding + float(total_amount) -float(advfee)
+    print(prev_oustanding,new_oustanding)
+    totalbill_payable = float(total_amount) -float(advfee)
+    #############Billheader
+    bill_data={
+        "doctor_id": request.session['doctor_id'],
+        "location_id":request.session['location_id'],
+        "patient_id": consult_data['patient_id'],
+        "consultation_id": request.session['consultation_id'],
+        "prescription_id":precription_id,
+        "total_bill_amount": float(total_amount),
+        "bill_type": 1, #Daycare
+        # "SGST": 75.50,
+        # "CGST": 75.50,
+        "Total_bill_payable": totalbill_payable,
+        # "discount_amount": 50.00,
+        "Total_bill_paid": float(advfee),
+        # "payment_mode": 1,
+        # "transaction_no": "TXN123456789",
+        # "billpayer_name": "John Doe",
+        # "billpayer_mobno": "9876543210",
+        # "bill_status": 0,
+        # "bill_document": "bill_123.pdf"
+        }
+    print(bill_data)
+    billresponse = session.post('https://mahi-durg.app/medicalrecord/api/insert_bill_header/',json=bill_data)
+    print(billresponse.text)
+
+
+    patient_charges_url="https://mahi-durg.app/pateint/api/insert_patient_charges/"
+    patient_charges_data={
+            "doctor_id": request.session['doctor_id'],
+            "patient_id": consult_data['patient_id'],
+            "patient_status": 1,
+            "charges_referencetype": 1,
+            "charges_reference_id": 3,
+            "charges_type": 1,
+            "charges_category": 1,
+            "charges_notes": "Test notes",
+            "charges_units": 5,
+            "charges_rate": 10,
+            "charges_amount": total_amount,
+            "charges_discount": 2,
+            "charges_discount_reason": 1,
+            "charges_discountby": "Admin",
+            "previous_outstanding":prev_oustanding,
+            "new_outstanding":new_oustanding
+        }
+    # print(patient_charges_data)
+    patient_charge_response=session.post(patient_charges_url,json=patient_charges_data)
+    print(patient_charge_response.text)
     
+    patient_apidata = {"patient_id":consult_data['patient_id'],"outstanding":new_oustanding}
+    oustanding_res=session.post("https://mahi-durg.app/pateint/api/update_patient_by_id/",json=patient_apidata)
+    print(oustanding_res.text)
+
+    # pdf_url="https://mahi-durg.app/medicalrecord/api/generateprescriptionpdf/"
+    # url_data= {"consultation_id":request.session['consultation_id']}
+    # response=session.post(pdf_url,json=url_data)
+    # # print(response.text)
+    # pdfurl=((response.json().get("message_data"))[0]).get("pdf_url")
+    # # print(pdfurl)
+    # pdf_link = pdfurl 
+    # # print(pdf_link)
+
+   # billresponse={'message_code':1000}
+    # if 1000:  # Assuming `success` is a variable indicating success status
+    #     return JsonResponse({'success': True, 'message': 'Bill Genrerated Successfully..'})
+    # else:
+    #     return JsonResponse({'success': False, 'error': 'Failed to Generate Bill'}, status=500)
+
+    if billresponse.json().get('message_code')==1000:  # Assuming `success` is a variable indicating success status
+        return JsonResponse({'success': True, 'message': 'Bill Genrerated Successfully..'})
+    else:
+        return JsonResponse({'success': False, 'error': 'Failed to Generate Bill'}, status=500)
 
 
+
+##########Bills
+def get_unpaid_bills(request):
+    if('doctor_id' in request.session):
+        patientbill_res=session.post("https://mahi-durg.app/medicalrecord/api/get_active_bills/",json={"doctor_id":request.session['doctor_id']})
+        #print(patientbill_res.text)
+        if(patientbill_res.json().get('message_code')==1000):
+            bills = patientbill_res.json().get('message_data')
+            return render(request,"Doctor/patient_bills.html",{"bills":bills})
+            return HttpResponse("bills done")
+        else:
+            return HttpResponse("<h1>Contact to Support</h1>")
+    
+    else:
+        return redirect(login)
+
+
+
+def daycarebillpdf(request,consultationid):
+    try:
+        print(consultationid)
+        # Fetch consultation data
+        consultation_url = "https://mahi-durg.app/medicalrecord/api/get_consultation_byconsultationid/"
+        api_para = {"consultation_id": consultationid}
+        consult_response = session.post(consultation_url, json=api_para)
+        consult_data = (consult_response.json().get("message_data"))[0]
+
+        # Fetch patient data
+        patient_url = "https://mahi-durg.app/pateint/api/get_patient_byid/"
+        patient_res = session.post(patient_url, json={"patient_id": consult_data['patient_id']})
+        patient = patient_res.json().get('message_data')
+
+        # Fetch daycare medication data
+        daycaremedic_url = "https://mahi-durg.app/medicalrecord/api/get_daycare_medication_details/"
+        patientmedic_response = session.post(daycaremedic_url, json=api_para)
+        patientmedic_data = patientmedic_response.json().get("message_data")
+
+        # Fetch doctor and clinic details
+        doctor_url = "https://mahi-durg.app/doctor/api/get_doctor_by_id/"
+        doctor_res = session.post(doctor_url, json={"doctor_id": request.session['doctor_id']})
+        doctor = doctor_res.json().get("message_data", {})
+
+        clinic_url = "https://mahi-durg.app/doctor/api/get_all_doctor_location/"
+        clinic_res = session.post(clinic_url, json={"doctor_location_id": request.session['location_id']})
+        clinic = clinic_res.json().get("message_data", {})
+
+        # Create the PDF in memory
+        buffer = BytesIO()
+        pdf = SimpleDocTemplate(
+            buffer,
+            pagesize=letter,
+            topMargin=10,  # Reduced top margin
+            leftMargin=30,
+            rightMargin=30,
+        )
+        elements = []
+        styles = getSampleStyleSheet()
+
+        # Add today's date on top left
+        today_date = datetime.datetime.now().strftime("%d-%m-%Y")
+        date_style = ParagraphStyle(
+            name='DateStyle',
+            parent=styles['Normal'],
+            alignment=0,  # Left align
+            fontSize=10
+        )
+        elements.append(Paragraph(f"Date: {today_date}", date_style))
+
+        # Add Bill Title at the top
+        title_style = ParagraphStyle(
+            name='TitleStyle',
+            parent=styles['Title'],
+            alignment=1,  # Center align
+            fontSize=16,
+            spaceAfter=10
+        )
+        elements.append(Paragraph("Daycare Bill", title_style))
+        elements.append(Spacer(1, 5))  # Reduced space below the title
+
+        # Add Doctor and Clinic Details
+        doctor_clinic_details = [
+            f"Doctor Name: {doctor[0].get('doctor_firstname', 'N/A')} {doctor[0].get('doctor_lastname', '')}",
+            f"Clinic Name: {clinic[0].get('location_title', 'N/A') if clinic else 'N/A'}",
+            f"Clinic Address: {clinic[0].get('location_address', 'N/A') if clinic else 'N/A'}",
+            f"Phone Number: {doctor[0].get('doctor_mobileno', 'N/A')}",
+        ]
+        for detail in doctor_clinic_details:
+            elements.append(Paragraph(detail, styles['Normal']))
+
+        # Add horizontal line
+        # elements.append(Spacer(1, 3))
+        elements.append(Table(
+            [[""]],
+            colWidths=[570],
+            style=TableStyle([('LINEBELOW', (0, 0), (-1, 0), 1, colors.black)])
+        ))
+        elements.append(Spacer(1, 8))
+
+        # Add Patient Details
+        patient_details = [
+            f"Patient Name: {patient.get('patient_firstname', 'N/A')} {patient.get('patient_lastname', '')}",
+            f"Gender: {'Male' if patient.get('patient_gender') == 0 else 'Female'}",
+            f"Mobile Number: {patient.get('patient_mobileno', 'N/A')}",
+        ]
+        for detail in patient_details:
+            elements.append(Paragraph(detail, styles['Normal']))
+        elements.append(Spacer(1, 10))  # Reduced space below patient details
+
+        # Add Consultation Fee
+        consultation_fee = consult_data.get("consultation_fees", 0)  # Assuming 'consultation_fee' is present in consult_data
+        total_amount = float(consultation_fee)
+        elements.append(Paragraph(f"DayeCare Amount: Rs {consultation_fee}", styles['Normal']))
+        elements.append(Spacer(1, 10))  # Reduced space below daycare amount
+
+        # Add Table for Medication Details
+        table_data = [["Medicine Name", "Quantity", "Price (Rs)", "Total Amount (Rs)"]]
+        for item in patientmedic_data:
+            table_data.append([
+                item['medicine_name'],
+                item['medicine_qty'],
+                f"{item['medicine_price']}",
+                f"{item['total_amount']}"
+            ])
+            total_amount += item['total_amount']
+
+        table = Table(table_data, colWidths=[200, 80, 100, 100])
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ]))
+        elements.append(table)
+        elements.append(Spacer(1, 10))  # Reduced space below the table
+
+        # Add Grand Total
+        elements.append(Paragraph(f"Grand Total: Rs {total_amount}", styles['Heading2']))
+
+        # Build PDF
+        pdf.build(elements)
+        buffer.seek(0)
+
+        # Create a response object to send the PDF
+        response = HttpResponse(buffer, content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="daycare_bill.pdf"'
+        return response
+
+    except Exception as e:
+        return JsonResponse({"message_code": 999, "message_text": f"Error: {str(e)}"})
+
+
+def daycarepayment(request):
+    if(request.method == 'GET'):
+        billHeaderId = request.GET.get('billHeaderId')
+        print(billHeaderId)
+        billheader_res = session.post("https://mahi-durg.app/medicalrecord/api/get_active_bills/",json={"billHeader_id":billHeaderId})
+        #print(billheader_res.text)
+        if(billheader_res.json().get('message_code')==1000):
+            bill = billheader_res.json().get('message_data')
+            return render(request,"Doctor/daycarepayment.html",{"bill":bill[0]})
+        else:
+            return HttpResponse("<h1>Contact to Support</h1>")
+    else:
+        print(request.POST)
+        # return redirect('get_unpaid_bills')
+        billHeader_Id=request.GET.get('billHeaderId')
+        patient_outstanding=float(request.POST['patient_outstanding'])
+        total_bill_amount=float(request.POST['total_bill_amount'])
+        print(patient_outstanding,total_bill_amount)
+        payable_status = int(request.POST['payable_status'])
+        bill_status=1
+        if(payable_status == 1):
+            new_patient_outstanding=0
+            paid_amount = float(total_bill_amount)
+            Total_bill_payable=0
+            print(paid_amount)
+        
+        elif(payable_status==2):
+            new_patient_outstanding= patient_outstanding - float(request.POST['paid_amount'])
+            paid_amount=float(request.POST['paid_amount'])
+            Total_bill_payable=0
+            print(paid_amount)
+        
+        elif(payable_status==3):
+            new_patient_outstanding= patient_outstanding - float(request.POST['paid_amount'])
+            remaining_amount= float(request.POST['oldpayableamount'])-float(request.POST['paid_amount'])
+            paid_amount=total_bill_amount - remaining_amount
+            Total_bill_payable=remaining_amount
+            print(paid_amount)
+            if(float(request.POST['paid_amount'])>=float(request.POST['oldpayableamount'])):
+                bill_status=1
+                Total_bill_payable=0
+            else:
+                bill_status=0
+            
+
+        print(new_patient_outstanding)
+        #update billheader detail
+        bill_data = {
+            "billHeader_id":billHeader_Id,
+            "billpayer_name":request.POST['billpayer_name'],
+            "billpayer_mobno":request.POST['billpayer_mobno'],
+            "transaction_no":request.POST['transaction_no'] if request.POST.get('transaction_no') else None,
+            "Total_bill_paid":paid_amount,
+            "payment_mode":request.POST['payment_mode'],
+            "Total_bill_payable":Total_bill_payable,
+            "bill_status":bill_status,
+            "billpaid_datetime": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        }
+        print(bill_data)
+        updatebillheader_res = session.post("https://mahi-durg.app/medicalrecord/api/update_bill_header/",json=bill_data)
+        print(updatebillheader_res.text)
+
+        consultation_url="https://mahi-durg.app/medicalrecord/api/get_consultation_byconsultationid/"
+        api_para={"consultation_id":request.POST['consultation_id']}
+        consult_response=session.post(consultation_url,json=api_para)
+        consult_data=(consult_response.json().get("message_data"))[0]
+        print(consult_data)
+
+        update_appstatus_url="https://mahi-durg.app/appointment/api/update_appointment_status"
+        appstatus_response=session.post(update_appstatus_url,json={"appointment_id":consult_data['appointment_id'],"appointment_status":4})
+        print(appstatus_response.text)
+
+        update_consultstatus_url="https://mahi-durg.app/medicalrecord/api/update_consultation_status/"
+        consultstatus_response=session.post(update_consultstatus_url,json={"consultation_id":request.POST['consultation_id'],"consultation_status":3})
+        print(consultstatus_response.text)
+
+        #update patient outstanding
+        updatepatient_res = session.post("https://mahi-durg.app/pateint/api/update_patient_by_id/",json={"patient_id":int(request.POST['patient_id']),"outstanding":new_patient_outstanding})
+        print(updatepatient_res.text)
+
+
+        return redirect('get_unpaid_bills')
+        #return HttpResponse("else part of 5525")

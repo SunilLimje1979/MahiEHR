@@ -203,6 +203,7 @@
                 <!-- <button class="button" onclick="location.href='/no_service/'"> <i class="fas fa-user" style="margin-bottom:20px ;"></i><br> User</button> -->
                 <button class="button" onclick="location.href='/MahiEHR/settingdashboard/'"> <i class="fas fa-cogs" style="margin-bottom:10px ;"></i><Br> Settings</button>
                 <button class="button" onclick="location.href='/MahiEHR/all_patient/'"> <i class="fas fa-user-injured" style="margin-bottom:10px ;"></i><br> Patient</button>
+                <button class="button" onclick="location.href='/MahiEHR/get_unpaid_bills/'"><i class="fa-solid fa-money-bill" style="margin-bottom:10px ;"></i><br> Bills</button>
                 <button class="button" onclick="location.href='/MahiEHR/get_all_medicines/'"><i class="fas fa-pills" style="margin-bottom:10px ;"></i><br> Medicines</button>
                 <button class="button" onclick="location.href='/MahiEHR/get_all_lab_report/'"><i class="fas fa-flask" style="margin-bottom:10px ;"></i><br>Exam/Lab</button>
                 <button class="button" onclick="location.href='/MahiEHR/all_kco/'"> <i class="fa-solid fa-notes-medical" style="margin-bottom:10px ;"></i><br>KCO</button>
@@ -213,6 +214,9 @@
                 <button class="button" onclick="location.href='/MahiEHR/showDeals/'"><i class="fa-solid fa-envelopes-bulk" style="margin-bottom:10px ;"></i><br>Offers</button>
                 <button class="button" onclick="location.href='/MahiEHR/create_death_certificate/'"><i class="fa-solid fa-skull" style="margin-bottom:10px ;"></i><br>Certificate</button>
                 <button class="button" onclick="location.href='/MahiEHR/medical_certificate/'"><i class="fa-solid fa-file-waveform" style="margin-bottom:10px ;"></i><br>Medic-Docs</button>
+            
+            {%else%}
+                <button class="button" onclick="location.href='/MahiEHR/get_unpaid_bills/'"><i class="fa-solid fa-money-bill" style="margin-bottom:10px ;"></i><br> Bills</button>
             {%endif%}
              
         </div>

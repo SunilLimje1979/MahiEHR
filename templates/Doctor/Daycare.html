@@ -5,7 +5,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consultation_application</title>
+    <title>DayCare Screen</title>
     <link rel="manifest" href="{% static 'assets/manifest.json' %}"> 
     <link rel="shortcut icon" href="{% static 'assets/img/mahi.png' %}">
     
@@ -23,10 +23,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css"/>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,500;0,600;0,700;1,400&amp;display=swap"/>
-    <!-- <link rel="stylesheet" href="{% static 'assets/plugins/bootstrap/css/bootstrap.min.css' %}"/>
-    <link rel="stylesheet" href="{% static 'assets/plugins/fontawesome/css/fontawesome.min.css' %}"/>
-    <link rel="stylesheet" href="{% static 'assets/plugins/fontawesome/css/all.min.css' %}"/>
-    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}" /> -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous"/>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
      
@@ -159,31 +155,6 @@
             }
         }
 
-        /* Button Styles */
-        .btn-admit {
-            background-color: #28a745; /* Green color */
-            color: white;
-            border: none;
-            padding: 5px 15px; /* Adjust padding for smaller size */
-            font-size: 14px;
-            border-radius: 5px; /* Rounded corners */
-            cursor: pointer;
-        }
-
-        .btn-admit:hover {
-            background-color: #218838; /* Darker green on hover */
-            color:white;
-        }
-
-        .btn-ipd {
-            background-color:rgb(144, 93, 12); /* Gray for disabled button */
-            color: white;
-            border: none;
-            padding: 5px 15px;
-            font-size: 14px;
-            border-radius: 5px;
-            cursor: not-allowed; /* Indicate disabled state */
-        }
 
         
     </style>
@@ -196,13 +167,12 @@
         {% csrf_token %}
         <nav class="navbar navbar-expand-lg navbar-light navbar-orange fixed-top">
             <div class="container-fluid pl-3">
-            {% if consult_data.consultation_status != 3 and consult_data.consultation_status != 2 %}
+            {% if consult_data.consultation_status != 3%}
                {% if request.session.subscription_status == 'active' %}
-                    <a class="navbar-brand"  href="#" style="color:#ffffff ;"><i class=""></i>
-                        </i> Consultation
+                    <a class="navbar-brand"  href="{% url 'get_all_doctor_appointments' %}" style="color:#ffffff ;"><i class="fas fa-arrow-left" style="color: #fff;"></i>DayCare 
                     </a>
                 {%else%}
-                    <a class="navbar-brand" style="color: white;"  href="{% url 'get_all_doctor_appointments' %}"><i class="fas fa-arrow-left" style="color: #fff;"></i> Consultation</a>
+                    <a class="navbar-brand" style="color: white;"  href="{% url 'get_all_doctor_appointments' %}"><i class="fas fa-arrow-left" style="color: #fff;"></i> DayCare</a>
                 {%endif%}
                     
                 <div class="d-flex justify-content-end">
@@ -216,7 +186,7 @@
                       {%endif%}        
                 </button>
             {%else%}
-                <a class="navbar-brand" style="color: white;"  href="{% url 'get_all_doctor_appointments' %}"><i class="fas fa-arrow-left" style="color: #fff;"></i> Consultation</a>
+                <a class="navbar-brand" style="color: white;"  href="{% url 'get_all_doctor_appointments' %}"><i class="fas fa-arrow-left" style="color: #fff;"></i> DayCare</a>
             {%endif%}
             </div>
         </nav>
@@ -227,22 +197,11 @@
           <div class="card " style="padding: 1%;">
                 
                 <div class="row">
-                  <!-- {{data1}}
-                  {{data2}} -->
-                  <!-- {{data3}} -->
-                  <!-- {{get_patient_by_appointment_id}} -->
                 </div>
                 <div class="label-row">
                   <label for="label1" style="font-size: 20px;">Patient: {{ get_patient_by_appointment_id.appointment_name }}</label>
                   <label for="label2"style="font-size: 20px; "><i class="fa-solid fa-user-group" style="color: #A52028;"></i> {{get_patient_by_appointment_id.appointment_token}}</label>
                 </div>
-                <!-- <div class="label-row">
-                  <label for="label2">{% if get_patient_by_appointment_id.appointment_gender is 0%}<i class="fa-solid fa-person" style="color: blue; font-size: 30px;"></i>{%else%}<i class="fa-solid fa-person-dress" style="color: rgb(208, 91, 110); font-size: 25px;"></i>{%endif%} 
-                    
-                  </label>
-                  <label for="label2" style="margin-right: 67%;">{{get_patient_by_appointment_id.age}} years</label>
-                 
-                </div> -->
                 <div class="label-row">
                   <div style="font-size: 20px;">
                       {% if get_patient_by_appointment_id.appointment_gender == 0 %}
@@ -253,7 +212,6 @@
                   </div>
                   <div style="font-size: 20px;">
                     Balance: {{outstanding}} &#8377;
-                    <!-- Balance: 48378573878 &#8377; -->
                 </div>
                 </div>
                 <div class="label-row">
@@ -287,30 +245,6 @@
                   <label for="" class="col-5" style="font-size: 20px;">Referred To</label>
                   <input type="text"  class="form-control form-control-sm me-2" name="referred_to_doctor" value="{{consult_data.referred_to_doctor}}" style="margin-left: 1%; margin-right: 0%; font-size: 16px;"   required>
                 </div>
-                {% if not consult_data %}
-                  <!-- Buttons for Daycare and IPD -->
-                  <div class="d-flex justify-content-between mt-4">
-                    <!-- Button for Admit to Daycare -->
-                    <button 
-                        type="button" 
-                        id="admitToDaycareBtn" 
-                        class="btn btn-sm btn-admit" 
-                        data-id="{{ get_patient_by_appointment_id.appointment_id}}"> <!-- Pass ID dynamically here -->
-                        Admit to Daycare
-                    </button>
-
-                    <!-- Button for Admit to IPD (Disabled) -->
-                    <button 
-                        type="button" 
-                        id="admitToIPDBtn" 
-                        class="btn btn-sm btn-ipd"
-                        style="background-color:rgb(144, 93, 12);color:white;"
-                        disabled>
-                        Admit to IPD
-                    </button>
-                  </div>
-                {%endif%}
-
                 
                 
                 <hr>
@@ -327,7 +261,7 @@
                <input type = "hidden" value="{{i.patient_status}}" name = "Patient_Status"/>
                <!-- <input type=" hiden" value="{{i.consultation_id}}" name ="consultation_id"/> -->
                <input type ="hidden" value="{{get_patient_by_appointment_id.appointment_datetime}}" name = "Consultation_DateTime"/>
-               
+               <input type="hidden" value="{{outstanding}}" name="patient_outstanding">
                 <div class="d-flex flex-start">
                   <label for="inputWeight" class="col-5" style="font-size: 18px;">Weight</label>
                   <input type="number" id="inputWeight" class="form-control form-control-sm me-2" style="width: 150px; font-size: 16px;" name="weight" value="{{i.weight}}" placeholder=" " required>
@@ -486,16 +420,17 @@
     <!-- Treatment -->
       <div class="container mb-2">
         <div class="card p-3">
-            <h2 class="fw-bold mb-1">Treatment</h2>
+            <h2 class="fw-bold mb-1">Daycare Medication</h2>
             <div class="table-responsive mb-2">
               <table class="table">
                   <thead>
                       <tr>
                           <th>Medicine</th>
                           <th>Mode</th>
-                          <th>Days</th>
+                          <th>Qty</th>
                           <th>Dosages</th>
                           <th>Instructions</th>
+                          <th>Price</th>
                           <th>Remove</th>
                       </tr>
                   </thead>
@@ -525,10 +460,11 @@
                                   Unknown Mode
                               {% endif %}
                           </td>
-                          <td>{{ i.medicine_duration }}</td>
+                          <td>{{ i.medicine_qty }}</td>
                           <td>{{ i.medicine_doses }}</td>
                           <!-- <td>{{ i.medicine_instruction_id }}</td> -->
                           <td data-instruction-id="{{ i.medicine_instruction_id }}">{{ i.instruction_text }}</td>
+                          <td>{{ i.medicine_price }}</td>
                           <td><button class="btn btn-danger btn-sm removeBtn">Remove</button></td>
                       </tr>
                       {% endfor %}
@@ -538,8 +474,6 @@
 
             <!-- Form for adding medicine details -->
             <div class="mb-3">
-                <!-- Search input for the dropdown -->
-                <!-- <input type="text" id="dropdownMedicineSearch" class="form-control mb-2" placeholder="Search medicine name"> -->
                 <!-- <label for="medicineSelect" class="form-label">Medicine</label> -->
                 <select class="form-select" id="medicineSelect" size="1">
                     <option value="" disabled selected hidden>Select Medicine</option>
@@ -562,10 +496,10 @@
                     <input type="text" class="form-control" id="modeField" readonly>
                 </div>
                 <div class="col-2">
-                    <label for="daysField"  class="form-label mt-1">Days:</label>
+                    <label for="qtyField"  class="form-label mt-1">Qty:</label>
                 </div>
                 <div class="col-3">
-                    <input type="text" class="form-control" id="daysField" readonly>
+                    <input type="number" class="form-control" id="qtyField" >
                 </div>
                 <div class="col-4">
                     <input type="text" class="form-control" id="dosagesField" readonly>
@@ -575,11 +509,13 @@
             <div class="row mb-3">
                 <!-- Second Row -->
                 <div class="col-5">
-                  <select class="form-select" id="languageSelect">
+                  <!-- <select class="form-select" id="priceField">
                     <option value="EN">English</option>
                     <option value="MA">Marathi</option>
                     <option value="HI">Hindi</option>
-                  </select>
+                  </select> -->
+                  <!-- <label for="priceField"  class="form-label mt-1">price:</label> -->
+                  <input type="text" class="form-control" id="priceField" placeholder="Price" >
                 </div>
                 <div class="col-7">
                   <select class="form-select" id="instructionsSelect">
@@ -593,44 +529,6 @@
 
             <button id="addMedicineBtn" class="btn btn-primary">Add Medicine</button>
 
-            <!-- Table to display added medicine details -->
-            <!-- <div class="table-responsive mt-4">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Medicine</th>
-                            <th>Mode</th>
-                            <th>Days</th>
-                            <th>Dosages</th>
-                            <th>Instructions</th>
-                            <th>Remove</th>
-                        </tr>
-                    </thead>
-                    <tbody id="medicineTableBody">
-                       
-                        {% for i in medic_list %}
-                        <tr>
-                            <td>{{ i.medicine_name }}</td>
-                            <td>
-                                {% if i.medicine_form == '1' %}
-                                    Tab
-                                {% elif i.medicine_form == '2' %}
-                                    Syp
-                                {% elif i.medicine_form == '3' %}
-                                    Pwd
-                                {% else %}
-                                    Unknown Mode
-                                {% endif %}
-                            </td>
-                            <td>{{ i.medicine_duration }}</td>
-                            <td>{{ i.medicine_doses }}</td>
-                            <td>{{ i.medicine_instruction_id }}</td>
-                            <td><button class="btn btn-danger btn-sm removeBtn">Remove</button></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div> -->
 
             <!-- Hidden fields for storing form data -->
             <input type="hidden" id="Medicine_input" name="Medicine">
@@ -655,8 +553,6 @@
             </div> 
             <div class="form-group">
                <!-- Search input for the dropdown -->
-              <!-- <input type="text" id="dropdownSearch" class="form-control mb-2" placeholder="Search lab name"> -->
-
                <!-- {{lab_investigation_report}}  -->
               <select class="form-control search form-select" name="labOptions"   onchange="updateTextArea()" id="labDropdown" size="1">
                 <option value="" disabled selected hidden>Select Lab</option>
@@ -665,29 +561,14 @@
                 {% for lab in lab_investigation_report  %}
                 <option value="{{lab.investigation_name}}">{{lab.investigation_name}}</option>
                 {%endfor%}
-                <!-- <option value="{{lab_investigation_report.investigation_name}}">{{lab_investigation_report.investigation_name}}</option> -->
-                <!-- <option value="{{lab_investigation_report.investigation_name}}">{{lab_investigation_report.investigation_category}}</option> -->
-
-                
-                <!-- {% for i in lab_investigation_report %} -->
-                <!-- {%endfor%} -->
-                <!-- <option value="{{lab_test_report}}">{{lab_test_report}}</option> -->
-                <!-- <option value="{{lab_investigation_report}}">{{lab_investigation_report}}</option> -->
-
-
-                <!-- <option value="Two">Two</option>
-                <option value="Three">Three</option> -->
+                 
               </select>
             </div>
           </div>
-          <!-- <div class="col-12">
-            <div class="form-group">
-              <textarea id="selectedOptions" type="text" placeholder="Display here selected options" class="form-control" name="lab_tests" rows="4" >{% for i in lab_list %}{{i}}{% if not forloop.last %}&#10;{% endif %}{% endfor %}</textarea>
-            </div>
-          </div>  -->
+          
         </div>
       </div>
-      <div class="container mb-2" style="margin-bottom:0%;">
+      <!-- <div class="container mb-2" style="margin-bottom:0%;">
         <div class="card"  style="padding: 1%;" >
         <div class="pt-2 ">
           <div class="col-12">
@@ -703,7 +584,7 @@
           </div>
             </div>
           </div>
-        </div>
+        </div> -->
       </div>
       </div>
       <div class="container mb-2 " style="margin-bottom:0% ">
@@ -727,15 +608,29 @@
       <!-- <div class="pt-3"> -->
           <div class="col mb-2">
             <div class="d-flex justify-content-between mb-2">
-              <label for="" class="  fw-bold times-new-roman"  style="max-width:60%; font-size: 20px;">Consultation Fees <i class="fa fa-inr"></i></label>
+              <label for="" class="  fw-bold times-new-roman"  style="max-width:60%; font-size: 20px;">DayCare Fee <i class="fa fa-inr"></i></label>
               <input type="number" class="form-control" name="Fess" value="{% if consult_data.consultation_fees %}{{ consult_data.consultation_fees }}{% else %}{{ default_fees }}{% endif %}" placeholder="Amount" style="max-width:40%;" />
+              <input type="hidden" name="old_daycarefees" value="{{consult_data.consultation_fees}}">
           </div>
           </div>
           
       </div>
       </div>
-      </div>
-    {% if pharmadata %}
+      {%if consult_data.consultation_status == 1 %}
+        <div class="container mb-2" style="margin-bottom:0%;">
+          <div class="card" style="padding: 1%;">
+          <!-- <div class="pt-3"> -->
+              <div class="col mb-2">
+                <div class="d-flex justify-content-between mb-2">
+                  <label for="" class="  fw-bold times-new-roman"  style="max-width:60%; font-size: 20px;">Advance Payment <i class="fa fa-inr"></i></label>
+                  <input type="number" class="form-control" id="advfee" name="advfee" value="0" placeholder="Advance Pay" style="max-width:40%;" />
+              </div>
+              </div>
+              
+          </div>
+        </div>
+      {%endif%}
+    {% comment %} {% if pharmadata %}
         <div class="container mt-3">
             <div class="card" style="padding: 1%;">
                 <div class="form-group">
@@ -748,7 +643,7 @@
                 </div>
             </div>
         </div>
-    {%endif%}
+    {%endif%} {% endcomment %}
 
     {% if laboratorydata %}
         <div id="laboratorydropdown" class="container mt-3" {%if lab_list %}style="display:block" {%else%}style="display:none" {%endif%}>
@@ -771,7 +666,15 @@
       <!-- <h1>Print and Save Example</h1> -->
       <div class="row mt-3 " style="margin-bottom:1%">
       <div class="d-flex justify-content-between">
-    {% if consult_data.consultation_status != 3 and consult_data.consultation_status != 2  %}
+        <!-- <button type="submit" class="btn btn-primary mx-3" id="SaveButton"  onclick="saveData()" style="background-color: #A52028; border-color:#A52028; color:white ;display: block;">
+          <i class="fas fa-save"></i> 
+            {% if consult_data %}
+              Update
+            {%else%}
+              Save 
+            {%endif%}        
+        </button> -->
+    {% if consult_data.consultation_status != 3%}
         <button type="submit" class="btn btn-primary mx-3" id="SaveButton"  onclick="saveData()" style="background-color: #A52028; border-color:#A52028; color:white ;display: block;">
           <i class="fas fa-save"></i> 
             {% if consult_data %}
@@ -786,9 +689,8 @@
         <button class="btn btn-primary" onclick="savePage()">Print</button> -->
         {%if consult_data%}
         <!-- <button class="btn btn-success" onclick="savePage()">Complete</button> -->
-        <button id="completeBtn" class="btn btn-success">Complete</button>
-        <button id="printBtn" class="btn btn-primary" style="display: none;background-color:#A52028;">Print</button>
-        <button id="paidBtn" class="btn btn-primary" style="display: none;background-color: #A52028;">Paid</button>
+        {%if consult_data.consultation_status == 1 %} <button id="completeBtn" class="btn btn-success">Finalize</button>{%endif%}
+        <button id="daycarebill" class="btn btn-info" style="color:white">Daycarebill</button>
         <div id="pdfViewer"></div>
         {%endif%}
     {%endif%}
@@ -812,10 +714,6 @@
      
     
 
-    <!-- <script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
-    <script src="{% static 'assets/js/popper.min.js' %}"></script>
-    <script src="{% static 'assets/plugins/bootstrap/js/bootstrap.min.js' %}"></script>
-    <script src="{% static 'assets/js/script.js' %}"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
@@ -889,36 +787,9 @@
               document.getElementById('laboratorydropdown').style.display = 'block';
           }
       }
-      // Reset the search input and dropdown
-      // var searchInput = document.getElementById('dropdownSearch');
-      // searchInput.value = '';
-      // const options = selectElement.querySelectorAll('option');
-      // options.forEach(option => option.style.display = '');
-      // selectElement.size = 1; // Close the dropdown
+
   }
 
-  // document.getElementById('dropdownSearch').addEventListener('input', function () {
-  //     const searchValue = this.value.toLowerCase();
-  //     const dropdown = document.getElementById('labDropdown');
-  //     const options = dropdown.querySelectorAll('option');
-
-  //     if (searchValue === '') {
-  //         options.forEach(option => option.style.display = '');
-  //         dropdown.size = 1; // Close the dropdown if search is cleared
-  //     } else {
-  //         options.forEach(function (option) {
-  //             if (option.value.toLowerCase().includes(searchValue) || option.value === "" || option.value === "clear") {
-  //                 option.style.display = '';
-  //             } else {
-  //                 option.style.display = 'none';
-  //             }
-  //         });
-
-  //         // Open the dropdown by setting size based on filtered options
-  //         const visibleOptions = Array.from(options).filter(option => option.style.display === '');
-  //         dropdown.size = visibleOptions.length > 1 ? visibleOptions.length : 2;
-  //     }
-  // });
 
   function saveData() {
       // Display loading circle on the button
@@ -933,88 +804,102 @@
   }
 </script>
 
+<script>
+  document.getElementById('daycarebill').addEventListener('click', function (event) {
+      event.preventDefault();
+      
+      fetch('/MahiEHR/daycarebillcharges/')
+          .then(response => {
+              if (response.ok) {
+                  return response.blob();
+              }
+              throw new Error("Failed to generate bill");
+          })
+          .then(blob => {
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.style.display = 'none';
+              a.href = url;
+              a.download = 'daycare_bill.pdf'; // File name for download
+              document.body.appendChild(a);
+              a.click();
+              window.URL.revokeObjectURL(url);
+          })
+          .catch(error => {
+              console.error('Error:', error);
+              alert('Failed to generate bill.');
+          });
+  });
+</script>
 
-  <script>
 
-    document.getElementById('backToAppointmentBtn').addEventListener('click', function(event) {
-        event.preventDefault(); // Prevent the default action
-        location.href = '/MahiEHR/get_all_doctor_appointments'; // Navigate to the specified URL
-    });
-
+  <!-- <script>
     document.getElementById('completeBtn').addEventListener('click', function() {
         // Send AJAX request to backend API to fetch the PDF link
         event.preventDefault(); 
-        fetch('/MahiEHR/get_pdf_link/')
+        $('.btn').prop('disabled', true); // Disable the save button
+        $('#loader').show(); // Show the loader
+        $('#overlay').show(); // Show the overlay to disable the page
+        fetch('/MahiEHR/daycare_finalize/')
         .then(response => response.json())
         .then(data => {
             // Check if the response contains the PDF link
-            if (data && data.pdf_link) {
-                // Show the Print button
-                document.getElementById('printBtn').style.display = 'block';
-                // Show the Paid button
-                document.getElementById('paidBtn').style.display = 'block';
-                // hide  the complete button
-                document.getElementById('completeBtn').style.display = 'none';
-                // Show the Back to Appointment button
-                document.getElementById('backToAppointmentBtn').style.display = 'block';
-                // hide  the update to Appointment button
-                document.getElementById('saveButton').style.display = 'none';
-                document.getElementById('SaveButton').style.display = 'none';
-                
-                // Store the PDF link in a variable
-                const pdfLink = data.pdf_link;
-                
-                // Attach the PDF link to the print button
-                document.getElementById('printBtn').dataset.pdfLink = pdfLink;
+            if (data.success) {
+              alert(data.message || "Bill Genreated successfully!");
+              window.location.reload();
             } else {
-                alert('Failed to fetch PDF link.');
+              alert(data.error || 'Failed to Genreate Bill Try Again or Contact Support link.');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Failed to fetch PDF link.');
+            alert('Failed to Genreate Bill Try Again or Contact Support link.');
         });
-    });
-    
-    document.getElementById('printBtn').addEventListener('click', function() {
-        // Open the PDF link in a new tab for printing
-        event.preventDefault(); 
-        const pdfLink = this.dataset.pdfLink;
-        if (pdfLink) {
-            const link = document.createElement("a");
-            link.href = pdfLink;
-            link.target="_blank";
-            link.download = "prescription_document.pdf"; // Specify the filename here
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            // window.open(pdfLink, '_blank');
-        } else {
-            alert('PDF link not available.');
-        }
-    });
+    });      
+</script> -->
+<script>
+  document.getElementById('completeBtn').addEventListener('click', function(event) {
+      event.preventDefault(); 
 
-    document.getElementById('paidBtn').addEventListener('click', function() {
-       // Send AJAX request to backend API to fetch the PDF link
-       event.preventDefault(); 
-       fetch('/MahiEHR/paid/')
-        .then(response => response.json())
-        .then(data => {
-            // Check the response from the server
-            if (data.message === 'Payment successful') {
-                // Display a success message on the page
-                alert('Payment done successfully!');
-            } else {
-                // Display an error message if payment failed
-                alert('Payment failed. Please try again.');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Payment not done');
-        });
-    });
-         
+      // Get the value from the input box
+      const advfeeValue = document.getElementById('advfee').value;
+
+      // Disable the button and show loader
+      $('.btn').prop('disabled', true); 
+      $('#loader').show(); 
+      $('#overlay').show(); 
+
+      // Send AJAX request to backend
+      fetch('/MahiEHR/daycare_finalize/', {
+          method: 'POST',  // Use POST method to send data
+          headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': '{{ csrf_token }}'  // Include CSRF token for Django backend
+          },
+          body: JSON.stringify({
+              advfee: advfeeValue  // Send advfee value
+          })
+      })
+      .then(response => response.json())
+      .then(data => {
+          // Handle the response
+          if (data.success) {
+              alert(data.message || "Bill generated successfully!");
+              window.location.reload();
+          } else {
+              alert(data.error || 'Failed to generate bill. Try again or contact support.');
+          }
+      })
+      .catch(error => {
+          console.error('Error:', error);
+          alert('Failed to generate bill. Try again or contact support.');
+      })
+      // .finally(() => {
+      //     $('.btn').prop('disabled', false); 
+      //     $('#loader').hide(); 
+      //     $('#overlay').hide(); 
+      // });
+  });
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
@@ -1028,158 +913,6 @@
 </script>
 
 
-
-<!-- <script>
-  // Initialize Select2
-  $(document).ready(function() {
-      $('#medicineSelect').select2();
-  });
-
-  document.addEventListener('DOMContentLoaded', () => {
-      const medicineSelect = document.getElementById('medicineSelect');
-      const modeField = document.getElementById('modeField');
-      const daysField = document.getElementById('daysField');
-      const dosagesField = document.getElementById('dosagesField');
-      const languageSelect = document.getElementById('languageSelect');
-      const instructionsSelect = document.getElementById('instructionsSelect');
-      const addMedicineBtn = document.getElementById('addMedicineBtn');
-      const medicineTableBody = document.getElementById('medicineTableBody');
-      const Medicine_input = document.getElementById('Medicine_input');
-      const Mode_input = document.getElementById('Mode_input');
-      const Days_input = document.getElementById('Days_input');
-      const Dosage_input = document.getElementById('Dosage_input');
-      const Language_input = document.getElementById('Language_input');
-      const Instructions_input = document.getElementById('Instructions_input');
-
-      // Initialize hidden fields with existing medicine list data
-      updateHiddenInputValues();
-
-      // Event listener for when a medicine is selected
-      $('#medicineSelect').on('change', function() {
-          const selectedOption = this.options[this.selectedIndex];
-          const form = selectedOption.getAttribute('data-form');
-          const duration = selectedOption.getAttribute('data-duration');
-          const dosages = selectedOption.getAttribute('data-dosages');
-
-          // Update fields in the form based on selected medicine
-          modeField.value = getModeLabel(form);
-          daysField.value = duration;
-          dosagesField.value = dosages;
-      });
-
-      // Event listener for adding medicine
-      addMedicineBtn.addEventListener('click', (event) => {
-          event.preventDefault(); // Prevent default form submission behavior
-
-          const selectedMedicine = medicineSelect.value;
-          const selectedOption = medicineSelect.options[medicineSelect.selectedIndex];
-          const mode = selectedOption.getAttribute('data-form'); // Get mode from selected option
-          const days = daysField.value;
-          const dosage = dosagesField.value;
-          const instructions = instructionsSelect.value;
-          const instructionsText = instructionsSelect.options[instructionsSelect.selectedIndex].text;
-          const language = languageSelect.value;
-
-          // Add row to the medicine table
-          const newRow = medicineTableBody.insertRow();
-          newRow.innerHTML = `
-              <td>${selectedMedicine}</td>
-              <td>${getModeLabel(mode)}</td>
-              <td>${days}</td>
-              <td>${dosage}</td>
-              <td data-instruction="${instructions}" data-language="${language}">${instructionsText}</td>
-              <td><button class="btn btn-danger btn-sm removeBtn">Remove</button></td>
-          `;
-
-          // Update hidden input values after adding medicine
-          updateHiddenInputValues();
-
-          // Clear the form fields after adding medicine
-          resetForm();
-      });
-
-      // Event delegation to handle remove button clicks
-      medicineTableBody.addEventListener('click', (event) => {
-          if (event.target.classList.contains('removeBtn')) {
-              const row = event.target.closest('tr');
-              medicineTableBody.removeChild(row);
-
-              // Update hidden input values after removal
-              updateHiddenInputValues();
-          }
-      });
-
-      // Function to update hidden input values after adding/removing a row
-      function updateHiddenInputValues() {
-          const medicineRows = Array.from(medicineTableBody.getElementsByTagName('tr'));
-          const medicines = [];
-          const modes = [];
-          const days = [];
-          const dosages = [];
-          const instructions = [];
-          const languages = [];
-
-          medicineRows.forEach(row => {
-              const cells = row.cells;
-              medicines.push(cells[0].textContent);
-              modes.push(getModeValue(cells[1].textContent));
-              days.push(cells[2].textContent);
-              dosages.push(cells[3].textContent);
-              instructions.push(cells[4].getAttribute('data-instruction')); // Get instructions from the 5th cell
-              languages.push(cells[4].getAttribute('data-language')); // Get language from the 5th cell
-          });
-
-          // console.log(instructions);
-
-          // Join arrays into comma-separated strings for hidden input values
-          Medicine_input.value = medicines.join(',');
-          Mode_input.value = modes.join(',');
-          Days_input.value = days.join(',');
-          Dosage_input.value = dosages.join(',');
-          Instructions_input.value = instructions.join(',');
-          Language_input.value = languages.join(',');
-      }
-
-      // Function to get mode label based on mode value
-      function getModeLabel(value) {
-          switch (value) {
-              case '1':
-                  return 'Tab';
-              case '2':
-                  return 'Syp';
-              case '3':
-                  return 'Pwd';
-              default:
-                  return 'Unknown';
-          }
-      }
-
-      // Function to get mode value based on mode label
-      function getModeValue(label) {
-          label = label.trim(); // Trim whitespace from the label
-          switch (label) {
-              case 'Tab':
-                  return 1;
-              case 'Syp':
-                  return 2;
-              case 'Pwd':
-                  return 3;
-              default:
-                  return 0;
-          }
-      }
-
-      // Function to reset the form fields
-      function resetForm() {
-          medicineSelect.selectedIndex = 0;
-          modeField.value = '';
-          daysField.value = '';
-          dosagesField.value = '';
-          languageSelect.selectedIndex = 0;
-          instructionsSelect.selectedIndex = 0;
-      }
-  });
-</script> -->
 <script>
     // Initialize Select2
 $(document).ready(function() {
@@ -1189,9 +922,9 @@ $(document).ready(function() {
 document.addEventListener('DOMContentLoaded', () => {
     const medicineSelect = document.getElementById('medicineSelect');
     const modeField = document.getElementById('modeField');
-    const daysField = document.getElementById('daysField');
+    const qtyField = document.getElementById('qtyField');
     const dosagesField = document.getElementById('dosagesField');
-    const languageSelect = document.getElementById('languageSelect');
+    const priceField = document.getElementById('priceField');
     const instructionsSelect = document.getElementById('instructionsSelect');
     const addMedicineBtn = document.getElementById('addMedicineBtn');
     const medicineTableBody = document.getElementById('medicineTableBody');
@@ -1214,7 +947,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Update fields in the form based on selected medicine
         modeField.value = getModeLabel(form);
-        daysField.value = duration;
+        qtyField.value = duration;
         dosagesField.value = dosages;
     });
 
@@ -1225,11 +958,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const selectedMedicine = medicineSelect.value;
         const selectedOption = medicineSelect.options[medicineSelect.selectedIndex];
         const mode = selectedOption.getAttribute('data-form'); // Get mode from selected option
-        const days = daysField.value;
+        const days = qtyField.value;
         const dosage = dosagesField.value;
         const instructions = instructionsSelect.value;
         const instructionsText = instructionsSelect.options[instructionsSelect.selectedIndex].text;
-        const language = languageSelect.value;
+        const language = priceField.value;
 
         // Add row to the medicine table
         const newRow = medicineTableBody.insertRow();
@@ -1239,6 +972,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <td>${days}</td>
             <td>${dosage}</td>
             <td data-instruction-id="${instructions}">${instructionsText}</td>
+            <td>${language}</td>
             <td><button class="btn btn-danger btn-sm removeBtn">Remove</button></td>
         `;
 
@@ -1268,6 +1002,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const days = [];
         const dosages = [];
         const instructions = [];
+        const prices =[];
 
         medicineRows.forEach(row => {
             const cells = row.cells;
@@ -1276,6 +1011,8 @@ document.addEventListener('DOMContentLoaded', () => {
             days.push(cells[2].textContent);
             dosages.push(cells[3].textContent);
             instructions.push(cells[4].getAttribute('data-instruction-id')); // Get instruction ID from the 5th cell
+            prices.push(cells[5].textContent);
+            
         });
 
         // Join arrays into comma-separated strings for hidden input values
@@ -1284,7 +1021,7 @@ document.addEventListener('DOMContentLoaded', () => {
         Days_input.value = days.join(',');
         Dosage_input.value = dosages.join(',');
         Instructions_input.value = instructions.join(',');
-        Language_input.value = ''; // Since we're no longer tracking languages
+        Language_input.value = prices.join(','); // Since we're no longer tracking languages
     }
 
     // Function to get mode label based on mode value
@@ -1340,16 +1077,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function resetForm() {
         medicineSelect.selectedIndex = 0;
         modeField.value = '';
-        daysField.value = '';
+        qtyField.value = '';
         dosagesField.value = '';
-        languageSelect.selectedIndex = 0;
+        priceField.value = '';
         instructionsSelect.selectedIndex = 0;
     }
 });
 
 </script>
 
-<script>
+<!-- <script>
   // Get the input elements
   const daysInput = document.getElementById('followup_days');
   const datetimeInput = document.getElementById('followup_datetime');
@@ -1374,7 +1111,7 @@ document.addEventListener('DOMContentLoaded', () => {
           datetimeInput.disabled = true;
       }
   });
-</script>
+</script> -->
 
 <script>
   // Function to calculate BMI
@@ -1398,47 +1135,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('inputHeight').addEventListener('input', calculateBMI);
 </script>
 
-<!-- <script>
-  document.getElementById('dropdownSearch').addEventListener('input', function () {
-            const searchValue = this.value.toLowerCase();
-            const dropdown = document.getElementById('labDropdown');
-            const options = dropdown.querySelectorAll('option');
 
-            options.forEach(function (option) {
-                if (option.value.toLowerCase().includes(searchValue) || option.value === "" || option.value === "clear") {
-                    option.style.display = '';
-                } else {
-                    option.style.display = 'none';
-                }
-            });
-            // Open the dropdown by setting size based on filtered options
-            const visibleOptions = Array.from(options).filter(option => option.style.display === '');
-            dropdown.size = visibleOptions.length > 1 ? visibleOptions.length : 2;
-        });
-</script> -->
-<!-- <script>
-document.getElementById('dropdownSearch').addEventListener('input', function () {
-  const searchValue = this.value.toLowerCase();
-  const dropdown = document.getElementById('labDropdown');
-  const options = dropdown.querySelectorAll('option');
-
-  if (searchValue === '') {
-      dropdown.size = 1; // Close the dropdown if search is cleared
-  } else {
-      options.forEach(function (option) {
-          if (option.value.toLowerCase().includes(searchValue) || option.value === "" || option.value === "clear") {
-              option.style.display = '';
-          } else {
-              option.style.display = 'none';
-          }
-      });
-
-      // Open the dropdown by setting size based on filtered options
-      const visibleOptions = Array.from(options).filter(option => option.style.display === '');
-      dropdown.size = visibleOptions.length > 1 ? visibleOptions.length : 2;
-  }
-});
-</script> -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <script>
         // Initialize Select2
@@ -1461,40 +1158,6 @@ document.getElementById('dropdownSearch').addEventListener('input', function () 
           $('#kco').select2();
         });
 
-</script>
-
-
-<script>
-    $(document).ready(function () {
-        // Handle "Admit to Daycare" button click
-        $("#admitToDaycareBtn").click(function (e) {
-            e.preventDefault(); // Prevent default behavior
-
-            const appointmentId = $(this).data("id"); // Get the ID from the button's data attribute
-
-            if (appointmentId) {
-                // Show the loader
-                $("#overlay, #loader").show();
-
-                // Redirect to the 'add_daycare' view with the ID in the URL
-                setTimeout(function () {
-                    window.location.href = `{% url 'add_daycare' %}?appointment_id=${appointmentId}`;
-                }, 500); // Adjust delay as needed
-            } else {
-                alert("Appointment ID is missing!");
-            }
-        });
-
-        // Handle "Admit to IPD" button click (currently disabled)
-        $("#admitToIPDBtn").click(function () {
-            alert("Admit to IPD is currently disabled.");
-        });
-
-        // Prevent form submission when these buttons are clicked
-        $("#admitToDaycareBtn, #admitToIPDBtn").click(function (e) {
-            e.preventDefault();
-        });
-    });
 </script>
 
 

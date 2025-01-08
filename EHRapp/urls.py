@@ -87,5 +87,11 @@ urlpatterns = [
     path('medical_certificate/',medical_certificate,name='medical_certificate'),
     path('update_certificate_body/',update_certificate_body,name='update_certificate_body'),
     path('generate_MedicalCertificate_pdf/',generate_MedicalCertificate_pdf,name='generate_MedicalCertificate_pdf'),
+    path('add_daycare/',add_daycare,name='add_daycare'),
+    path('daycarebillcharges/',daycarebillcharges,name='daycarebillcharges'),
+    path('daycare_finalize/',daycare_finalize,name='daycare_finalize'),
+    path('get_unpaid_bills/',get_unpaid_bills,name='get_unpaid_bills'),
+    path('daycarebillpdf/<int:consultationid>/',daycarebillpdf,name='daycarebillpdf'),
+    path('daycarepayment/',daycarepayment,name='daycarepayment'),
 
 ]
