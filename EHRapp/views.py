@@ -5383,7 +5383,8 @@ def get_unpaid_bills(request):
             return render(request,"Doctor/patient_bills.html",{"bills":bills})
             return HttpResponse("bills done")
         else:
-            return HttpResponse("<h1>Contact to Support</h1>")
+            bills = []
+            return render(request,"Doctor/patient_bills.html",{"bills":bills})
     
     else:
         return redirect(login)
