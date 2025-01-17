@@ -239,11 +239,11 @@
                 </div>
                 <div class="d-flex justify-content-between mb-2 ">
                   <label for="" class="col-5" style="font-size: 20px;"> Referred By </label>
-                  <input type="text" class="form-control form-control-sm me-2"   name="referred_by_doctor" value="{{consult_data.referred_by_doctor}}" style="margin-left: 1%; margin-right: 0%; font-size: 16px;"  required>
+                  <input type="text" class="form-control form-control-sm me-2"   name="referred_by_doctor" value="{%if consult_data.referred_by_doctor%}{{consult_data.referred_by_doctor}}{%endif%}" style="margin-left: 1%; margin-right: 0%; font-size: 16px;">
                   </div>
                 <div class="d-flex justify-content-between">
                   <label for="" class="col-5" style="font-size: 20px;">Referred To</label>
-                  <input type="text"  class="form-control form-control-sm me-2" name="referred_to_doctor" value="{{consult_data.referred_to_doctor}}" style="margin-left: 1%; margin-right: 0%; font-size: 16px;"   required>
+                  <input type="text"  class="form-control form-control-sm me-2" name="referred_to_doctor" value="{% if consult_data.referred_to_doctor%}{{consult_data.referred_to_doctor}}{%endif%}" style="margin-left: 1%; margin-right: 0%; font-size: 16px;">
                 </div>
                 
                 
@@ -262,65 +262,65 @@
                <!-- <input type=" hiden" value="{{i.consultation_id}}" name ="consultation_id"/> -->
                <input type ="hidden" value="{{get_patient_by_appointment_id.appointment_datetime}}" name = "Consultation_DateTime"/>
                <input type="hidden" value="{{outstanding}}" name="patient_outstanding">
-                <div class="d-flex flex-start">
-                  <label for="inputWeight" class="col-5" style="font-size: 18px;">Weight</label>
-                  <input type="number" id="inputWeight" class="form-control form-control-sm me-2" style="width: 150px; font-size: 16px;" name="weight" value="{{i.weight}}" placeholder=" " required>
-                  <label for="inputWeight" style="font-size: 18px;">Kg</label>
-                </div>
-                <div class="d-flex flex-start mt-2">
-                  <label for="" class="col-5" style="font-size: 18px;">Height</label>
-                  <input type="text" id="inputHeight" class="form-control form-control-sm me-2" name="height" placeholder=" " value="{{i.height}}" required style="margin-right:01% ; font-size: 16px;" >
-                  <label for="inputHeight" style="font-size: 18px;">cm</label>
-                </div>
-                <div class="d-flex flex-start mt-2">
-                  <label for="" class="col-5" style="font-size: 18px;">BMI</label>
-                  <input type="text" id="inputBMI" class="form-control form-control-sm me-2 " name="bmi" placeholder=" " value="{{ i.bmi}}" readonly style="margin-right:01% ;font-size: 16px;" >
-                  <label for="inputBMI" style="font-size: 18px;">kg/m&sup2;</label>
-                </div>
-                <div class="d-flex flex-start mt-2">
-                  <label for="input1" class="col-5" style="font-size: 18px;">Temperature</label>
-                  <input type="number" id="input2" class="form-control form-control-sm me-2" style="width: 150px; font-size: 16px;" name="temp" value="{{i.patient_temparature}}" placeholder=" " required >
-                  <label for="input1" style="font-size: 18px;">(°F)</label>
-                </div>
-                <div class="d-flex flex-start mt-2">
-                  <label for="input1" class="col-5" style="font-size: 18px;">Blood Pressure</label>
-                  <input type="number" id="input1" class="form-control form-control-sm me-1" style="width: 60px; font-size: 16px;" name="bp_s" value="{{i.patient_bpsystolic}}" placeholder=" " required>
-                  <label for="input1" class="me-1" style="font-size: 20px;">/</label>
-                  <input type="number" id="input2" class="form-control form-control-sm me-1" style="width: 60px; font-size: 16px;" name="bp_d" value="{{i.patient_bpdistolic}}" placeholder=" " required>
-                  <label for="input1" style="font-size: 17px;">Sis/Dia</label>
-                </div>
-    
-                
-                <div class="d-flex flex-start mt-2">
-                  <label for="Heart_rate" class="col-5" style="font-size: 18px;">Heart Rate</label>
-                  <input type="number" id="inputField" class="form-control form-control-sm me-1" style="width: 120px;font-size: 16px;" name="heart_rate" value="{{i.patient_heartratepluse}}" placeholder=" " required  style="margin-right:01% ;" >
-                  <label for="" class=" p-1" style="font-size: 18px;">Per/min</label>
-                </div>
+               <div class="d-flex flex-start">
+                <label for="inputWeight" class="col-5" style="font-size: 18px;">Weight</label>
+                <input type="number" id="inputWeight" class="form-control form-control-sm me-2" style="width: 150px; font-size: 16px;" name="weight" value="{% if i.weight %}{{i.weight}}{%endif%}" placeholder=" ">
+                <label for="inputWeight" style="font-size: 18px;">Kg</label>
+              </div>
+              <div class="d-flex flex-start mt-2">
+                <label for="" class="col-5" style="font-size: 18px;">Height</label>
+                <input type="text" id="inputHeight" class="form-control form-control-sm me-2" name="height" placeholder=" " value="{% if i.height %}{{i.height}}{%endif%}"  style="margin-right:01% ; font-size: 16px;" >
+                <label for="inputHeight" style="font-size: 18px;">cm</label>
+              </div>
+              <div class="d-flex flex-start mt-2">
+                <label for="" class="col-5" style="font-size: 18px;">BMI</label>
+                <input type="text" id="inputBMI" class="form-control form-control-sm me-2 " name="bmi" placeholder=" " value="{% if i.bmi %}{{ i.bmi}}{%endif%}" readonly style="margin-right:01% ;font-size: 16px;" >
+                <label for="inputBMI" style="font-size: 18px;">kg/m&sup2;</label>
+              </div>
+              <div class="d-flex flex-start mt-2">
+                <label for="input1" class="col-5" style="font-size: 18px;">Temperature</label>
+                <input type="number" id="input2" class="form-control form-control-sm me-2" style="width: 150px; font-size: 16px;" name="temp" value="{% if i.patient_temparature %}{{i.patient_temparature}}{%endif%}" placeholder=" "  >
+                <label for="input1" style="font-size: 18px;">(°F)</label>
+              </div>
+              <div class="d-flex flex-start mt-2">
+                <label for="input1" class="col-5" style="font-size: 18px;">Blood Pressure</label>
+                <input type="number" id="input1" class="form-control form-control-sm me-1" style="width: 60px; font-size: 16px;" name="bp_s" value="{% if i.patient_bpsystolic %}{{i.patient_bpsystolic}}{%endif%}" placeholder=" " >
+                <label for="input1" class="me-1" style="font-size: 20px;">/</label>
+                <input type="number" id="input2" class="form-control form-control-sm me-1" style="width: 60px; font-size: 16px;" name="bp_d" value="{% if i.patient_bpdistolic %}{{i.patient_bpdistolic}}{%endif%}" placeholder=" " >
+                <label for="input1" style="font-size: 17px;">Sis/Dia</label>
+              </div>
+  
+              
+              <div class="d-flex flex-start mt-2">
+                <label for="Heart_rate" class="col-5" style="font-size: 18px;">Heart Rate</label>
+                <input type="number" id="inputField" class="form-control form-control-sm me-1" style="width: 120px;font-size: 16px;" name="heart_rate" value="{% if i.patient_heartratepluse %}{{i.patient_heartratepluse}}{%endif%}" placeholder=" "  style="margin-right:01% ;" >
+                <label for="" class=" p-1" style="font-size: 18px;">Per/min</label>
+              </div>
 
-                <div class="d-flex flex-start mt-2">
-                  <label for="" class="col-5" style="font-size: 18px;">Respiratory Rate</label>
-                  <input type="number" id="inputField" class="form-control form-control-sm me-2" name="respiratory_rate" value="{{i.patient_respiratoryrate}}" placeholder=" " required style="margin-right:01% ; font-size: 16px;" >
-                </div>
+              <div class="d-flex flex-start mt-2">
+                <label for="" class="col-5" style="font-size: 18px;">Respiratory Rate</label>
+                <input type="number" id="inputField" class="form-control form-control-sm me-2" name="respiratory_rate" value="{% if i.patient_respiratoryrate %}{{i.patient_respiratoryrate}}{%endif%}" placeholder=" "  style="margin-right:01% ; font-size: 16px;" >
+              </div>
 
-                <div class="d-flex flex-start mt-2">
-                  <label for="" class="col-5" style="font-size: 18px;">Pain Scale</label>
-                  <select id="inputField" class="form-control form-control-sm me-2" name="pain_scale" required style="margin-right: 1%; font-size: 16px;">
-                      <option value="" disabled selected>Select Pain Scale</option>
-                      {% for value in pain_scale_range %}
-                          <option value="{{ value }}" {% if value == i.patient_painscale %} selected {% endif %}>{{ value }}</option>
-                      {% endfor %}
-                  </select>
-                </div>
+              <div class="d-flex flex-start mt-2">
+                <label for="" class="col-5" style="font-size: 18px;">Pain Scale</label>
+                <select id="inputField" class="form-control form-control-sm me-2" name="pain_scale"  style="margin-right: 1%; font-size: 16px;">
+                    <option value=""  selected>Select Pain Scale</option>
+                    {% for value in pain_scale_range %}
+                        <option value="{{ value }}" {% if value == i.patient_painscale %} selected {% endif %}>{{ value }}</option>
+                    {% endfor %}
+                </select>
+              </div>
 
-                <div class="d-flex flex-start mt-2">
-                  <label for="" class="col-5" style="font-size: 18px;">Chest</label>
-                  <input type="text" id="inputField" class="form-control form-control-sm me-2" name="chest" placeholder=" " value="{{i.patient_chest}}" required  style="margin-right:1% ;font-size: 16px;">
-                </div>
-                <div class="d-flex flex-start mt-2">
-                  <label for="" class="col-5" style="font-size: 18px;">ECG</label>
-                  <textarea id="inputField" class="form-control form-control-sm me-2" name="ecg" placeholder=" " required style="margin-right: 1%; font-size: 16px; height: 50px;">{{ i.patient_ecg }}</textarea>
-                </div>
-                </div>
+              <div class="d-flex flex-start mt-2">
+                <label for="" class="col-5" style="font-size: 18px;">Chest</label>
+                <input type="text" id="inputField" class="form-control form-control-sm me-2" name="chest" placeholder=" " {% if i.patient_chest != '0' %} value="{{i.patient_chest}}" {%endif%} style="margin-right:1% ;font-size: 16px;">
+              </div>
+              <div class="d-flex flex-start mt-2">
+                <label for="" class="col-5" style="font-size: 18px;">ECG</label>
+                <textarea id="inputField" class="form-control form-control-sm me-2" name="ecg" placeholder=" "  style="margin-right: 1%; font-size: 16px; height: 50px;">{% if i.patient_ecg != '0' %}{{ i.patient_ecg }}{%endif%}</textarea>
+              </div>
+              </div>
                 {%endfor%}
               </div>
             </div>
@@ -332,7 +332,7 @@
               <div class="row">
                   <div class="col ">
                     <div class="d-flex justify-content-between">
-                      <label for="Name" class="col-sm-8 col-form-label times-new-roman fw-bold" style="font-size:20px;">Complaint</label>
+                      <label for="Name" class="col-sm-8 col-form-label times-new-roman fw-bold" style="font-size:20px;">Complaint{% if not symptoms_data.symtoms  %}<span style="color: red; font-weight: bold; font-size: 1em;">*</span>{%endif%}</label>
                       
                     </div>
                   </div>
@@ -353,7 +353,7 @@
                       <!-- {{kco}} -->
                       <div class="d-flex justify-content-between mb-2">
                           <label for="" class="fw-bold times-new-roman" style="margin-right:2%;font-size: 20px;">KCO</label>
-                          <select class="form-control search form-select" id="kco" required  onchange="UpdateKCOTextArea()">
+                          <select class="form-control search form-select" id="kco"   onchange="UpdateKCOTextArea()">
                               <option value="Kco" disabled selected hidden>KCO</option>
                               <option value="clear">Clear</option>
                              
@@ -365,7 +365,7 @@
                   </div>
                   <div class="col-12">
                       <div class="form-group">
-                          <textarea type="text" name="kco" id="selectedKCOTextArea" placeholder="display selected options here" class="form-control" rows="4" required >{{symptoms_data.kco}}</textarea>
+                          <textarea type="text" name="kco" id="selectedKCOTextArea" placeholder="display selected options here" class="form-control" rows="4" >{%if symptoms_data.kco%}{{symptoms_data.kco}}{%endif%}</textarea>
                       </div>
                   </div>
               </div>
@@ -379,7 +379,7 @@
                 <div class="row">
                     <div class="col ">
                       <div class="d-flex justify-content-between">
-                        <label for="Name" class="col-sm-8 col-form-label times-new-roman fw-bold" style="font-size:20px;">Diagnosis</label>
+                        <label for="Name" class="col-sm-8 col-form-label times-new-roman fw-bold" style="font-size:20px;">Diagnosis{% if not symptoms_data.findings  %}<span style="color: red; font-weight: bold; font-size: 1em;">*</span>{%endif%}</label>
                         
                       </div>
                     </div>
@@ -399,7 +399,7 @@
               <div class="col-12 mb-2">
                 <div class="d-flex justify-content-between mb-2">
                   <label for="" class="  fw-bold times-new-roman" style="margin-right:2% ;font-size: 20px;">Advice</label>
-                  <select class="form-control search form-select" name="advice" id="advice"  required  onchange="updateAdviceTextArea()" >
+                  <select class="form-control search form-select" name="advice" id="advice"   onchange="updateAdviceTextArea()" >
                     <option value="Adv" disabled selected hidden>Advice</option>
                     <option value="clear">Clear</option>
                     {% for a in advice %}
@@ -410,7 +410,7 @@
               </div>
               <div class="col-12">
                   <div class="form-group">
-                      <textarea type="text" name="advice" placeholder="Display here selected options" class="form-control" id="selectedAdviceTextArea" rows="4" required>{{symptoms_data.advice}}</textarea>
+                      <textarea type="text" name="advice" placeholder="Display here selected options" class="form-control" id="selectedAdviceTextArea" rows="4" >{%if symptoms_data.advice%}{{symptoms_data.advice}}{%endif%}</textarea>
                   </div>
               </div>
           </div>
@@ -434,7 +434,7 @@
                           <th>Remove</th>
                       </tr>
                   </thead>
-                  <tbody id="medicineTableBody">
+                  <tbody id="medicineTableBody" required>
                       <!-- Dynamically populated rows will go here -->
                       {% for i in medic_list %}
                       <tr>
@@ -596,7 +596,7 @@
               </div>
               <div class="col-12">
                 <div class="form-group">
-                    <textarea type="text" placeholder="Add Prescription" class="form-control" name="Prescription" rows="4" required>{%if prescription %}{{prescription}}{%endif%}</textarea>
+                    <textarea type="text" placeholder="Add Prescription" class="form-control" name="Prescription" rows="4" >{%if prescription and prescription != '0' %}{{prescription}}{%endif%}</textarea>
                 </div>
               </div>
           </div>
@@ -1123,11 +1123,17 @@ document.addEventListener('DOMContentLoaded', () => {
       // Convert height from cm to meters
       height /= 100;
       
-      // Calculate BMI
-      let bmi = (weight / (height * height)).toFixed(2); // Rounded to 2 decimal places
-      
-      // Display BMI in the BMI input field
-      document.getElementById('inputBMI').value = bmi;
+      // Validate weight and height to ensure they have values and are greater than zero
+      if (weight && height > 0) {
+        // Calculate BMI
+        let bmi = (weight / (height * height)).toFixed(2); // Rounded to 2 decimal places
+
+        // Display BMI in the BMI input field
+        document.getElementById('inputBMI').value = bmi;
+      } else {
+        // Clear the BMI input field if values are invalid
+        document.getElementById('inputBMI').value = '';
+      }
   }
   
   // Event listener for input fields

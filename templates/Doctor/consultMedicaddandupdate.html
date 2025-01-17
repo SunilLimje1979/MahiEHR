@@ -66,13 +66,50 @@
             width: 100%;
             padding: 2px;
         }
+        /* Loader styles */
+         #loader {
+            position: fixed;
+            left: 30%;
+            top: 30%;
+            transform: translate(-50%, -50%);
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 16px solid  #f5873e;
+            width: 120px;
+            height: 120px;
+            -webkit-animation: spin 2s linear infinite;
+            animation: spin 2s linear infinite;
+            display: none;
+            z-index: 1000;
+        }
+
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+            }
+
+            100% {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 
 <body>
-
+    <div id="overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999;"></div>
+    <div id="loader"></div>
     <!-- Doctor Registration Form with Navigation Bar -->
-    <form class="container form-container" method="POST">
+    <form class="container form-container" id="feeform" method="POST">
         {% csrf_token %}
         <!-- Navigation Bar -->
         <nav class="navbar navbar-expand-lg navbar-light navbar-orange fixed-top">
@@ -112,24 +149,24 @@
                 <tr>
                     <td>1</td>
                     <td>Home</td>
-                    <td><input type="number" name="homeFirstVisitFee" value="{{ consult_data.1.first_visit_fee}}" class="form-control" required/></td>
-                    <td><input type="number" name="homeSecondVisitFee" value="{{ consult_data.1.second_visit_fee}}" class="form-control" style="width:90%" required/></td>
+                    <td><input type="number" name="homeFirstVisitFee" value="{%if consult_data%}{{ consult_data.1.first_visit_fee}}{%else%}500{%endif%}" class="form-control" required/></td>
+                    <td><input type="number" name="homeSecondVisitFee" value="{%if consult_data%}{{ consult_data.1.second_visit_fee}}{%else%}500{%endif%}" class="form-control" style="width:90%" required/></td>
                 </tr>
 
                 <!--Clinic-->
                 <tr>
                     <td>2</td>
                     <td>Clinic</td>
-                    <td><input type="number" name="clinicFirstVisitFee" value="{{ consult_data.2.first_visit_fee}}" class="form-control" required/></td>
-                    <td><input type="number" name="clinicSecondVisitFee" value="{{ consult_data.2.second_visit_fee}}" class="form-control" style="width:90%" required/></td>
+                    <td><input type="number" name="clinicFirstVisitFee" value="{%if consult_data%}{{ consult_data.2.first_visit_fee}}{%else%}100{%endif%}" class="form-control" required/></td>
+                    <td><input type="number" name="clinicSecondVisitFee" value="{%if consult_data%}{{ consult_data.2.second_visit_fee}}{%else%}100{%endif%}" class="form-control" style="width:90%" required/></td>
                 </tr>
 
                 <!--Phone/Video-->
                 <tr>
                     <td>3</td>
                     <td>Phone/Video</td>
-                    <td><input type="number" name="phoneFirstVisitFee" value="{{ consult_data.3.first_visit_fee}}" class="form-control" required/></td>
-                    <td><input type="number" name="phoneSecondVisitFee" value="{{ consult_data.3.second_visit_fee}}" class="form-control" style="width:90%" required/></td>
+                    <td><input type="number" name="phoneFirstVisitFee" value="{%if consult_data%}{{ consult_data.3.first_visit_fee}}{%else%}200{%endif%}" class="form-control" required/></td>
+                    <td><input type="number" name="phoneSecondVisitFee" value="{%if consult_data%}{{ consult_data.3.second_visit_fee}}{%else%}200{%endif%}" class="form-control" style="width:90%" required/></td>
                 </tr>
             </tbody>
         </table>
@@ -148,21 +185,21 @@
                     <tr>
                         <td>1</td>
                         <td>Daycare</td>
-                        <td><input type="number" name="daycare" value="{{ medic_data.1.charges}}" class="form-control" required/></td>
+                        <td><input type="number" name="daycare" value="{%if medic_data%}{{ medic_data.1.charges}}{%else%}1000{%endif%}" class="form-control" required/></td>
                     </tr>
                         
                     <!--IV-->
                     <tr>
                         <td>2</td>
                         <td>IV</td>
-                        <td><input type="number" name="IV" value="{{ medic_data.2.charges}}" class="form-control" required/></td>
+                        <td><input type="number" name="IV" value="{%if medic_data%}{{ medic_data.2.charges}}{%else%}500{%endif%}" class="form-control" required/></td>
                     </tr>
 
                     <!--Injection-->
                     <tr>
                         <td>3</td>
                         <td>Injection</td>
-                        <td><input type="number" name="injection"value="{{ medic_data.3.charges}}" class="form-control" required/></td>
+                        <td><input type="number" name="injection"value="{%if medic_data%}{{ medic_data.3.charges}}{%else%}500{%endif%}" class="form-control" required/></td>
                     </tr>
             </tbody>
         </table>
@@ -186,6 +223,17 @@
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+    <script>
+        // Handle form submission
+        $('#feeform').on('submit', function(e) {
+            $('.btn').prop('disabled', true); // Disable the save button
+            $('#loader').show(); // Show the loader
+            $('#overlay').show(); // Show the overlay to disable the page
+        });
+    </script> 
 </body>
 
 </html>

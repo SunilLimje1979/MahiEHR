@@ -221,11 +221,50 @@
          .message.error {
              background-color: #f44336;
          }
+
+         /* Loader styles */
+         #loader {
+            position: fixed;
+            left: 30%;
+            top: 30%;
+            transform: translate(-50%, -50%);
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 16px solid  #f5873e;
+            width: 120px;
+            height: 120px;
+            -webkit-animation: spin 2s linear infinite;
+            animation: spin 2s linear infinite;
+            display: none;
+            z-index: 1000;
+        }
+
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+            }
+
+            100% {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
  
     </style>
 </head>
 
 <body>
+    <div id="overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999;"></div>
+    <div id="loader"></div>
     <div class="navbar">
         <a class="navbar-brand" href="/MahiEHR/dashboard/">
             <i class="fas fa-arrow-left" style="color: white;"></i><span style="color: white; font-size: 24px"> Settings Dashboard</span> 
@@ -279,6 +318,8 @@
     $(document).ready(function() {
         // Function to handle PDF download on icon click
         $('#pdf-icon').on('click', function() {
+            $('#loader').show(); // Show the loader
+            $('#overlay').show(); // Show the overlay to disable the page
             // Alert and start fetching PDF URL
             alert("Your download will start now.");
 
@@ -288,6 +329,8 @@
             .then(data => {
                 // Check if the response contains the PDF URL
                 if (data && data.pdf_url) {
+                    $('#loader').hide(); // hide the loader
+                    $('#overlay').hide(); // hide the overlay to disable the page
                     // Create a download link
                     const pdfUrl = data.pdf_url;
                     const link = document.createElement("a");
@@ -298,10 +341,14 @@
                     link.click();
                     document.body.removeChild(link);
                 } else {
+                    $('#loader').hide(); // hide the loader
+                    $('#overlay').hide(); // hide the overlay to disable the page
                     alert('Failed to fetch PDF URL.');
                 }
             })
             .catch(error => {
+                $('#loader').hide(); //hide the loader
+                $('#overlay').hide(); // hide the overlay to disable the page
                 console.error('Error:', error);
                 alert('Failed to fetch PDF URL.');
             });

@@ -120,8 +120,8 @@
                             {% endif %}
                         </p> -->
                         <p><i class="fa-solid fa-stethoscope" style="color:#008373;"></i> {{consultation.symptoms_data.findings}}</p>
-                        <p><i class="fa-solid fa-check" style="color: deepskyblue;"></i> {{consultation.symptoms_data.advice}}</p>
-                        <p><i class="fa-solid fa-check" style="color: deepskyblue;"></i> {{ consultation.instructions }}</p>
+                        {%if consultation.symptoms_data.advice and consultation.symptoms_data.advice != 'None' %} <p><i class="fa-solid fa-check" style="color: deepskyblue;"></i> {{consultation.symptoms_data.advice}}</p>{%endif%}
+                        {% if consultation.instructions%}<p><i class="fa-solid fa-check" style="color: deepskyblue;"></i> {{ consultation.instructions }}</p>{%endif%}
                          
                     </div>
                 </div>

@@ -78,6 +78,15 @@
       .form-control{
         border-color:rgb(160, 154, 154);
       }
+    .modal input {
+      width: 100%;
+      padding: 5px;
+      margin: 10px 0;
+    }
+    .modal button {
+      width: 100%;
+      margin-top: 10px;
+    }
         
     </style>
   </head>
@@ -213,7 +222,7 @@
 
         {%if consult_data.consultation_status == 2 %}
           <div class="text-center mt-3">
-          <button id="paidBtn" class="btn btn-light" style="background-color:  #A52028; border-color:#A52028;color:white">Paid</button>
+          <button id="paidbutton" class="btn btn-light" type="button" style="background-color:  #A52028; border-color:#A52028;color:white">Paid</button>
           </div>
         {%endif%}
                 
@@ -221,6 +230,32 @@
     {%if request.session.subscription_status == 'inactive' and consult_data.consultation_status == 2 %}
       {% include "Doctor/popup.html" %}
     {%endif%}
+    <!-- Modal Structure -->
+    <div id="paymentModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 9999; justify-content: center; align-items: center;">
+      <div style="background: white; padding: 20px; border-radius: 5px; width: 90%; max-width: 400px;">
+          <h4>Payment Details</h4>
+          <form id="paymentForm">
+              <div>
+                  <label>Total Outstanding:</label>
+                  <input type="number" id="previousOutstanding" value="{{data1.outstanding}}" readonly />
+              </div>
+              <div>
+                  <label>Consultation Fee:</label>
+                  <input type="number" id="consultationFee" value="{{consult_data.consultation_fees}}" readonly />
+              </div>
+              <div>
+                  <label>New Outstanding:</label>
+                  <input type="number" id="newOutstanding"  readonly />
+              </div>
+              <div>
+                  <label>Paid Amount:</label>
+                  <input type="number" id="paidAmount" required />
+              </div>
+              <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
+          <button id="closeModal" class="btn btn-secondary">Close</button>
+      </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script
@@ -228,6 +263,7 @@
       integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
       crossorigin="anonymous"
     ></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <!-- <script>
         document.getElementById('paidBtn').addEventListener('click', function() {
@@ -252,7 +288,7 @@
         });
     });
 </script> -->
-<script>
+{% comment %} <script>
   // Wait for the document to be fully loaded
   document.addEventListener('DOMContentLoaded', function() {
       // Get the paidBtn element
@@ -284,7 +320,83 @@
           });
       }
   });
+</script> {% endcomment %}
+<script>
+  document.getElementById('paidbutton').addEventListener('click', function(event) {
+    // Send AJAX request to backend API to fetch the PDF link
+    event.preventDefault();
+    console.log('paid button clicked');
+    //fetch('/DoctorCollection/paid/')
+    //.then(response => response.json())
+    // Show the modal
+    const modal = document.getElementById('paymentModal');
+    if (modal) {
+        modal.style.display = 'flex';
+    } else {
+        console.error('Modal not found');
+        return;
+    }
+
+    const previousOutstanding = parseFloat(document.getElementById('previousOutstanding').value) || 0;
+
+    // Get consultation fee (ensure the field name matches your HTML)
+    const consultationFee = parseFloat(document.getElementById('consultationFee').value) || 0;
+
+    // Calculate and set the new outstanding amount
+    document.getElementById('newOutstanding').value = previousOutstanding;
+
+});
+// Close modal
+document.getElementById('closeModal').addEventListener('click', function() {
+    document.getElementById('paymentModal').style.display = 'none';
+});
+
+// Handle form submission
+document.getElementById('paymentForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    $('.btn').prop('disabled', true); // able the save button
+    const previousOutstanding = document.getElementById('previousOutstanding').value;
+    const consultationFee = document.getElementById('consultationFee').value;
+    const newOutstanding = document.getElementById('newOutstanding').value;
+    const paidAmount = document.getElementById('paidAmount').value;
+
+    // Pass the data to your server endpoint (adjust URL accordingly)
+    fetch('/MahiEHR/paid/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            previous_outstanding: previousOutstanding,
+            consultation_fee: consultationFee,
+            new_outstanding: newOutstanding,
+            paid_amount: paidAmount,
+        }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Check the response from the server
+        if (data.message === 'Payment successful') {
+            // Display a success message on the page
+            alert('Payment done successfully!');
+            document.getElementById('paymentModal').style.display = 'none';
+            $('.btn').prop('disabled', false); // able the save button
+            // Redirect to the appointment screen
+            window.location.href = '{% url "get_all_doctor_appointments" %}';
+        } else {
+            // Display an error message if payment failed
+            alert('Payment failed. Please try again.');
+            $('.btn').prop('disabled', false); // able the save button
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Payment not done');
+        $('.btn').prop('disabled', false); // able the save button 
+    });
+});
 </script>
+
 
 </body>
 </html>

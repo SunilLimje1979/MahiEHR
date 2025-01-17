@@ -80,13 +80,51 @@
             max-height: 750px;  
             overflow-y: auto; 
         }
+
+        /* Loader styles */
+         #loader {
+            position: fixed;
+            left: 30%;
+            top: 30%;
+            transform: translate(-50%, -50%);
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 16px solid  #f5873e;
+            width: 120px;
+            height: 120px;
+            -webkit-animation: spin 2s linear infinite;
+            animation: spin 2s linear infinite;
+            display: none;
+            z-index: 1000;
+        }
+
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+            }
+
+            100% {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 
 <body>
-
+    <div id="overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999;"></div>
+    <div id="loader"></div>
     <!-- Doctor Registration Form with Navigation Bar -->
-    <form class="container form-container" method="POST" enctype="multipart/form-data">
+    <form class="container form-container" id="clinicform" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         <!-- Navigation Bar -->
         <nav class="navbar navbar-expand-lg navbar-light navbar-orange fixed-top">
@@ -116,7 +154,7 @@
             <div class="col-md-6 col-12 mb-3">
                 <div class="form-floating">
                     <input type="text" class="form-control"  name="clinicName" value="{{ data.location_title}}" placeholder="Clinic Name" required>
-                    <label for="clinicName">Clinic Name</label>
+                    <label for="clinicName">Clinic Name{% if not data %}<span style="color: red; font-weight: bold; font-size: 1em;">*</span>{%endif%}</label>
                 </div>
             </div>
             <!-- <div class="col-md-6 col-6 mb-3">
@@ -136,7 +174,7 @@
             <div class="col-md-6 col-12 mb-3">
                 <div class="form-floating">
                     <textarea class="form-control" name="address" placeholder="Address" rows="3" required>{{ data.location_address}}</textarea>
-                    <label for="address">Address</label>
+                    <label for="address">Address{% if not data %}<span style="color: red; font-weight: bold; font-size: 1em;">*</span>{%endif%}</label>
                 </div>
             </div>
         </div>
@@ -191,7 +229,7 @@
             <div class="col-md-6 col-6 mb-3">
                 <div class="form-floating">
                     <input type="text" class="form-control" name="pincode" value="{{data.location_pincode}}" pattern="[0-9]{6}" title="Please enter a valid 6-digit PIN code" placeholder="Pincode" required>
-                    <label for="pincode">Pincode</label>
+                    <label for="pincode">Pincode{% if not data %}<span style="color: red; font-weight: bold; font-size: 1em;">*</span>{%endif%}</label>
                 </div>
             </div>
         </div>
@@ -200,13 +238,13 @@
         <div class="row">
             <div class="col-md-6 col-6 mb-3">
                 <div class="form-floating">
-                    <input type="text" class="form-control" name="latitude" value="{{data.location_latitute}}" placeholder="Latitude" required>
+                    <input type="text" class="form-control" name="latitude" value="{%if data.location_latitute%} {{data.location_latitute}} {%endif%}" placeholder="Latitude">
                     <label for="latitude">Latitude</label>
                 </div>
             </div>
             <div class="col-md-6 col-6 mb-3">
                 <div class="form-floating">
-                    <input type="text" class="form-control" name="longitude" value="{{data.location_longitute}}"  placeholder="Longitude" required>
+                    <input type="text" class="form-control" name="longitude" value="{%if data.location_longitute%} {{data.location_longitute}} {%endif%}"  placeholder="Longitude">
                     <label for="longitude">Longitude</label>
                 </div>
             </div>
@@ -301,6 +339,14 @@
     });
 </script>
 
+<script>
+    // Handle form submission
+    $('#clinicform').on('submit', function(e) {
+        $('.btn').prop('disabled', true); // Disable the save button
+        $('#loader').show(); // Show the loader
+        $('#overlay').show(); // Show the overlay to disable the page
+    });
+</script> 
 
 </body>
 

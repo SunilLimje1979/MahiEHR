@@ -244,6 +244,25 @@
         </div>
         </div>
     </div>
+     <!-- QR Code Modal -->
+     <div class="modal fade" id="qrCodeModal" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="qrCodeModalLabel">QR Code for Appointment Booking</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Your QR code for appointment booking is ready. Click the download button below, or you can later download it from the QR Code option in the Settings Dashboard.</p>
+                </div>
+                <div class="modal-footer">
+                    <a href="https://mahi-durg.app/medicalrecord/static/clinicpdfs/{{request.session.doctor_id}}{{request.session.location_id}}.pdf" target="_blank" class="btn btn-primary" id="downloadQRCodeBtn">Download QR PDF</a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     <script>
@@ -267,6 +286,36 @@
             });
             subscriptionModal.show();
           }
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if the QR code modal has already been shown
+            if (!localStorage.getItem('qrCodeModalShown')) {
+                var qrCodeModalElement = document.getElementById('qrCodeModal');
+                var qrCodeModal = new bootstrap.Modal(qrCodeModalElement, {
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                qrCodeModal.show();
+    
+                // Add event listener to the download button
+                document.getElementById('downloadQRCodeBtn').addEventListener('click', function() {
+                    // Close the modal
+                    qrCodeModal.hide();
+                    // Mark the modal as shown in localStorage
+                    localStorage.setItem('qrCodeModalShown', 'true');
+                });
+    
+                // Add event listeners for the Close and X buttons
+                qrCodeModalElement.querySelector('.btn-close').addEventListener('click', function() {
+                    localStorage.setItem('qrCodeModalShown', 'true');
+                });
+                qrCodeModalElement.querySelector('.btn-secondary').addEventListener('click', function() {
+                    localStorage.setItem('qrCodeModalShown', 'true');
+                });
+            }
         });
     </script>
 </body>

@@ -100,13 +100,51 @@
             transform: translateY(-50%);
             cursor: pointer;
         }
+
+        /* Loader styles */
+         #loader {
+            position: fixed;
+            left: 30%;
+            top: 30%;
+            transform: translate(-50%, -50%);
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 16px solid  #f5873e;
+            width: 120px;
+            height: 120px;
+            -webkit-animation: spin 2s linear infinite;
+            animation: spin 2s linear infinite;
+            display: none;
+            z-index: 1000;
+        }
+
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+            }
+
+            100% {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 
 <body>
-
+    <div id="overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999;"></div>
+    <div id="loader"></div>
     <!-- Doctor Registration Form with Navigation Bar -->
-    <form class="container form-container" method="Post">
+    <form class="container form-container" id="regform" method="Post">
         {% csrf_token %}
         <!-- Navigation Bar -->
         <nav class="navbar navbar-expand-lg navbar-light navbar-orange fixed-top">
@@ -136,13 +174,13 @@
             <div class="col-md-6 col-6 mb-3">
                 <div class="form-floating">
                     <input type="text" class="form-control" id="floatingfirstname" name="firstName" value="{{data.doctor_firstname}}" placeholder="First Name" required>
-                    <label for="floatingfirstname">First Name</label>
+                    <label for="floatingfirstname">First Name{% if not doctor_id %}<span style="color: red; font-weight: bold; font-size: 1em;">*</span>{%endif%}</label>
                 </div>
             </div>
             <div class="col-md-6 col-6 mb-3">
                 <div class="form-floating">
                     <input type="text" class="form-control" id="floatinglastname" name="lastName" value="{{data.doctor_lastname}}" placeholder="Last Name" required>
-                    <label for="floatinglastname">Last Name</label>
+                    <label for="floatinglastname">Last Name{% if not doctor_id %}<span style="color: red; font-weight: bold; font-size: 1em;">*</span>{%endif%}</label>
                 </div>
             </div>
         </div>
@@ -152,13 +190,13 @@
             <div class="col-md-6 col-6 mb-3">
                 <div class="form-floating">
                     <input type="text" class="form-control" name="mobileNumber" value="{{data.doctor_mobileno}}"  placeholder="Mobile Number" pattern="[0-9]{10}" title="Please enter a valid 10-digit mobile number" required>
-                    <label for="mobileNumber">Mobile Number</label>
+                    <label for="mobileNumber">Mobile Number{% if not doctor_id %}<span style="color: red; font-weight: bold; font-size: 1em;">*</span>{%endif%}</label>
                 </div>
             </div>
             <div class="col-md-6 col-6 mb-3">
                 <div class="form-floating">
                     <input type="email" class="form-control" name="email" value="{{data.doctor_email}}" placeholder="Email" required>
-                    <label for="email">Email</label>
+                    <label for="email">Email{% if not doctor_id %}<span style="color: red; font-weight: bold; font-size: 1em;">*</span>{%endif%}</label>
                 </div>
             </div>
         </div>
@@ -167,8 +205,8 @@
         <div class="row">
             <div class="col-md-6 col-6 mb-3">
                 <div class="form-floating">
-                    <select class="form-select" name="gender" aria-label="Floating label select example" required>
-                        <option value="" disabled selected hidden>Select</option>
+                    <select class="form-select" name="gender" aria-label="Floating label select example">
+                        <option value="0"  selected >Select</option>
                         <option value="1" {% if data.doctor_gender == 1 %}selected{% endif %}>Male</option>
                         <option value="2" {% if data.doctor_gender == 2 %}selected{% endif %}>Female</option>
                     </select>
@@ -177,8 +215,8 @@
             </div>
             <div class="col-md-6 col-6 mb-3">
                 <div class="form-floating">
-                    <select name="maritalStatus" class="form-select" aria-label="Floating label select example" required>
-                        <option value="" disabled selected hidden>Select</option>
+                    <select name="maritalStatus" class="form-select" aria-label="Floating label select example">
+                        <option value="0"  selected >Select</option>
                         <option value="1" {% if data.doctor_maritalstatus == 1 %}selected{% endif %}>Single</option>
                         <option value="2" {% if data.doctor_maritalstatus == 2 %}selected{% endif %}>Married</option>
                     </select>
@@ -191,13 +229,13 @@
         <div class="row">
             <div class="col-md-6 col-6 mb-3">
                 <div class="form-floating">
-                    <input type="date" class="form-control" name="dob" value="{{ data.doctor_dateofbirth}}" required>
+                    <input type="date" class="form-control" name="dob" value="{%if data.doctor_dateofbirth %}{{ data.doctor_dateofbirth}}{%endif%}">
                     <label for="dob">Date of Birth</label>
                 </div>
             </div>
             <div class="col-md-6 col-12 mb-3">
                 <div class="form-floating">
-                    <textarea class="form-control" name="address"  placeholder="Address" rows="3" required>{{ data.doctor_address }}</textarea>
+                    <textarea class="form-control" name="address"  placeholder="Address" rows="3" >{{ data.doctor_address }}</textarea>
                     <label for="address">Address</label>
                 </div>
             </div>
@@ -205,7 +243,7 @@
         <div class="col-md-6 col-12 mb-3">
             <div class="form-floating">
                 <input type="password" class="form-control" id="password"  name="password" value="{{data.password}}" placeholder="Password" required>
-                <label for="password" style="margin-left: -7px;">Password (For Login Purpose)</label>
+                <label for="password" style="margin-left: -7px;">Password (For Login Purpose){% if not doctor_id %}<span style="color: red; font-weight: bold; font-size: 1em;">*</span>{%endif%}</label>
                 <i class="fa fa-eye password-toggle" id="togglePassword"></i>
             </div>
         </div>
@@ -260,7 +298,7 @@
             <div class="col-md-6 col-6 mb-3">
                 <div class="form-floating">
                     <input type="text" class="form-control" name="pincode" value="{{data.doctor_pincode}}" pattern="[0-9]{6}" title="Please enter a valid 6-digit PIN code" placeholder="Pincode" required>
-                    <label for="pincode">Pincode</label>
+                    <label for="pincode">Pincode{% if not doctor_id %}<span style="color: red; font-weight: bold; font-size: 1em;">*</span>{%endif%}</label>
                 </div>
             </div>
         </div>
@@ -269,7 +307,7 @@
         <div class="row">
             <div class="col-md-6 col-6 mb-3">
                 <div class="form-floating">
-                    <input type="text" class="form-control" name="aadharNumber" value="{{data.doctor_aadharnumber}}" pattern="[0-9]{12}" title="Please enter a valid 12-digit Aadhar number" placeholder="Aadhar Number" required>
+                    <input type="text" class="form-control" name="aadharNumber" {% if data.doctor_aadharnumber != '0'%}value="{{data.doctor_aadharnumber}}" {%endif%} pattern="[0-9]{12}" title="Please enter a valid 12-digit Aadhar number" placeholder="Aadhar Number">
                     <label for="aadharNumber">Aadhar Number</label>
                 </div>
             </div>
@@ -283,7 +321,7 @@
         <div class="row">
             <div class="col-md-6 col-6 mb-3">
                 <div class="form-floating">
-                    <input type="text" class="form-control" name="registrationNumber" value="{{data.doctor_registrationno}}" placeholder="Registration Number" required>
+                    <input type="text" class="form-control" name="registrationNumber" {% if data.doctor_registrationno != '0'%} value="{{data.doctor_registrationno}}"{%endif%} placeholder="Registration Number">
                     <label for="registrationNumber" style="margin-left: -7px;">Registration Number</label>
                 </div>
             </div>
@@ -376,7 +414,14 @@
         this.classList.toggle('fa-eye-slash');
     });
 </script>
-
+<script>
+    // Handle form submission
+    $('#regform').on('submit', function(e) {
+        $('.btn').prop('disabled', true); // Disable the save button
+        $('#loader').show(); // Show the loader
+        $('#overlay').show(); // Show the overlay to disable the page
+    });
+</script> 
 </body>
 
 </html>
