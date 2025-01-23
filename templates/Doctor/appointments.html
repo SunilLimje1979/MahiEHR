@@ -125,11 +125,49 @@
         .message.error {
             background-color: #f44336;
         }
+        /* Loader styles */
+        #loader {
+            position: fixed;
+            left: 30%;
+            top: 46%;
+            transform: translate(-50%, -50%);
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 16px solid #f5873e;
+            width: 120px;
+            height: 120px;
+            -webkit-animation: spin 2s linear infinite;
+            animation: spin 2s linear infinite;
+            display: none;
+            z-index: 1000;
+        }
+
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+            }
+
+            100% {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
     </style>
 </head>
 
 <body>
-
+    <div id="overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999;"></div>
+    <div id="loader"></div>
     <nav class="navbar navbar-orange fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href='/MahiEHR/dashboard/'><i class="fas fa-arrow-left"></i> Appointment</a>
@@ -159,7 +197,7 @@
         </script>
     {% endif %}
 
-    <div class="d-flex justify-content-between" style="margin-top: 24%;">
+    <div class="d-flex justify-content-between" style="margin-top: 21%;">
         <button class="btn btn-primary filter-btn" data-status="1" style="margin-left:1%;margin-right: 1%;background-color: #A52028; border-color:#A52028;" >Uncompleted</button>
         <button class="btn btn-primary filter-btn" data-status="2" style="background-color: #A52028; border-color:#A52028;" >Partially Completed</button>
         <button class="btn btn-primary filter-btn" data-status="3" style="margin-right: 1%;margin-left: 1%;background-color: #A52028; border-color:#A52028;" >Completed</button>
@@ -192,6 +230,9 @@
                         Unpaid: <span id="unpaidAmount"></span>
                     </p>
                 </div>
+            </div>
+            <div class="row" id="daycare-row"> 
+                
             </div>
         </div>
     </div>
@@ -228,6 +269,8 @@
     
             // Function to fetch data based on date
             function fetchData(selectedDate) {
+                $('#loader').show(); // Show the loader
+                $('#overlay').show(); // Show the overlay to disable the page
                 $.ajax({
                     type: 'POST',
                     url: '/MahiEHR/fetch_data/',
@@ -238,6 +281,8 @@
                     success: function (response) {
                         // Handle the API response data
                         updateData(response);
+                        $('#loader').hide(); // hide the loader
+                        $('#overlay').hide(); // hide the overlay to disable the page
                     }
                 });
             }
@@ -425,7 +470,7 @@
 
 <script>
     // Function to calculate and update appointment and collection statistics
-    function updateStats(data) {
+    {% comment %} function updateStats(data) {
         const totalAppointments = data.length;
         const completedAppointments = data.filter(appointment => appointment.appointment_status === 3).length;
         const paidAppointments = data.filter(appointment => appointment.appointment_status === 4).length;
@@ -500,7 +545,121 @@
         // document.getElementById('totalAmount').textContent = totalAmount.toFixed(2); // Display total amount
         // document.getElementById('paidAmount').textContent = paidAmount.toFixed(2); // Display paid amount
         // document.getElementById('unpaidAmount').textContent = unpaidAmount.toFixed(2); // Display unpaid amount
+    } {% endcomment %}
+    function updateStats(data) {
+        const totalAppointments = data.length;
+        const completedAppointments = data.filter(appointment => appointment.appointment_status === 3).length;
+        const paidAppointments = data.filter(appointment => appointment.appointment_status === 4).length;
+        const pendingAppointments = data.filter(appointment => appointment.appointment_status === 1).length;
+        const partiallyCompletedAppointments = data.filter(appointment => appointment.appointment_status === 2).length;
+
+        // Update appointment statistics in the HTML
+        document.getElementById('totalAppointments').textContent = totalAppointments;
+        document.getElementById('completedAppointments').textContent = completedAppointments;
+        document.getElementById('paidAppointments').textContent = paidAppointments;
+        document.getElementById('pendingAppointments').textContent = pendingAppointments;
+        document.getElementById('partiallyCompletedAppointments').textContent = partiallyCompletedAppointments;
+
+        const role = "{{ role }}";
+        if (role === 'Doctor') {
+            // Calculate Paid and Unpaid amounts for OPD and DayCare
+            const opdPaid = data.reduce((total, appointment) => {
+                if (appointment.patient_status === 1 && appointment.appointment_status === 4) {
+                    return total + parseFloat(appointment.consult_fee);
+                } else {
+                    return total;
+                }
+            }, 0);
+
+        //Calculate collection-related statistics
+            const totalAmount = data.reduce((total, appointment) => {
+                if (appointment.appointment_status === 3 || appointment.appointment_status === 4) {
+                    return total + parseFloat(appointment.consult_fee);
+                } else {
+                    return total;
+                }
+            }, 0);
+
+            const paidAmount = data.reduce((total, appointment) => {
+                if (appointment.appointment_status === 4) {
+                    return total + parseFloat(appointment.consult_fee);
+                } else {
+                    return total;
+                }
+            }, 0);
+
+            const unpaidAmount = data.reduce((total, appointment) => {
+                if (appointment.appointment_status === 3) {
+                    return total + parseFloat(appointment.consult_fee);
+                } else {
+                    return total;
+                }
+            }, 0);
+            const opdUnpaid = data.reduce((total, appointment) => {
+                if (appointment.patient_status === 1 && appointment.appointment_status === 3) {
+                    return total + parseFloat(appointment.consult_fee);
+                } else {
+                    return total;
+                }
+            }, 0);
+
+            const daycarePaid = data.reduce((total, appointment) => {
+                if (appointment.patient_status === 2 && appointment.appointment_status === 4) {
+                    return total + parseFloat(appointment.consult_fee);
+                } else {
+                    return total;
+                }
+            }, 0);
+
+            const daycareUnpaid = data.reduce((total, appointment) => {
+                if (appointment.patient_status === 2 && appointment.appointment_status === 3) {
+                    return total + parseFloat(appointment.consult_fee);
+                } else {
+                    return total;
+                }
+            }, 0);
+
+            document.getElementById('totalAmount').textContent = totalAmount.toFixed(2); // Display total amount
+            document.getElementById('paidAmount').textContent = paidAmount.toFixed(2); // Display paid amount
+            document.getElementById('unpaidAmount').textContent = unpaidAmount.toFixed(2); // Display unpaid amount
+            // Update the table dynamically
+            const tableHTML = `
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center;">Services</th>
+                            <th>Paid</th>
+                            <th>Unpaid</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="text-align: center;">OPD</td>
+                            <td>${opdPaid.toFixed(2)}</td>
+                            <td>${opdUnpaid.toFixed(2)}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center;">DayCare</td>
+                            <td>${daycarePaid.toFixed(2)}</td>
+                            <td>${daycareUnpaid.toFixed(2)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+
+            // Insert the table into the targeted div
+            const tableContainer = document.getElementById('daycare-row');
+            tableContainer.innerHTML = tableHTML;
+
+            // Show or hide the daycare-row div based on DayCare amounts
+            if (daycarePaid === 0 && daycareUnpaid === 0) {
+                tableContainer.style.display = 'none'; // Hide the div if both amounts are zero
+            } else {
+                tableContainer.style.display = 'block'; // Show the div
+            }
+        }
     }
+
 
     // Function to fetch data based on selected date
     function fetchData(selectedDate) {
