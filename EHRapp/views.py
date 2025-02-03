@@ -4218,6 +4218,8 @@ def medical_certificate(request):
                 "IssueCertificate_Type":request.POST.get('certificate_type', ''),
                 "IssueCertificate_body":certificate_body
             }
+            if(request.POST.get('system_patient_id')):
+                data['patient_id']= int(request.POST.get('system_patient_id'))
             if(request.POST.get('leave_Starton')):
                 data["leave_Starton"]= request.POST.get('leave_Starton', '')
             if(request.POST.get('leave_Endon')):

@@ -165,6 +165,7 @@
             <div class="mb-3">
                 <!-- Add this hidden field to your form -->
                 <input type="hidden" id="edited_certificate_body" name="certificate_body" value="">
+                <input type="hidden" id="system_patient_id" name="system_patient_id" value="{% if data.patient_id %}{{data.patient_id}}{%endif%}">
                 <label for="certificate_body" class="form-label">Certificate Body</label>
                 <!-- <textarea id="certificate_body" name="certificate_body" class="form-control" rows="8" >{{data.certificate_body}}</textarea> -->
                 <div id="certificate_body" name="certificate_body" class="form-control" rows="8"> {{ data.IssueCertificate_body|safe }}</div>
@@ -252,6 +253,7 @@
                     method: 'POST',
                     data: { patient_id: selectedPatientId },
                     success: function (patientData) {
+                        $('#system_patient_id').val(selectedPatientId);
                         $('#patient_name').val(patientData.patient_name);
                         $('#patient_age').val(patientData.patient_age);
                         $('#patient_gender').val(patientData.patient_gender).change();
