@@ -2018,7 +2018,7 @@ def Consultation(request,id):
                 api_data = {
                     "Doctor_Id":request.session["doctor_id"],
                     "Patient_Id":patient_id,
-                    "Patient_Status":patient_status,
+                    "patient_status":patient_status,
                     "Consultation_DateTime":request.POST["Consultation_DateTime"],
                     "patient_heartratepluse":request.POST['heart_rate'] if request.POST.get('heart_rate') else 0,
                     "patient_bpsystolic": request.POST['bp_s'] if request.POST.get('bp_s') else 0,
@@ -2080,7 +2080,7 @@ def Consultation(request,id):
                 api_data = {
                     "Doctor_Id":request.session["doctor_id"],
                     "Patient_Id":patient_id,
-                    "Patient_Status":patient_status,
+                    "patient_status":patient_status,
                     "Consultation_DateTime":request.POST["Consultation_DateTime"],
                     "patient_heartratepluse": request.POST['heart_rate'],
                     "patient_bpsystolic": request.POST['bp_s'],
