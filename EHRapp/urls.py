@@ -93,5 +93,7 @@ urlpatterns = [
     path('get_unpaid_bills/',get_unpaid_bills,name='get_unpaid_bills'),
     path('daycarebillpdf/<int:consultationid>/',daycarebillpdf,name='daycarebillpdf'),
     path('daycarepayment/',daycarepayment,name='daycarepayment'),
+    path('masters/' , masters , name='masters'),
+    path("bookappointment_onthe_spot/<int:id>",bookappointment_onthe_spot,name='bookappointment_onthe_spot'),
 
 ]

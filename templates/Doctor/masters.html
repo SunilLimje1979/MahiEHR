@@ -1,0 +1,211 @@
+{% load static %}
+{% load pwa %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master</title>
+    <link rel="manifest" href="{% static 'assets/manifest.json' %}"> 
+    <link rel="shortcut icon" href="{% static 'assets/img/OPDLogo.png' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css"/>
+    <style>
+        body {
+             font-family: 'Arial', sans-serif;
+             margin: 0;
+             padding: 0;
+         }
+ 
+         .navbar {
+             background-color:   #A52028;
+             color: white;
+             padding: 3px 5px;
+             text-align: center;
+             font-size: 24px;
+             margin-bottom: 10px;
+             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.7);
+         }
+ 
+         .container {
+             padding: 5px;
+         }
+ 
+         .button-container {
+             display: flex;
+             flex-wrap: wrap;
+             justify-content: space-between;
+         }
+ 
+         .button {
+            width: 49%;
+            margin-bottom: 5px;
+            padding: 5px;
+            font-size: 30px;
+            text-align: center;
+            background-color:white;
+            color:  #a62d28;
+            border: 1px solid #ff7f50; /* Added a colored border */
+            cursor: pointer;
+            border-radius: 10px;
+            box-shadow: 4px 4px 6px rgba(0.1, 0.1, 0.1, 0.1);
+            transition: background-color 0.3s, box-shadow 0.3s;
+         }
+ 
+         .button-single {
+             width: 49%;
+             padding: 20px;
+             font-size: 30px;
+             text-align: center;
+             background-color: #A52028;
+             color: white;
+             outline-color: #ff9632;
+             cursor: pointer;
+             border-radius: 10px;
+             box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+             transition: background-color 0.3s, box-shadow 0.3s;
+         }
+ 
+         /* Hover and active styles */
+         .button:hover, .button-single:hover {
+             background-color:   #A52028;
+             color: white;
+             box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.2);
+         }
+ 
+         .button:active, .button-single:active {
+             background-color:   #A52028;
+             box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.3);
+         }
+ 
+         /* Icon style */
+         i {
+             margin-bottom: 10px;
+             font-size: 28px;
+             transition: transform 0.3s;
+             color:   #A52028;
+         }
+ 
+         .button:hover i, .button-single:hover i {
+             transform: scale(1.2);
+             color: white;
+         }
+ 
+         /* Message styling */
+         .messages {
+             position: fixed;
+             top: 10%;
+             right: 10%;
+             z-index: 1000;
+             max-width: 300px;
+         }
+ 
+         .message {
+             padding: 10px;
+             margin-bottom: 10px;
+             color: #fff;
+             border-radius: 5px;
+             transition: opacity 0.5s ease-out;
+         }
+ 
+         .message.success {
+             background-color: #4caf50;
+         }
+ 
+         .message.error {
+             background-color: #f44336;
+         }
+
+         /* Loader styles */
+         #loader {
+            position: fixed;
+            left: 30%;
+            top: 30%;
+            transform: translate(-50%, -50%);
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 16px solid #ff7f50;
+            width: 120px;
+            height: 120px;
+            -webkit-animation: spin 2s linear infinite;
+            animation: spin 2s linear infinite;
+            display: none;
+            z-index: 1000;
+        }
+
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+            }
+
+            100% {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+ 
+    </style>
+</head>
+
+<body>
+    <div id="overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999;"></div>
+    <div id="loader"></div>
+    <div class="navbar">
+        <a class="navbar-brand" href="/MahiEHR/dashboard/">
+            <i class="fas fa-arrow-left" style="color: white; font-size:22px;"></i><span style="color: white; font-size: 24px"> Master</span> 
+        </a>
+    </div>
+
+    {% if messages %}
+    <div id="messages-container" class="messages">
+      {% for message in messages %}
+        <div class="message{% if message.tags %} {{ message.tags }}{% endif %}">{{ message }}</div>
+      {% endfor %}
+    </div>
+
+    <script>
+      // Add a script to hide messages after a delay
+      document.addEventListener('DOMContentLoaded', function() {
+        var messagesContainer = document.getElementById('messages-container');
+        if (messagesContainer) {
+          setTimeout(function() {
+            messagesContainer.style.opacity = '0';
+            setTimeout(function() {
+              messagesContainer.style.display = 'none';
+            }, 500);  // Adjust the second timeout based on transition duration in CSS
+          }, 1000);  // Adjust the delay time (in milliseconds) as needed
+        }
+      });
+    </script>
+    {% endif %}
+
+
+    <div class="container">
+        <div class="button-container">
+            <button class="button" onclick="location.href='/MahiEHR/get_all_medicines/'"><i class="fas fa-pills" style="margin-bottom:10px ;"></i><br> Medicines</button>
+            <button class="button" onclick="location.href='/MahiEHR/get_all_lab_report/'"><i class="fas fa-flask" style="margin-bottom:10px ;"></i><br>Exam/Lab</button>
+            <button class="button" onclick="location.href='/MahiEHR/all_kco/'"> <i class="fa-solid fa-notes-medical" style="margin-bottom:10px ;"></i><br>KCO</button>
+            <button class="button" onclick="location.href='/MahiEHR/all_advice/'"> <i class="fa-solid fa-comment-medical" style="margin-bottom:10px ;"></i><br>Advice</button>
+            <button class="button" onclick="location.href='/MahiEHR/all_instruction/'"><i class="fa-solid fa-book-medical" style="margin-bottom:10px ;"></i><br><span style="font-size: 29px;">Instruction</span></button> 
+            <button class="button" onclick="location.href='/MahiEHR/all_diseases/'"><i class="fa-solid fa-virus" style="margin-bottom:10px ;"></i><br>Disease</button>
+            <button class="button" onclick="location.href='/MahiEHR/all_allergy/'"><i class="fa-solid fa-hand-dots" style="margin-bottom:10px ;"></i><br>Allergies</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+   
+</body>
+
+</html>

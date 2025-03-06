@@ -44,7 +44,7 @@
 
         .patient-card {
             background-color: white;
-            padding: 8px; /* Increased padding for more space inside the card */
+            padding: 5px 4px; /* Increased padding for more space inside the card */
             margin-bottom: 10px; /* Increased margin for better spacing between cards */
             border-radius: 8px; /* Slightly more rounded corners */
             border: 1px solid #ff7f50; /* Added a colored border */
@@ -114,12 +114,50 @@
         .actions-container .spacer {
             margin-right: 10px;
         }
+
+        /* Loader styles */
+         #loader {
+            position: fixed;
+            left: 30%;
+            top: 30%;
+            transform: translate(-50%, -50%);
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 16px solid #ff7f50;
+            width: 120px;
+            height: 120px;
+            -webkit-animation: spin 2s linear infinite;
+            animation: spin 2s linear infinite;
+            display: none;
+            z-index: 1000;
+        }
+
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+            }
+
+            100% {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 
 <body>
-
-    <div class="container form-container">
+    <div id="overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999;"></div>
+    <div id="loader"></div>
+    <div class="container form-container" style="overflow-x: hidden;">
         <!-- Navigation Bar -->
         <nav class="navbar navbar-expand-lg navbar-light navbar-orange fixed-top">
             <div class="container-fluid pl-3">
@@ -155,18 +193,15 @@
         </script>
         {% endif %}
 
-        <!-- Search Bar -->
-        <div class="row mb-4">
-            <div class="col-md-6 mb-2">
-                <input type="text" id="searchInputName" class="form-control" placeholder="Search by Patient name">
-            </div>
-            <div class="col-md-6">
-                <input type="text" id="searchInputMobile" class="form-control" placeholder="Search by Mobile number">
+        <!-- Search Box -->
+        <div class="row mb-2">
+            <div class="col-12">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search by Patient Name or Mobile Number">
             </div>
         </div>
 
         <!-- Patient Cards -->
-        {% for patient in all_data %}
+        {% comment %} {% for patient in all_data %}
         <div class="patient-card">
             <div class="row">
                 <div class="col-md-12">
@@ -187,6 +222,87 @@
                 </div>
             </div>
         </div>
+        {% endfor %} {% endcomment %}
+        {% for patient in all_data %}
+            <div class="patient-card">
+                <div class="row">
+                    <div class="col-12">
+                        {% comment %} <div class="d-flex align-items-center justify-content-between">
+                            <div class="patient-info" style="margin-right: 10px;">
+                                {{ patient.patient_mobileno }}  
+                            </div>
+                            <div class="patient-label">{{ patient.patient_firstname }} {{ patient.patient_lastname }}</div>
+                            <div class="patient-label" style="margin-left: 10px;">&#8377;{% if patient.outstanding %} {{ patient.outstanding }} {% else %} 0 {% endif %}</div>
+                        </div> {% endcomment %}
+                        
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="patient-info" style="margin-right: 10px;">
+                                {{ patient.patient_mobileno }}  
+                            </div>
+                            <div class="patient-label" style="margin-left: 10px;">
+                                &#8377;{% if patient.outstanding %} {{ patient.outstanding }} {% else %} 0 {% endif %}
+                            </div>
+                        </div>
+
+                        
+                        <div class="patientname mt-1">
+                            {{ patient.patient_firstname }} {% if patient.patient_fateherhusbandname  %} {{ patient.patient_fateherhusbandname }} {%endif%} {{ patient.patient_lastname}}
+                        </div>
+
+                        <div class="actions-container d-flex align-items-center justify-content-between mt-2">
+                            <div>
+                                <a href="{% url 'bookappointment_onthe_spot' patient.patient_id %}" style="margin:0;" 
+                                    onclick="return confirmBooking(this, '{{ patient.patient_firstname }}', '{{ patient.patient_lastname }}');">
+                                    <i class="fa-solid fa-stethoscope" style="font-size: 18px; color:rgb(13, 173, 236);"></i>
+                                </a>
+                                <a href="{% url 'update_patient' patient.patient_id %}" class="ms-2"
+                                    onclick="return confirmUpdating(this, '{{ patient.patient_firstname }}', '{{ patient.patient_lastname }}');">
+                                    <i class="fa-solid fa-pencil" style="font-size: 18px; color:rgb(13, 173, 236);"></i>
+                                </a>
+                            </div>
+
+                            {% if patient.family_members %}
+                                
+                                <a href="#" data-bs-toggle="collapse" data-bs-target="#family_{{ patient.patient_id }}">
+                                    <i class="fa-solid fa-user-group" style="font-size: 18px; color:rgb(13, 173, 236);"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if patient.family_members %}
+                
+                <div id="family_{{ patient.patient_id }}" class="collapse mt-2">
+                    {% for member in patient.family_members %}
+                        <div class="patient-card w-100" style="background: #f8f9fa; padding: 5px; border-radius: 5px; margin-top: 5px;">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        {% comment %} <div class="patient-info" style="margin-right: 10px;">
+                                            {{ member.patient_mobileno }}  
+                                        </div> {% endcomment %}
+                                        <div class="patient-label">{{ member.patient_firstname }} {{ member.patient_lastname }}</div>
+                                        <div class="patient-label" style="margin-left: 10px;">&#8377;{% if member.outstanding %} {{ member.outstanding }} {% else %} 0 {% endif %}</div>
+                                    </div>
+
+                                    <div class="actions-container d-flex align-items-center mt-1">
+                                        <a href="{% url 'bookappointment_onthe_spot' member.patient_id %}" 
+                                            onclick="return confirmBooking(this, '{{ member.patient_firstname }}', '{{ member.patient_lastname }}');">
+                                            <i class="fa-solid fa-stethoscope" style="font-size: 18px; color:rgb(13, 173, 236);"></i>
+                                        </a>
+                                        <a href="{% url 'update_patient' member.patient_id %}" class="ms-2"
+                                            onclick="return confirmUpdating(this, '{{ member.patient_firstname }}', '{{ member.patient_lastname }}');">
+                                            <i class="fa-solid fa-pencil" style="font-size: 18px; color:rgb(13, 173, 236);"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
         {% endfor %}
     </div>
 
@@ -194,37 +310,126 @@
         integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
         crossorigin="anonymous"></script>
     
-    <!-- JavaScript code -->
+    {% comment %} <script>
+        document.getElementById('searchInput').addEventListener('input', function () {
+            const searchValue = this.value.toLowerCase().trim();
+            const searchWords = searchValue.split(/\s+/); // Split by spaces to allow multiple words
+            const patientCards = document.querySelectorAll('.patient-card');
+        
+            patientCards.forEach(function (card) {
+                const nameElement = card.querySelector('.patientname');  // Name
+                const mobileElement = card.querySelector('.patient-info');  // Mobile Number
+                
+                const nameText = nameElement ? nameElement.textContent.toLowerCase() : '';  
+                const mobileText = mobileElement ? mobileElement.textContent.toLowerCase() : '';
+        
+                // Check if every word in search input appears in either name or mobile number
+                const matchesSearch = searchWords.every(word => 
+                    nameText.includes(word) || mobileText.includes(word)
+                );
+        
+                if (matchesSearch) {
+                    card.style.display = 'flex';  // Show matching cards
+                } else {
+                    card.style.display = 'none';  // Hide non-matching cards
+                }
+            });
+        }); 
+    </script> {% endcomment %}
     <script>
-
-        document.getElementById('searchInputName').addEventListener('input', function () {
-            const searchValue = this.value.toLowerCase();
+        document.getElementById('searchInput').addEventListener('input', function () {
+            const searchValue = this.value.toLowerCase().trim();
+            const searchWords = searchValue.split(/\s+/); // Split input into words
             const patientCards = document.querySelectorAll('.patient-card');
-
+    
             patientCards.forEach(function (card) {
-                const nameText = card.querySelector('.patient-label').textContent.toLowerCase();
-                if (nameText.includes(searchValue)) {
-                    card.style.display = 'block';
+                const nameElement = card.querySelector('.patientname');  // Main Patient Name
+                const mobileElement = card.querySelector('.patient-info');  // Mobile Number
+                const familySection = card.nextElementSibling; // Family members section (collapse div)
+                const familyMemberElements = familySection ? familySection.querySelectorAll('.patient-label') : []; // Family Member Names
+    
+                const nameText = nameElement ? nameElement.textContent.toLowerCase() : '';  
+                const mobileText = mobileElement ? mobileElement.textContent.toLowerCase() : '';
+                let familyMemberText = '';
+    
+                // Collect all family member names inside a single string
+                familyMemberElements.forEach(member => {
+                    familyMemberText += member.textContent.toLowerCase() + ' ';
+                });
+    
+                // Check if any search word matches name, mobile, or family member names
+                const matchesSearch = searchWords.every(word => 
+                    nameText.includes(word) || 
+                    mobileText.includes(word) || 
+                    familyMemberText.includes(word)
+                );
+    
+                if (matchesSearch) {
+                    card.classList.remove('d-none'); // Show main patient card
                 } else {
-                    card.style.display = 'none';
+                    card.classList.add('d-none'); // Hide non-matching cards
+                }
+            });
+    
+            // **Fix Bootstrap Collapse Toggle Issue**
+            document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(toggle => {
+                let targetId = toggle.getAttribute('data-bs-target');
+                let collapseElement = document.querySelector(targetId);
+                
+                if (collapseElement) {
+                    let bsCollapse = new bootstrap.Collapse(collapseElement, { toggle: false });
+                    
+                    // Reset collapse state if search is cleared
+                    if (!searchValue) {
+                        bsCollapse.hide();
+                    }
                 }
             });
         });
+    </script> 
+   
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
-        document.getElementById('searchInputMobile').addEventListener('input', function () {
-            const searchValue = this.value.toLowerCase();
-            const patientCards = document.querySelectorAll('.patient-card');
+    <script>
+        function confirmBooking(element, firstName, lastName) {
+            let message = `Do you want to book an appointment for ${firstName} ${lastName} and proceed further for consultation?`;
+            
+            if (confirm(message)) {
+                $('#loader').show(); // Show the loader
+                $('#overlay').show(); // Show the overlay to disable the page
 
-            patientCards.forEach(function (card) {
-                const mobileText = card.querySelector('.patient-info').textContent.toLowerCase();
-                if (mobileText.includes(searchValue)) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        });
+                window.location.href = element.href; // Proceed with navigation
 
+                // Hide loader after 2 seconds
+                setTimeout(function() {
+                    $('#loader').hide();
+                    $('#overlay').hide();
+                }, 5000);
+
+            }
+            return false; // Prevent default action until confirmation
+        }
+    </script>
+    <script>
+        function confirmUpdating(element, firstName, lastName) {
+            let message = `Do you want to Update the details for ${firstName} ${lastName} ?`;
+            
+            if (confirm(message)) {
+                $('#loader').show(); // Show the loader
+                $('#overlay').show(); // Show the overlay to disable the page
+
+                window.location.href = element.href; // Proceed with navigation
+
+                // Hide loader after 8 seconds
+                setTimeout(function() {
+                    $('#loader').hide();
+                    $('#overlay').hide();
+                }, 8000);
+
+            }
+            return false; // Prevent default action until confirmation
+        }
     </script>
 </body>
 
