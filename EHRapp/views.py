@@ -1291,7 +1291,10 @@ def delete_lab_report(request,investigation_id):
 #####################Appointments##############################
 
 def get_all_doctor_appointments(request):
-    return render(request,'Doctor/appointments.html',{'role':request.session['role']})
+    if('doctor_id' in request.session):
+        return render(request,'Doctor/appointments.html',{'role':request.session['role']})
+    else:
+        return redirect(login)
 
 
 @csrf_protect
@@ -5766,3 +5769,115 @@ def bookappointment_onthe_spot(request,id):
 
     else:
         return redirect(login)
+    
+#################################SOS members (Emergency Group Doctor)######################
+def sos_group(request):
+    if('doctor_id' in request.session):
+        res = session.post('https://mahi-durg.app/doctor/api/get_emergency_group_doctors/',json={'doctor_id':request.session['doctor_id']})
+        if(res.json().get('message_code')==1000):
+            all_sos_members= res.json().get('message_data')
+        else:
+            messages.error(request,"No SOS members is Added...")
+            all_sos_members=0
+        return render(request,'Doctor/all_sosgroup_members.html',{'all_sos_members':all_sos_members})
+    
+    else:
+        return redirect(login)
+    
+
+def add_sos_member(request):
+    if('doctor_id' in request.session):
+        if(request.method=='GET'):
+            return render(request,"Doctor/addandupdate_sos_member.html")
+        
+        else:
+            api_data = {
+            "doctor_id":request.session['doctor_id'],
+            "doctor_name":request.POST['doctor_name'],
+            "doctor_mobileno":request.POST["doctor_mobileno"]
+            }
+            api_url= f"https://mahi-durg.app/doctor/api/insert_emergency_group_doctor/"
+            response = session.post(api_url,json=api_data)
+            print(response.text)
+            if(response.json().get('message_code')==1000):
+                messages.success(request, 'SOS Member Added successfully!')
+            else:
+                messages.success(request, response.json().get('message_text'))
+   
+            return redirect(sos_group)
+        
+    else:
+        return redirect(login)
+
+def update_sos_member(request,emergency_groupdoctor_id):
+    if(request.method=="GET"):
+        res = session.post('https://mahi-durg.app/doctor/api/get_emergency_group_doctors/',json={'emergency_groupdoctor_id':emergency_groupdoctor_id})
+        if(res.json().get('message_code')==1000):
+            member= (res.json().get('message_data'))[0]
+            return render(request,'Doctor/addandupdate_sos_member.html',{'member':member})
+        else:
+            messages.error(request,res.json().get('message_text'))
+            return redirect(sos_group)
+    
+    else:
+        api_data = { 
+                  "emergency_groupdoctor_id":emergency_groupdoctor_id,
+                  "doctor_name":request.POST['doctor_name'],
+                  "doctor_mobileno":request.POST["doctor_mobileno"]
+                }
+        api_url = f"https://mahi-durg.app/doctor/api/update_emergency_group_doctor/"
+        response = session.post(api_url,json=api_data)
+        print(response.text)
+        if(response.json().get('message_code')==1000):
+            messages.success(request, 'SOS member Updated successfully!')
+        else:
+            messages.success(request,response.json().get('message_text'))
+        
+        return redirect(sos_group)
+
+
+def delete_sos_member(request,emergency_groupdoctor_id):
+    if emergency_groupdoctor_id:
+        api_url = f'https://mahi-durg.app/doctor/api/delete_emergency_group_doctor/'
+        api_data={'emergency_groupdoctor_id':emergency_groupdoctor_id}
+        response = session.post(api_url,api_data)
+        print(response.text)
+        if response.json().get('message_code') == 1000:
+            messages.success(request, 'SOS Member Deleted successfully!')
+                   
+        else:
+            messages.error(request,response.json().get('message_text'))
+
+        return redirect(sos_group)
+    else:
+        return  HttpResponse("Id is Invalid......")
+
+
+@csrf_exempt  # Remove this if using CSRF token in AJAX
+def send_support_message(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            appointment_id = data.get("appointment_id")
+
+            if not appointment_id:
+                return JsonResponse({"success": False, "message": "Invalid appointment ID."})
+
+            print(f"Support request received for Appointment ID: {appointment_id}")
+        
+            if 'doctor_id' in request.session:
+                res=session.post('https://mahi-durg.app/doctor/api/insert_emergency_support_message/',{'doctor_id':request.session['doctor_id'],'appointment_id':appointment_id})
+            # Perform backend logic (e.g., send a message, log an entry)
+            else:
+                redirect(login)
+
+            print(res.text)
+            if(res.json().get('message_code')==1000):
+                return JsonResponse({"success": True, "message": "Message sent successfully!"})
+            
+            else:  
+                return JsonResponse({"success": False, "message":res.json().get('message_text')})
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)})
+
+    return JsonResponse({"success": False, "message": "Invalid request method."})

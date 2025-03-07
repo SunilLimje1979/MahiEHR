@@ -360,9 +360,14 @@
                                         ${appointment.appointment_gender !== 0 ? `<label  for="label1"><i class="fa-solid fa-person-dress me-2" style="color: rgb(208, 91, 110); font-size: 30px;"></i></label>` : ''}
                                         ${appointment.appointment_gender === 0 ? `<label  for="label1"><i class="fa-solid fa-person me-2" style="color: blue; font-size: 30px;"></i></label>` : ''}
                                         ${appointment.age ? `<label for="label1">${appointment.age} years</label>` : ''}
+                                        <label for="label2"><i class="fa-solid fa-phone ms-2" style="font-size:18px;"></i>${appointment.appointment_mobileno}</label>
                                         </div>
                                         <div>
-                                        <label for="label2"><i class="fa-solid fa-phone me-2"></i>${appointment.appointment_mobileno}</label>
+                                            <button class="btn btn-link text-success p-0" style="font-size: 14px;" 
+                                            onclick="handleSupportClick(event)" 
+                                            data-appointment-id="${appointment.appointment_id}">
+                                            Emerg. Team
+                                        </button>
                                         </div>
                                     </div>
                                     
@@ -422,6 +427,44 @@
                 // Implement custom logic for the info icon click here (e.g., redirect to another page)
                 window.location.href = `/MahiEHR/patient_history/${appointmentId}`; // Example: Navigate to another screen
             };
+        
+        // Define handleSupportClick function
+        const handleSupportClick = (event) => {
+            event.preventDefault(); // Prevent default behavior
+
+            const appointmentId = event.target.dataset.appointmentId; // Get appointment_id
+
+            // Show confirmation dialog before proceeding
+            const confirmSend = confirm("Do you want to send an emergency message?");
+            
+            if (!confirmSend) {
+                return; // Exit if user selects "No"
+            }
+
+            console.log("Clicked on Support Team for appointment:", appointmentId);
+            $('#loader').show(); // Show the loader
+            $('#overlay').show(); // Show the overlay to disable the page
+            // Send AJAX request to Django view
+            fetch('/MahiEHR/send_support_message/', {
+                method: 'POST',
+                headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+                body: JSON.stringify({ appointment_id: appointmentId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    $('#loader').hide(); // hide the loader
+                    $('#overlay').hide(); // hide the overlay to disable the page
+                    alert("Message sent successfully!");
+                } else {
+                    $('#loader').hide(); // hide the loader
+                    $('#overlay').hide(); // hide the overlay to disable the page
+                    alert(data.message);
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        };
+
     </script>
 
 <!-- <script>

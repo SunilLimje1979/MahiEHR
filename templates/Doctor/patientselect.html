@@ -42,9 +42,47 @@
         .form-control {
             border-color: #000000;
         }
+        /* Loader styles */
+         #loader {
+            position: fixed;
+            left: 30%;
+            top: 30%;
+            transform: translate(-50%, -50%);
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 16px solid  #f5873e;
+            width: 120px;
+            height: 120px;
+            -webkit-animation: spin 2s linear infinite;
+            animation: spin 2s linear infinite;
+            display: none;
+            z-index: 1000;
+        }
+
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+            }
+
+            100% {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 <body>
+        <div id="overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999;"></div>
+        <div id="loader"></div>
         <nav class="navbar navbar-orange fixed-top">
             <div class="container-fluid">
                 <a class="navbar-brand" href="{% url 'get_all_doctor_appointments' %}"><i class="fas fa-arrow-left"> </i> Patient Selection</a>
@@ -144,6 +182,17 @@
             document.getElementById('addMemberBtn').style.display = 'none';
         });
     </script> -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+    <script>
+        // Handle form submission
+        $('#addMemberForm').on('submit', function(e) {
+            $('.btn').prop('disabled', true); // Disable the save button
+            $('#loader').show(); // Show the loader
+            $('#overlay').show(); // Show the overlay to disable the page
+        });
+    </script>
     
 </body>
 </html>
